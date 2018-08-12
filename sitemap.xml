@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://yoursite.com/2018/08/12/python_time/</loc>
+    
+    <lastmod>2018-08-12T09:52:07.739Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://yoursite.com/about/index.html</loc>
     
     <lastmod>2018-08-12T09:15:33.363Z</lastmod>
@@ -145,13 +152,6 @@
     <loc>http://yoursite.com/2017/02/01/Arrow-%E4%B8%80%E4%B8%AA%E6%9C%80%E5%A5%BD%E7%94%A8%E7%9A%84%E6%97%A5%E6%9C%9F%E6%97%B6%E9%97%B4Python%E5%A4%84%E7%90%86%E5%BA%93/</loc>
     
     <lastmod>2018-08-12T07:55:20.876Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://yoursite.com/2018/08/12/python_time/</loc>
-    
-    <lastmod>2018-08-12T06:19:17.377Z</lastmod>
     
   </url>
   
