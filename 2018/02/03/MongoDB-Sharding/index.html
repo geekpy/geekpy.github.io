@@ -1,0 +1,36 @@
+<!DOCTYPE html><html><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>MongoDB Sharding | Geekpy's Blog</title><link rel="stylesheet" type="text/css" href="/css/normalize.css"><link rel="stylesheet" type="text/css" href="/css/highlight.css"><link rel="stylesheet" type="text/css" href="/css/very-simple.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/font-awesome/4.5.0/css/font-awesome.min.css"><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="alternate" type="application/atom+xml" href="/atom.xml"></head><body><!-- include the sidebar--><!-- include ./includes/sidebar.jade--><!-- Blog title and subtitle--><header><div class="container header"><a id="logo" href="/." class="title">Geekpy's Blog</a><span class="subtitle"></span><label id="toggle-menu" for="menu" onclick><i class="fa fa-bars"></i></label></div></header><!-- use checkbox hack for toggle nav-bar on small screens--><input id="menu" type="checkbox"><!-- Navigation Links--><nav id="nav"><div class="container"><a href="/" class="sidebar-nav-item active">Home</a><a href="/archives" class="sidebar-nav-item">Archives</a><a href="/about" class="sidebar-nav-item">About</a></div></nav><div id="header-margin-bar"></div><div class="wrapper"><div class="container post-header"><h1>MongoDB Sharding</h1></div></div><article><div class="container post"><p>详细介绍MongoDB sharding<br><a id="more"></a></p>
+<h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><h2 id="Sharding-Key"><a href="#Sharding-Key" class="headerlink" title="Sharding Key"></a>Sharding Key</h2><ul>
+<li>Sharding key必须是在对应的collection当中所有的文档都存在的field，比如我要sharding我的user collection，我就可以找nick_name这种所有documents中都存在的field来做为sharding key，当然还要考虑其它因素，但是这个是一个必要条件。</li>
+<li>sharding key可以一个或者多个fields组成，还以user document为例，除了可以使用nick_name还可以加一个created time一起作为sharding key。当然具体使用什么field要根据系统的实际情况来综合考虑。</li>
+<li>sharding只能有一个，而且设定后不可更改</li>
+<li>针对已经有数据的collections做sharding时，原collections必须有以sharding key开头的索引；如果是空的collection，则MongoDB会自动创建对应的索引</li>
+</ul>
+<h2 id="Sharding的优势"><a href="#Sharding的优势" class="headerlink" title="Sharding的优势"></a>Sharding的优势</h2><h3 id="读写效率"><a href="#读写效率" class="headerlink" title="读写效率"></a>读写效率</h3><p>由于我们可以将相应的写操作分布在不同的shard上，可以更加均匀分担写压力，因此写的性能一般情况下会得到提高。<br>读取操作时，如果query中包含shard key对应的field，或者以这个field为prefix的compound index key</p>
+<h3 id="存储容量"><a href="#存储容量" class="headerlink" title="存储容量"></a>存储容量</h3><p>由于是水平分割，因此几乎可以无限扩容，不需要担心某个collection过大而无法单机存储的问题</p>
+<h3 id="高可用"><a href="#高可用" class="headerlink" title="高可用"></a>高可用</h3><p>从MongoDB3.2开始，config server已经支持replicaset模式，这样的话sharding节点和config节点均可以通过replicaset来保证高可用。</p>
+<h2 id="关于Sharding的考虑"><a href="#关于Sharding的考虑" class="headerlink" title="关于Sharding的考虑"></a>关于Sharding的考虑</h2><p>由于sharding的不可逆性，所以最好是先不使用sharding，在业务运行一段时间后，根据业务的情况来做决定，这主要需要考虑如下因素：</p>
+<ul>
+<li>某个collection的数据是否非常大，达到未来可能一台机器的存储容量都无法解决该collection的存储。</li>
+<li>是否有些collection存在性能问题，希望通过sharding来解决</li>
+<li>由于具有不可逆性，我们可以只针对需要做sharding的collection做sharding，而其它collection不需要sharding。不做sharding的collection会存储于primary shard之上（所以可见这个shard应该有更大的容量）</li>
+<li>针对需要分片的collection，需要确定满足以下几个条件：<ul>
+<li>选取的key可以使得collection的数据能均衡地分布在不同的shard上</li>
+<li>写请求的时候也能均匀分布，比如时间戳作为key时，虽然也能将key均匀分布到不同的shard上，但是同一时间段，写请求就会持续在一个shard上，这样就不是均匀写了</li>
+<li>我们针对该collection的查询主要是使用哪个field来作为查询条件，那么这个field最好是作为shard key</li>
+<li>作为sharding key的field需要有索引，或者是作为compound索引的prefix。</li>
+<li>尽量避免会导致jumbo chunk的key，比如通过age来作为key，同一个age的数据均会放到同一个chunk，这就可能导致chunk不断变大，当超过chunk size时，就会变成jumbo chunk</li>
+</ul>
+</li>
+</ul>
+<h2 id="Sharding策略"><a href="#Sharding策略" class="headerlink" title="Sharding策略"></a>Sharding策略</h2><p>Sharding有两种策略：一种是ranged sharding; 另一种是hashed sharding。</p>
+<ul>
+<li>如果选择的key，其值域非常接近，尤其是单调递增或者递减(increase or decrease monotonically, 也可以翻译成单向递增递减)，就会导致所有的新增操作都会集中在最大的range的shard上（如果是递增）；或者集中在最小range的那个shard上（如果是递减）。这就导致无法均匀地进行写操作（因为所有的写操作都集中在一个shard甚至一个chunk上）。而那个最大或最小range的shard将成为系统的瓶颈。具体参考<a href="https://docs.mongodb.com/manual/core/sharding-shard-key/#shard-key-monotonic" target="_blank" rel="noopener">shard-key-monotonic</a>。在这种情况下，我们应当选择hashed sharding.</li>
+<li>hashed sharding。MongoDB通过hash算法(MD5)来计算key的hash值，然后将数据存储于对应范围的chunk上。由于算法的原因，即使非常”近”的key通过hash之后的值可能会有很大的差异，从而可以更加均匀的分布在不同的chunk之上。hashed sharding的缺点在于当我们的业务有很多范围查询时，（比如uid 5~20)，此时由于可能分布在很多不同的chunk上，所以就必须进行广播时操作，即要求所有的shard都进行查询，看是否有在这个范围内的数据，如果有就会交给mongos，mongos再负责将这些数据组合成一个完整的答案给客户端。这种情况下，势必会影响到查询性能。所以具体使用什么样的策略，需要综合考虑很多因素。</li>
+</ul>
+<h2 id="Splitting-and-Migration"><a href="#Splitting-and-Migration" class="headerlink" title="Splitting and Migration"></a>Splitting and Migration</h2><h3 id="Splitting"><a href="#Splitting" class="headerlink" title="Splitting"></a>Splitting</h3><p>splitting就是当chunk中存储的数据量超过设定的chunk size时(默认64M)，将其分裂成两个chunk，具体参考<a href="https://docs.mongodb.com/manual/core/sharding-data-partitioning/#chunk-splits" target="_blank" rel="noopener">chunk split</a><br><img src="http://upload-images.jianshu.io/upload_images/3959253-e563c219fc51aa4f.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="Splitting"></p>
+<h3 id="Migration"><a href="#Migration" class="headerlink" title="Migration"></a>Migration</h3><p>数据迁移，是将某一个shard中的chunk数据迁移到另一个shard上。迁移有两种方式，一种是手动迁移，一种自动迁移。大部分时候，MongoDB会通过balancer进行自动迁移，以保持chunk在shard上能够均匀分布。手动迁移仅用于某些特定场景如bulk insert。</p>
+<h4 id="关于balancer"><a href="#关于balancer" class="headerlink" title="关于balancer"></a>关于balancer</h4><p>balancer是一个后台进程，它会自动判断含有最多chunk的shard和最少chunk的shard之间的chunk数量差达到了设定的threshold，如果达到了，就会自动进行数据迁移。<br><img src="http://upload-images.jianshu.io/upload_images/3959253-2700a7cbe0745a9b.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="Balancing"></p>
+</div><div class="container"><hr></div></article><footer id="footer"><div class="container"><div class="bar"><div class="social"><a href="mailto:rebor.liu@gmail.com" target="_blank"><i class="fa fa-envelope-o"></i></a><a href="https://github.com/geekpy" target="_blank"><i class="fa fa-github"></i></a></div><div class="footer">© 2018 <a href="/" rel="nofollow">geekpy</a>. Powered by <a rel="nofollow" target="_blank" href="https://hexo.io">Hexo</a>. Theme <a target="_blank" href="https://github.com/lotabout/very-simple">very-simple</a>.</div></div></div></footer><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.css"><script src="//cdn.bootcss.com/jquery/2.0.3/jquery.min.js"></script><script src="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.pack.js"></script><script>$(document).ready(function() {
+    $(".fancybox").fancybox();
+});
+</script></body></html>
