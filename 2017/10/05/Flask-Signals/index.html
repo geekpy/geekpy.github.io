@@ -1,0 +1,110 @@
+<!DOCTYPE html><html><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>Flask Signals 详解 | Geekpy's Blog</title><link rel="stylesheet" type="text/css" href="/css/normalize.css"><link rel="stylesheet" type="text/css" href="/css/highlight.css"><link rel="stylesheet" type="text/css" href="/css/very-simple.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/font-awesome/4.5.0/css/font-awesome.min.css"><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="alternate" type="application/atom+xml" href="/atom.xml"></head><body><!-- include the sidebar--><!-- include ./includes/sidebar.jade--><!-- Blog title and subtitle--><header><div class="container header"><a id="logo" href="/." class="title">Geekpy's Blog</a><span class="subtitle"></span><label id="toggle-menu" for="menu" onclick><i class="fa fa-bars"></i></label></div></header><!-- use checkbox hack for toggle nav-bar on small screens--><input id="menu" type="checkbox"><!-- Navigation Links--><nav id="nav"><div class="container"><a href="/" class="sidebar-nav-item active">Home</a><a href="/archives" class="sidebar-nav-item">Archives</a><a href="/about" class="sidebar-nav-item">About</a></div></nav><div id="header-margin-bar"></div><div class="wrapper"><div class="container post-header"><h1>Flask Signals 详解</h1></div></div><article><div class="container post"><h2 id="Flask-Signals简介"><a href="#Flask-Signals简介" class="headerlink" title="Flask Signals简介"></a>Flask Signals简介</h2><p>Flask Signals和操作系统的signals系统很类似，都是通过信号（也可以说是事件event）来通知已经注册的回调函数，让回调函数自动开始执行。Flask定义了自己的一套核心signals和对应的functions(用于发起消息，注册回调函数)，我们需要定义自己的回调函数，然后注册到对应的signal，这样就可以在收到该信号的时候自动执行我们定义的回调函数。</p>
+<h2 id="什么情况下需要使用Signals"><a href="#什么情况下需要使用Signals" class="headerlink" title="什么情况下需要使用Signals?"></a>什么情况下需要使用Signals?</h2><p>当我们需要使用观察者模式来解耦模块之间的信息传递的时候，Signals系统就可以帮助我们轻松达到目的。观察者模式如下图(图片来自voidcn)<br><img src="http://upload-images.jianshu.io/upload_images/3959253-15e7e0cf37d01caa.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="观察者模式"></p>
+<h3 id="与Hook函数的区别"><a href="#与Hook函数的区别" class="headerlink" title="与Hook函数的区别"></a>与Hook函数的区别</h3><p>试想，当我们需要监听某个事件，当它发生的时候，需要执行一系列functions，来实现诸如log记录等功能时，我们就可以使用Signals系统来实现，但是这里有一个疑问就是这个功能通过hook函数似乎也可以实现，比如通过<code>before_request</code> decorator实现记录日志的功能和使用<code>request_started</code>来记录日志就非常相似， 如下代码所示：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">#!/usr/bin/env python</span><br><span class="line"># -*- coding: utf-8 -*-</span><br><span class="line"></span><br><span class="line">from flask import Flask, request, request_started</span><br><span class="line">app = Flask(__name__)</span><br><span class="line"></span><br><span class="line">@app.before_request</span><br><span class="line">def print_url_in_hook():</span><br><span class="line">    print &quot;in hook, url: %s&quot; % request.url</span><br><span class="line"></span><br><span class="line">@app.route(&quot;/&quot;)</span><br><span class="line">def hello():</span><br><span class="line">    return &quot;Hello, World!&quot;</span><br><span class="line"></span><br><span class="line">def print_url_in_signal_subscriber(sender, **extra):</span><br><span class="line">    print &quot;in signal subscriber, url: %s&quot; % request.url</span><br><span class="line"></span><br><span class="line">if __name__ == &quot;__main__&quot;:</span><br><span class="line">    request_started.connect(print_url_in_signal_subscriber, app)</span><br><span class="line">    app.run()</span><br></pre></td></tr></table></figure></p>
+<p>当收到http请求后，打印如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">in signal subscriber, url: http://localhost:5000/</span><br><span class="line">in hook, url: http://localhost:5000/</span><br><span class="line">127.0.0.1 - - [05/Oct/2017 16:57:20] &quot;GET / HTTP/1.1&quot; 200 -</span><br></pre></td></tr></table></figure></p>
+<p>那么到底什么情况下使用signal，什么情况下使用hook函数呢？我们来看下它们的主要区别：</p>
+<ol>
+<li>signal的callback函数是无顺序的，而hook函数的执行是按照定义的顺序执行的。（这一点虽然是官网提出的区别，但是实际测试发现signal执行实际是按照注册的顺序执行的，即先通过connect进行注册的回调函数会先被执行）</li>
+<li>signal无法直接abort这个request请求，相比较在hook函数中可以直接abort request，即直接返回response给客户端，而无需再执行后续的操作。</li>
+<li>signal可以通过参数携带数据，而hook函数通常不会携带额外的参数<h3 id="与RabbitMQ等消息中间件的区别"><a href="#与RabbitMQ等消息中间件的区别" class="headerlink" title="与RabbitMQ等消息中间件的区别"></a>与RabbitMQ等消息中间件的区别</h3>Rabbitmq与signals都支持观察者模式，但是它们的区别也是很明显的：</li>
+<li>Rabbitmq之类的消息中间件更加重量级，提供更多功能，如分布式部署，消息存储备份等功能，而signal系统显然更加轻量级，只提供简单的消息分发功能</li>
+<li>Rabbitmq之类的消息中间件可以在不同的系统间传递消息，从而使得不同的功能模块可以使用不同的语言进行开发，而signal系统显然仅限于Flask系统中使用</li>
+</ol>
+<p>显然，signal系统使用局限性更大，但也更加轻量级，在只是简单的进行消息分发的系统中，使用signal更加简单方便</p>
+<h2 id="怎么使用Signals"><a href="#怎么使用Signals" class="headerlink" title="怎么使用Signals?"></a>怎么使用Signals?</h2><p>Flask提供的signal机制优先使用<a href="https://pythonhosted.org/blinker/" target="_blank" rel="noopener">blinker</a>提供的库，但当blinker没有安装的时候，Flask也可以回退到使用自己的库。但是鉴于官网推荐使用blinker，所以我们最好还是安装blinker。</p>
+<h3 id="使用blinker"><a href="#使用blinker" class="headerlink" title="使用blinker"></a>使用blinker</h3><p>安装blinker<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install blinker</span><br></pre></td></tr></table></figure></p>
+<p>测试Flask signal是否使用blinker<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">In [1]: from flask import signals</span><br><span class="line"></span><br><span class="line">In [2]: signals.signals_available</span><br><span class="line">Out[2]: True</span><br></pre></td></tr></table></figure></p>
+<p>当<code>signals.signals_available</code>返回True时，说明使用的是Blinker库</p>
+<h3 id="使用Flask-Built-in-signals"><a href="#使用Flask-Built-in-signals" class="headerlink" title="使用Flask Built-in signals"></a>使用Flask Built-in signals</h3><p>Flask内置有多个signals可以直接使用，这些signals会自动emit(发射)，我们只需要定义自己的回调函数，然后通过connect方式来subscribe我们定义的函数到对应的signal即可监听该signal</p>
+<p>下表展示了Flask内置的Signals，详细请参考<a href="http://flask.pocoo.org/docs/0.12/api/#core-signals-list" target="_blank" rel="noopener">Flask built-in signals</a>:</p>
+<table>
+<thead>
+<tr>
+<th>Signals</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>template_rendered</td>
+<td>当template被成功渲染之后会触发</td>
+</tr>
+<tr>
+<td>before_render_template</td>
+<td>当template被渲染之前会触发</td>
+</tr>
+<tr>
+<td>request_started</td>
+<td>当request context建立好之后，并在request被处理之前</td>
+</tr>
+<tr>
+<td>request_finished</td>
+<td>当发送response给客户端之后被触发</td>
+</tr>
+<tr>
+<td>got_request_exception</td>
+<td>当request处理过程中发生异常时，该signal会被触发，它甚至早于程序中的异常处理</td>
+</tr>
+<tr>
+<td>request_tearing_down</td>
+<td>当request tear down的时候触发，无论何种情况该signal都会被触发，即使发生异常</td>
+</tr>
+<tr>
+<td>appcontext_tearing_down</td>
+<td>当应用的context tear down的时候触发</td>
+</tr>
+<tr>
+<td>appcontext_pushed</td>
+<td>当应用的context被push时触发</td>
+</tr>
+<tr>
+<td>appcontext_popped</td>
+<td>当应用的context被pop时触发</td>
+</tr>
+<tr>
+<td>message_flashed</td>
+<td>当应用发送flash message时触发</td>
+</tr>
+</tbody>
+</table>
+<p>之前的例子我们已经看到如何使用<code>request_started</code> signal了，这里需要说明两点：</p>
+<ol>
+<li>在定义回调函数时，第一个参数必须是sender对象（即发送该signal的对象），第二个参数**extra用于接受额外的参数，也防止将来Flask在发送signal时添加新的参数。</li>
+<li>使用connect注册回调函数时，第一个参数是回调函数，这个是必须的，第二参数是sender对象，是可选的，但最佳实践是要明确发送该signal的对象</li>
+</ol>
+<p>另外，我们也可以临时性注册一个回调函数，这个尤其在进行单元测试时非常有用，因为我们不想在实际程序中添加测试相关的回调函数，因此需要一种机制在测试完成后，再取消注册该回调函数，有两种方式可以此种临时注册的机制：</p>
+<ul>
+<li>一种是通过<code>contextmanager</code>decorator和disconnect函数一起来实现，如下：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">from flask import template_rendered</span><br><span class="line">from contextlib import contextmanager</span><br><span class="line"></span><br><span class="line">@contextmanager</span><br><span class="line">def captured_templates(app):</span><br><span class="line">    recorded = []</span><br><span class="line">    def record(sender, template, context, **extra):</span><br><span class="line">        recorded.append((template, context))</span><br><span class="line">    # 当使用with关键字进入with context时，自动注册record函数到template_rendered signal</span><br><span class="line">    template_rendered.connect(record, app)</span><br><span class="line">    try:</span><br><span class="line">        yield recorded</span><br><span class="line">    finally:</span><br><span class="line">        # with context结束时会自动调用disconnect函数来解除注册</span><br><span class="line">        template_rendered.disconnect(record, app)</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>使用时代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">with captured_templates(app) as templates:</span><br><span class="line">    rv = app.test_client().get(&apos;/&apos;)</span><br><span class="line">    assert rv.status_code == 200</span><br><span class="line">    assert len(templates) == 1</span><br><span class="line">    template, context = templates[0]</span><br><span class="line">    assert template.name == &apos;index.html&apos;</span><br><span class="line">    assert len(context[&apos;items&apos;]) == 10</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li>另外一种方式是使用connect_to函数<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">from flask import template_rendered</span><br><span class="line"></span><br><span class="line">def captured_templates(app, recorded, **extra):</span><br><span class="line">    def record(sender, template, context):</span><br><span class="line">        recorded.append((template, context))</span><br><span class="line">    return template_rendered.connected_to(record, app)</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>使用时代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">templates = []</span><br><span class="line">with captured_templates(app, templates, **extra):</span><br><span class="line">    ...</span><br><span class="line">    template, context = templates[0]</span><br></pre></td></tr></table></figure></p>
+<h3 id="自定义signals的使用"><a href="#自定义signals的使用" class="headerlink" title="自定义signals的使用"></a>自定义signals的使用</h3><h4 id="自定义signal"><a href="#自定义signal" class="headerlink" title="自定义signal"></a>自定义signal</h4><p>当我们需要自定义signal时，我们可以直接使用blinker库</p>
+<ol>
+<li><p>首先定义一个namespace</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">from blinker import Namespace</span><br><span class="line">my_signals = Namespace()</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>使用我们自定义的namespace定义自己的signal</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">upload_image_finished = my_signals.signal(&apos;upload_image_finished&apos;)</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>至此，我们就定义了一个signal，名为<code>upload_image_finished</code></p>
+<h4 id="发射自定义signal"><a href="#发射自定义signal" class="headerlink" title="发射自定义signal"></a>发射自定义signal</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">from flask import current_app</span><br><span class="line"></span><br><span class="line">def upload_image(image_path, upload_url):</span><br><span class="line">    # upload image code</span><br><span class="line">    ...</span><br><span class="line">    # after upload image</span><br><span class="line">    upload_image_finished.send(current_app._get_current_object())</span><br></pre></td></tr></table></figure>
+<ul>
+<li>当在类的method中使用send函数发射signal时，我们可以选择该类的对象作为sender对象，因此直接使用self作为参数，但是当我们不是在类的method当中，或者我们想让应用对象作为sender，那么我们就需使用如上代码所示的current_app._get_current_object()来获取应用对象</li>
+<li>使用sender时，第一个参数是sender对象，是必选的。其余实际我们还可以传递更多参数(记得我们的callback函数使用了**extra), 这样的话我们实际就拥有了传递更多数据的能力。</li>
+</ul>
+<h3 id="注册回调函数的简化写法"><a href="#注册回调函数的简化写法" class="headerlink" title="注册回调函数的简化写法"></a>注册回调函数的简化写法</h3><p>从文章的第一个示例可以看出我们需要通过调用connect函数来对回调函数进行注册, 其实还有一个简化的写法可以把回调函数的定义和注册过程结合在一起，如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">from flask import template_rendered</span><br><span class="line"></span><br><span class="line">@template_rendered.connect_via(app)</span><br><span class="line">def when_template_rendered(sender, template, context, **extra):</span><br><span class="line">    print &apos;Template %s is rendered with %s&apos; % (template.name, context)</span><br></pre></td></tr></table></figure></p>
+<p>通过connect_via装饰器来简化回调函数定义和注册的过程</p>
+<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><ul>
+<li><a href="http://flask.pocoo.org/docs/0.12/signals/" target="_blank" rel="noopener">Flask Signals</a></li>
+<li><a href="https://pythonhosted.org/blinker/" target="_blank" rel="noopener">Blinker Doc</a></li>
+</ul>
+</div><div class="container"><hr></div></article><footer id="footer"><div class="container"><div class="bar"><div class="social"><a href="mailto:rebor.liu@gmail.com" target="_blank"><i class="fa fa-envelope-o"></i></a><a href="https://github.com/geekpy" target="_blank"><i class="fa fa-github"></i></a></div><div class="footer">© 2018 <a href="/" rel="nofollow">geekpy</a>. Powered by <a rel="nofollow" target="_blank" href="https://hexo.io">Hexo</a>. Theme <a target="_blank" href="https://github.com/lotabout/very-simple">very-simple</a>.</div></div></div></footer><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.css"><script src="//cdn.bootcss.com/jquery/2.0.3/jquery.min.js"></script><script src="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.pack.js"></script><script>$(document).ready(function() {
+    $(".fancybox").fancybox();
+});
+</script></body></html>
