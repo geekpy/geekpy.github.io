@@ -2,23 +2,44 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>http://yoursite.com/2018/08/12/flask_login_detail/</loc>
+    <loc>http://yoursite.com/2018/08/12/python_time/</loc>
     
-    <lastmod>2018-08-12T05:47:52.361Z</lastmod>
+    <lastmod>2018-08-12T06:19:17.377Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://yoursite.com/2016/12/06/flask_login_detail/</loc>
+    
+    <lastmod>2018-08-12T06:15:08.724Z</lastmod>
     
   </url>
   
   <url>
     <loc>http://yoursite.com/2017/10/12/Flask-Login/</loc>
     
-    <lastmod>2018-08-12T05:33:31.486Z</lastmod>
+    <lastmod>2018-08-12T06:06:52.332Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://yoursite.com/2018/08/12/flask_restful_api/</loc>
+    <loc>http://yoursite.com/2017/10/05/Flask-Signals/</loc>
     
-    <lastmod>2018-08-12T05:31:11.729Z</lastmod>
+    <lastmod>2018-08-12T05:55:48.002Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://yoursite.com/2018/02/22/flask_celery/</loc>
+    
+    <lastmod>2018-08-12T05:54:49.367Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://yoursite.com/2017/08/10/flask_restful_api/</loc>
+    
+    <lastmod>2018-08-12T05:50:21.523Z</lastmod>
     
   </url>
   
@@ -26,27 +47,6 @@
     <loc>http://yoursite.com/2017/10/08/Werkzeug-Local/</loc>
     
     <lastmod>2018-08-12T05:29:42.840Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://yoursite.com/2017/10/05/Flask-Signals/</loc>
-    
-    <lastmod>2018-08-12T05:28:47.381Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://yoursite.com/2018/08/12/flask_celery/</loc>
-    
-    <lastmod>2018-08-12T05:26:02.394Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://yoursite.com/2018/08/12/python_time/</loc>
-    
-    <lastmod>2018-08-12T03:55:08.092Z</lastmod>
     
   </url>
   
