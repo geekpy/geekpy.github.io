@@ -1,0 +1,60 @@
+<!DOCTYPE html><html><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>理解数据库的事务，ACID，CAP和一致性 | Geekpy's Blog</title><link rel="stylesheet" type="text/css" href="/css/normalize.css"><link rel="stylesheet" type="text/css" href="/css/highlight.css"><link rel="stylesheet" type="text/css" href="/css/very-simple.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/font-awesome/4.5.0/css/font-awesome.min.css"><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="alternate" type="application/atom+xml" href="/atom.xml"></head><body><!-- include the sidebar--><!-- include ./includes/sidebar.jade--><!-- Blog title and subtitle--><header><div class="container header"><a id="logo" href="/." class="title">Geekpy's Blog</a><span class="subtitle"></span><label id="toggle-menu" for="menu" onclick><i class="fa fa-bars"></i></label></div></header><!-- use checkbox hack for toggle nav-bar on small screens--><input id="menu" type="checkbox"><!-- Navigation Links--><nav id="nav"><div class="container"><a href="/" class="sidebar-nav-item active">Home</a><a href="/archives" class="sidebar-nav-item">Archives</a><a href="/about" class="sidebar-nav-item">About</a></div></nav><div id="header-margin-bar"></div><div class="wrapper"><div class="container post-header"><h1>理解数据库的事务，ACID，CAP和一致性</h1></div></div><article><div class="container post"><p>本文详细阐述了数据库常用的一些概念如事务、ACID、CAP等</p>
+<p>&lt;!--more--&gt;</p>
+<h2>什么是事务</h2>
+<p>事务是指由一系列数据库操作组成的一个完整的逻辑过程，这个过程中的所有操作要么都成功，要么都不成功。比如：常见的例子就是银行转账的例子，一次转账操作会包含多个数据库操作，而这些数据库操作需要放到一个事务当中，保证其要么都成功，要么都不成功。</p>
+<h2>什么是ACID</h2>
+<p>ACID是事务的四个特性，指的是atomicity，原子性；consistency，一致性；isolation，隔离性；durability，持久性。</p>
+<ol>
+<li>原子性(atomicity): 指所有在事务中的操作要么都成功，要么都不成功，所有的操作都不可分割，没有中间状态。一旦某一步执行失败，就会全部回滚到初始状态。</li>
+<li>一致性(consistency): 指的是逻辑上的一致性，即所有操作是符合现实当中的期望的。具体参考下一节</li>
+<li>隔离性(isolation): 即不同事务之间的相互影响和隔离的程度。比如，不同的隔离级别，事务的并发程度也不同，最强的隔离状态是所有的事务都是串行化的（serializable）（即一个事务完成之后才能进行下一个事务），这样并发性也会降到最低，在保证了强一致性的情况下，性能也会受很大影响，所以在实际工程当中，往往会折中一下。</li>
+<li>持久性(durability): 可以简单地理解为事务执行完毕后数据不可逆并持久化存储于存储系统当中</li>
+</ol>
+<h2>理解一致性</h2>
+<p>实际上我们通常说的数据库事务的一致性和分布式系统的一致性并不是一个概念。这里可以区分成“内部一致性”和“外部一致性”。“内部一致性”搞数据库的人很少这么说，一般就直接说一致性，更准确的说是“Consistency in ACID”（“事务 ACID 属性中的一致性”）；“外部一致性”是针对分布式系统而言的，分布式领域提及的 Consistency 表示系统的正确性模型，著名的也是臭名昭著的 CAP 理论中的 C 就是这个范畴的。这主要是由于分布式系统写入和读取都可能不在同一台机器上，而这必然会有一段时间导致不同机器上所存的数据不一致的情况，这就是所谓的“不一致时间窗口”。</p>
+<h4>内部一致性</h4>
+<p>要理解内部一致性也就是我们通常所说的ACID中的一致性，就必须从反面考虑什么情况下是不一致的。不一致的情况主要有以下几种情况：
+<img src="http://upload-images.jianshu.io/upload_images/3959253-604e246793805ad0.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="丢失修改、不可重复读、脏读"></p>
+<ul>
+<li>修改丢失：丢失修改是事务A和B先后更改数据数据x（假设初始是x0)，但是在A未正式更改前，B已经读取了原先的数据x0，最后A更改后为x1，B更改的并不是A更新后的x1，而是更改的x0，更改后假设为x2，这时x2将x1覆盖了，相当于事务A针对x的更改丢失了。</li>
+<li>脏读： 事务T1读取了T2更改的x，但是T2在实际存储数据时可能出错回滚了，这时T1读取的实际是无效的数据，这种情况下就是脏读</li>
+<li>不可重复读：是说在T1读取x时，由于中间T2更改了x，所以T1前后两次读取的x值不相同，这就是所谓的不可重复读</li>
+<li>幻读：在T1读取符合某个条件的所有记录时，T2增加了一条符合该条件的记录，这就导致T1执行过程中前后读取的记录可能不一致，即T2之后读取时会多出一条记录。</li>
+</ul>
+<p>其中前三种（丢失修改、不能重复读、脏读）都是由于并发事务在修改同一份数据的时候导致的问题，此类问题可以通过对同一个资源加锁的方式来解决，而最后一种情况是由于不同事务并发时，新增数据导致的问题，对于新增的记录是无法加锁的，此种情况只能通过事务的串行化来解决。而串行化与并发是矛盾的，所以要在性能和事务的一致性强度上取得一个平衡，就涉及到不同的隔离等级，关于隔离等级，详见<em>理解隔离性</em>一节。</p>
+<h4>外部一致性</h4>
+<p>在分布式系统中我们所说的一致性，也就是外部一致性，通常会分为强一致性，弱一致性，还有最终一致性，而要理解外部一致性，需要对CAP理论（Consistency，Availability和Partition Tolerance）有所了解，关于CAP详见<em>CAP定理</em>一节。</p>
+<ul>
+<li>强一致性：指系统中的某个数据被成功更新后，后续任何对该数据的读取操作都将得到更新后的值</li>
+<li>弱一致性：弱一致性是相对于强一致性而言，它不保证总能得到最新的值；</li>
+<li>最终一致性：是弱一致性的特殊形式，即保证在没有新的更新的条件下，经过一段“不一致时间窗口”，最终所有的访问都是最后更新的值。最常见的是DNS服务，更新域名指向的机器后，多级缓存要等到expiration time的时候才会更新，但是随着时间的推移，最终数据会趋于一致。</li>
+</ul>
+<h2>理解隔离性</h2>
+<p>事务的隔离级别从低到高有
+读未提交（Read uncommitted）、读提交（read committed）、可重复读（repeatable read）和串行化（Serializable）</p>
+<ul>
+<li>Read Uncommitted：事务读数据时不会加锁，写数据时会有行级共享锁。假设事务1先于事务2，当事务1更新数据的时候，事务2可以读取事务1未提交的数据，但是不能更新事务1正在更新的数据。而如果事务1只是读数据，那么事务2既可以读数据，也可以更新数据。
+这种情况下无法规避脏读，不可重复读的问题。</li>
+<li>Read Committed：即在一个事务修改数据过程中，如果事务还没提交，其他事务不能读该数据，或者说只能读取committed的数据。事务读数据的瞬间会加行级共享锁，一旦读完该行，立即释放该行级共享锁；而写数据的瞬间会加行级排它锁，直到事务结束。这种情况下就避免了脏读，但是却不能避免不可重复读的问题</li>
+<li>Repeatable Read：当然就再升一级，为的就是避免不可重复读的问题，所以名字叫repeatable read。怎么实现的呢，我们知道read committed是，事务读操作只在读的一瞬间加锁，读完这行就释放锁了，而repeatable read级别是读的一瞬间加锁，但是一直到事务结束才释放锁。但是repeatable read不能解决幻读的问题，因为幻读是增加记录，并不是更改原先的记录。</li>
+<li>Serialization：到达这一级别的隔离，可以彻底解决一致性的所有问题。一般来说是通过加表锁来解决串行化的问题。</li>
+</ul>
+<h2>CAP定理</h2>
+<p>CAP理论主要是针对分布式存储系统的，C是指Consistency一致性，A是指Availability可用性，P是指Partition tolerance分区容忍性。CAP定理认为分布式系统中这三个特性最多只能同时满足两个特性。下面我们来分别看下这三个特性究竟是什么意思。
+<img src="http://upload-images.jianshu.io/upload_images/3959253-184c37c7dc01d4d5.gif?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="CAP"></p>
+<ul>
+<li>一致性(Consistency): 指在分布式系统中的所有数据备份，在同一时刻是否同样的值。（等同于所有节点访问同一份最新的数据副本）</li>
+<li>可用性(Availability): 在集群中一部分节点故障后，集群整体是否还能响应客户端的读写请求。（对数据更新具备高可用性）</li>
+<li>分区容忍性(Partition tolerance): 即当节点之间无法正常通信时，就产生了分区，而分区产生后，依然能够保证服务可用，那么我们就说系统是分区容忍的。显然如果节点越多，且备份越多，分区容忍度就越高（因为即便是其中一个或多个节点挂了，仍然有其它节点和备份可用）。</li>
+</ul>
+<p>那么，为什么说三个特性无法全部保证呢？首先，假如我们要保证分区容忍性，必然要做多个副本节点，而这必然会带来一致性的问题，即保证多个节点的数据是相同的，但是，要让多个节点数据相同，就必须要花时间去复制数据，这还是能够正常通信的情况下，那么在数据复制的过程中为了保持一致性，就不能对外提供服务，所以这段时间就无法满足可用性的问题。
+实际工程通常会采取一些折中措施，比如并不保证强一致性，只保证最终一致性，什么意思呢？比如，有三个数据节点互为备份，某份数据在节点A更改后，需要将更改复制到节点B和C，假设复制过程中，有客户访问该数据，那么此时不保证是一致的，即访问A节点的用户得到的是最新数据，而访问B和C节点的用户得到是老数据，但是最终，数据会复制完成，所以最终A、B、C三个节点的数据是一致的。（比如像文章点赞这种数据，延迟下也没有关系啦）</p>
+<h2>Reference</h2>
+<ul>
+<li><a href="http://www.hollischuang.com/archives/943" target="_blank" rel="noopener">深入分析事务的隔离级别</a></li>
+<li><a href="https://www.zhihu.com/question/56073588/answer/253106572" target="_blank" rel="noopener">如何理解数据库的内部一致性和外部一致性？</a></li>
+</ul>
+</div><div class="container"><hr></div></article><footer id="footer"><div class="container"><div class="bar"><div class="social"><a href="mailto:rebor.liu@gmail.com" target="_blank"><i class="fa fa-envelope-o"></i></a><a href="https://github.com/geekpy" target="_blank"><i class="fa fa-github"></i></a></div><div class="footer">© 2018 <a href="/" rel="nofollow">geekpy</a>. Powered by <a rel="nofollow" target="_blank" href="https://hexo.io">Hexo</a>. Theme <a target="_blank" href="https://github.com/lotabout/very-simple">very-simple</a>.</div></div></div></footer><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.css"><script src="//cdn.bootcss.com/jquery/2.0.3/jquery.min.js"></script><script src="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.pack.js"></script><script>$(document).ready(function() {
+    $(".fancybox").fancybox();
+});
+</script></body></html>

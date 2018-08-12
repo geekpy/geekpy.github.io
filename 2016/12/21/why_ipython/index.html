@@ -1,28 +1,51 @@
-<!DOCTYPE html><html><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>为什么要使用IPython | Geekpy's Blog</title><link rel="stylesheet" type="text/css" href="/css/normalize.css"><link rel="stylesheet" type="text/css" href="/css/highlight.css"><link rel="stylesheet" type="text/css" href="/css/very-simple.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/font-awesome/4.5.0/css/font-awesome.min.css"><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="alternate" type="application/atom+xml" href="/atom.xml"></head><body><!-- include the sidebar--><!-- include ./includes/sidebar.jade--><!-- Blog title and subtitle--><header><div class="container header"><a id="logo" href="/." class="title">Geekpy's Blog</a><span class="subtitle"></span><label id="toggle-menu" for="menu" onclick><i class="fa fa-bars"></i></label></div></header><!-- use checkbox hack for toggle nav-bar on small screens--><input id="menu" type="checkbox"><!-- Navigation Links--><nav id="nav"><div class="container"><a href="/" class="sidebar-nav-item active">Home</a><a href="/archives" class="sidebar-nav-item">Archives</a><a href="/about" class="sidebar-nav-item">About</a></div></nav><div id="header-margin-bar"></div><div class="wrapper"><div class="container post-header"><h1>为什么要使用IPython</h1></div></div><article><div class="container post"><p>IPython提供了改进的交互式Python Shell，我们可以利用IPython来执行Python语句，并能够立刻看到结果，这一点跟Python自带的shell工具没有什么不同，但是IPython额外提供了很多实用的功能是Python自带的shell所没有的，下面就来看看这些实用的功能吧。<br><a id="more"></a></p>
-<p>####Tab自动补全<br>使用过Linux命令行的同学都知道tab自动补全有多实用吧，IPython可以针对之前输入过的变量，对象的方法等进行自动补全。我们只需要输入一部分，就可以看到命名空间中所有相匹配的变量，函数等</p>
+<!DOCTYPE html><html><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>为什么要使用IPython | Geekpy's Blog</title><link rel="stylesheet" type="text/css" href="/css/normalize.css"><link rel="stylesheet" type="text/css" href="/css/highlight.css"><link rel="stylesheet" type="text/css" href="/css/very-simple.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/font-awesome/4.5.0/css/font-awesome.min.css"><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="alternate" type="application/atom+xml" href="/atom.xml"></head><body><!-- include the sidebar--><!-- include ./includes/sidebar.jade--><!-- Blog title and subtitle--><header><div class="container header"><a id="logo" href="/." class="title">Geekpy's Blog</a><span class="subtitle"></span><label id="toggle-menu" for="menu" onclick><i class="fa fa-bars"></i></label></div></header><!-- use checkbox hack for toggle nav-bar on small screens--><input id="menu" type="checkbox"><!-- Navigation Links--><nav id="nav"><div class="container"><a href="/" class="sidebar-nav-item active">Home</a><a href="/archives" class="sidebar-nav-item">Archives</a><a href="/about" class="sidebar-nav-item">About</a></div></nav><div id="header-margin-bar"></div><div class="wrapper"><div class="container post-header"><h1>为什么要使用IPython</h1></div></div><article><div class="container post"><p>IPython提供了改进的交互式Python Shell，我们可以利用IPython来执行Python语句，并能够立刻看到结果，这一点跟Python自带的shell工具没有什么不同，但是IPython额外提供了很多实用的功能是Python自带的shell所没有的，下面就来看看这些实用的功能吧。</p>
+<p>&lt;!--more--&gt;</p>
+<p>####Tab自动补全
+使用过Linux命令行的同学都知道tab自动补全有多实用吧，IPython可以针对之前输入过的变量，对象的方法等进行自动补全。我们只需要输入一部分，就可以看到命名空间中所有相匹配的变量，函数等</p>
 <p><img src="http://upload-images.jianshu.io/upload_images/3959253-1db6cf5999a46cef.JPG?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="1.JPG"></p>
-<p>这个示例显示了，当输入mylist. 之后按tab键就自动出现的可以使用的method。<br>tab补全还可以针对文件路径进行补全，例如下面的例子在输入Anaconda之后按tab自动显示路径下的所有可选路径</p>
+<p>这个示例显示了，当输入mylist. 之后按tab键就自动出现的可以使用的method。
+tab补全还可以针对文件路径进行补全，例如下面的例子在输入Anaconda之后按tab自动显示路径下的所有可选路径</p>
 <p><img src="http://upload-images.jianshu.io/upload_images/3959253-fb281fe67f8656c1.JPG?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2.JPG"></p>
-<p>####内省<br>在变量的前面或者后面加问号?就可以查询改对象相关的信息(简要信息)，有的时候对象的描述信息较多时，需要两个问号??来显示全部信息.</p>
+<p>####内省
+在变量的前面或者后面加问号?就可以查询改对象相关的信息(简要信息)，有的时候对象的描述信息较多时，需要两个问号??来显示全部信息.</p>
 <p><img src="http://upload-images.jianshu.io/upload_images/3959253-c756f716132319ce.JPG?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="3.JPG"></p>
-<p>####魔术命令<br>魔术命令(magic commands)是IPython提供一整套命令，用这些命令可以操作IPython本身，以及提供一些系统功能。魔术命令分为两种：一种是基于行的(line-oriented), 命令只针对一行；另一种是基于单元的(cell-oriented)， 命令可以针对多行，均作为其参数。<br>比如：下面这个%timeit魔术命令就是line-oriented<br>%timeit range(1000)<br>下面的魔术命令是cell-oriented<br>%%timeit x = numpy.random.rann((100, 100))<br>numpy.linalg.svd(x)<br>注：这里timeit只针对svd进行测试，不会针对x变量的赋值做测试。</p>
-<p>IPython提供了很多类似的魔术命令，如果你想看都有哪些魔术命令，可以通过%lsmagic来查询，如果想查询某个命令的详细信息，可以通过%cmd?来获取，例如：%run?<br>另外，默认情况下automagic是ON状态，也就是说对于line-oriented命令我们不需要使用前面的百分号%，直接输入命令即可（例如：timeit range(1000) )，但是对于cell-oriented命令我们必须输入%%，可以通过%automagic来打开/关闭这个automagic功能。</p>
+<p>####魔术命令
+魔术命令(magic commands)是IPython提供一整套命令，用这些命令可以操作IPython本身，以及提供一些系统功能。魔术命令分为两种：一种是基于行的(line-oriented), 命令只针对一行；另一种是基于单元的(cell-oriented)， 命令可以针对多行，均作为其参数。
+比如：下面这个%timeit魔术命令就是line-oriented
+%timeit range(1000)
+下面的魔术命令是cell-oriented
+%%timeit x = numpy.random.rann((100, 100))
+numpy.linalg.svd(x)
+注：这里timeit只针对svd进行测试，不会针对x变量的赋值做测试。</p>
+<p>IPython提供了很多类似的魔术命令，如果你想看都有哪些魔术命令，可以通过%lsmagic来查询，如果想查询某个命令的详细信息，可以通过%cmd?来获取，例如：%run?
+另外，默认情况下automagic是ON状态，也就是说对于line-oriented命令我们不需要使用前面的百分号%，直接输入命令即可（例如：timeit range(1000) )，但是对于cell-oriented命令我们必须输入%%，可以通过%automagic来打开/关闭这个automagic功能。</p>
 <p>下面仅就常用的魔术命令做下介绍：</p>
-<h5 id="run-命令"><a href="#run-命令" class="headerlink" title="%run 命令"></a>%run 命令</h5><p>该命令可以直接执行python脚本，并输出结果，比如我们有一个python文件如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># test.py</span><br><span class="line">def main():</span><br><span class="line">    print &quot;this is a test.&quot;</span><br><span class="line"></span><br><span class="line">if __name__ == &apos;__main__&apos;:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure></p>
+<h5>%run 命令</h5>
+<p>该命令可以直接执行python脚本，并输出结果，比如我们有一个python文件如下：
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># test.py</span><br><span class="line">def main():</span><br><span class="line">    print &quot;this is a test.&quot;</span><br><span class="line"></span><br><span class="line">if __name__ == &apos;__main__&apos;:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure></p>
 <p>在IPython中执行如下图：</p>
 <p><img src="http://upload-images.jianshu.io/upload_images/3959253-4f5b8302d6da7e74.JPG?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="run.JPG"></p>
-<h5 id="paste-和-cpaste命令"><a href="#paste-和-cpaste命令" class="headerlink" title="%paste 和 %cpaste命令"></a>%paste 和 %cpaste命令</h5><p>我们经常会将python文件中的代码粘贴到IPython中执行，以便查看效果，尤其是针对现实图形的代码。这时如果直接拷贝粘贴，IPython可能无法正确的执行，这是因为IPython一旦遇到空行就认为粘贴结束，然后就开始执行了。<br>例如，我们有如下代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">def add(x, y):</span><br><span class="line">    result = x + y</span><br><span class="line">    print result</span><br><span class="line"></span><br><span class="line">add(1, 2)</span><br></pre></td></tr></table></figure></p>
+<h5>%paste 和 %cpaste命令</h5>
+<p>我们经常会将python文件中的代码粘贴到IPython中执行，以便查看效果，尤其是针对现实图形的代码。这时如果直接拷贝粘贴，IPython可能无法正确的执行，这是因为IPython一旦遇到空行就认为粘贴结束，然后就开始执行了。
+例如，我们有如下代码：
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">def add(x, y):</span><br><span class="line">    result = x + y</span><br><span class="line">    print result</span><br><span class="line"></span><br><span class="line">add(1, 2)</span><br></pre></td></tr></table></figure></p>
 <p>如果直接拷贝粘贴到IPython当中，就会报错，如下：</p>
 <p><img src="http://upload-images.jianshu.io/upload_images/3959253-85d9feee0f25cc75.JPG?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="paste.JPG"></p>
 <p>这时我们就需要使用%paste或者%cpaste来粘贴了，先拷贝代码，然后在IPython中输入%paste，结果如下：</p>
 <p><img src="http://upload-images.jianshu.io/upload_images/3959253-46fd6f21e584f4d6.JPG?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="paste_cmd.JPG"></p>
-<p>%cpaste也可以粘贴代码，与%paste区别就是它可以持续粘贴(即continue paste)，直到我们按Ctrl+D或者输入双减号”–”以结束粘贴</p>
-<h5 id="pdb"><a href="#pdb" class="headerlink" title="%pdb"></a>%pdb</h5><p>用以打开/关闭自动pdb唤出功能，当我们打开这个功能的时候(通过%pdb on 或者%pdb 1)，程序一旦遇到exception就会自动调用pdb，进入pdb交互界面(如果要关闭该功能可以通过%pdb off 或者%pdb 0)<br>例如我们有一个test2.py文件如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">def raise_exception():</span><br><span class="line">    var_before_exception = 1</span><br><span class="line">    raise Exception(&quot;test&quot;)</span><br><span class="line">    var_after_exception = 2</span><br><span class="line">    print var_before_exception</span><br><span class="line">    print var_after_exception</span><br><span class="line"></span><br><span class="line">raise_exception()</span><br></pre></td></tr></table></figure></p>
+<p>%cpaste也可以粘贴代码，与%paste区别就是它可以持续粘贴(即continue paste)，直到我们按Ctrl+D或者输入双减号&quot;--&quot;以结束粘贴</p>
+<h5>%pdb</h5>
+<p>用以打开/关闭自动pdb唤出功能，当我们打开这个功能的时候(通过%pdb on 或者%pdb 1)，程序一旦遇到exception就会自动调用pdb，进入pdb交互界面(如果要关闭该功能可以通过%pdb off 或者%pdb 0)
+例如我们有一个test2.py文件如下：
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">def raise_exception():</span><br><span class="line">    var_before_exception = 1</span><br><span class="line">    raise Exception(&quot;test&quot;)</span><br><span class="line">    var_after_exception = 2</span><br><span class="line">    print var_before_exception</span><br><span class="line">    print var_after_exception</span><br><span class="line"></span><br><span class="line">raise_exception()</span><br></pre></td></tr></table></figure></p>
 <p>当我们打开pdb开关后，执行如下图所示：</p>
 <p><img src="http://upload-images.jianshu.io/upload_images/3959253-e49d8fc237e4369a.JPG?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="pdb.JPG"></p>
 <p>可以发现pdb在raise exception的地方被唤出了。</p>
-<h5 id="edit"><a href="#edit" class="headerlink" title="%edit"></a>%edit</h5><p>用于启动一个编辑器。在Linux上会启动vim，在Windows上会启动notepad。我们可以在编辑器上编辑代码，保存退出后就会执行相应代码。</p>
-<h5 id="！cmd"><a href="#！cmd" class="headerlink" title="！cmd"></a>！cmd</h5><p>！后可以跟一个shell指令，从而在IPython界面就可以直接执行shell指令而不需要再退出IPython了<br>例如下面执行一条ping命令：</p>
+<h5>%edit</h5>
+<p>用于启动一个编辑器。在Linux上会启动vim，在Windows上会启动notepad。我们可以在编辑器上编辑代码，保存退出后就会执行相应代码。</p>
+<h5>！cmd</h5>
+<p>！后可以跟一个shell指令，从而在IPython界面就可以直接执行shell指令而不需要再退出IPython了
+例如下面执行一条ping命令：</p>
 <p><img src="http://upload-images.jianshu.io/upload_images/3959253-ae3c2c63b7ee044c.JPG?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="ping.JPG"></p>
 <p>除上述魔术命令外，IPython还提供了很多其它命令，下表列出了常用的一些命令，如果要查看完整列表，请使用%lsmagic</p>
 <table>
@@ -75,10 +98,19 @@
 </tr>
 </tbody>
 </table>
-<h4 id="matplotlib集成和pylab模式"><a href="#matplotlib集成和pylab模式" class="headerlink" title="matplotlib集成和pylab模式"></a>matplotlib集成和pylab模式</h4><p>IPython在使用matplotlib库生成图形的时候，仍然可以在IPython交互界面输入和操作，这是它比Python shell强大的一个重要功能点，使得我们在做科学计算的时候，可以更好的与数据交互并可视化。而要使用此功能，需要在启动IPython的时候，开启pylab模式，如下<br>$ipython –pylab</p>
-<h4 id="输入和输出"><a href="#输入和输出" class="headerlink" title="输入和输出"></a>输入和输出</h4><p>IPython的交互界面提示符分为In和Out，In代表输入并在后面的中括号中带有行号，如: In [2]:<br>Out代表输出，同样也有行号。IPython提供了一下几种快捷方式方便我们操作输入和输出：<br>  ● _ 和__: 单下划线_代表上一个输出，双下划线代表上上个输出<br>  ● _iX和_X: X代表行号，_iX代表第X行的输入的字符串，_X代表输出的字符串<br>  ● exec：我们可以利用exec命令来执行历史的输入操作<br>下图展示了如何利用这些快捷方式更方便的进行输入和输出的操作：</p>
+<h4>matplotlib集成和pylab模式</h4>
+<p>IPython在使用matplotlib库生成图形的时候，仍然可以在IPython交互界面输入和操作，这是它比Python shell强大的一个重要功能点，使得我们在做科学计算的时候，可以更好的与数据交互并可视化。而要使用此功能，需要在启动IPython的时候，开启pylab模式，如下
+$ipython --pylab</p>
+<h4>输入和输出</h4>
+<p>IPython的交互界面提示符分为In和Out，In代表输入并在后面的中括号中带有行号，如: In [2]:
+Out代表输出，同样也有行号。IPython提供了一下几种快捷方式方便我们操作输入和输出：
+● _ 和__: 单下划线_代表上一个输出，双下划线代表上上个输出
+● _iX和_X: X代表行号，_iX代表第X行的输入的字符串，_X代表输出的字符串
+● exec：我们可以利用exec命令来执行历史的输入操作
+下图展示了如何利用这些快捷方式更方便的进行输入和输出的操作：</p>
 <p><img src="http://upload-images.jianshu.io/upload_images/3959253-5694a399cc400d7d.JPG?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="inout.JPG"></p>
-<h4 id="键盘快捷键"><a href="#键盘快捷键" class="headerlink" title="键盘快捷键"></a>键盘快捷键</h4><p>IPython提供了类似Linux的快捷键操作方式，可以方便我们的命令操作</p>
+<h4>键盘快捷键</h4>
+<p>IPython提供了类似Linux的快捷键操作方式，可以方便我们的命令操作</p>
 <table>
 <thead>
 <tr>
