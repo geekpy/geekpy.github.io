@@ -1,0 +1,104 @@
+<!DOCTYPE html><html><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>史上最详解Python日期和时间处理（下） | Geekpy's Blog</title><link rel="stylesheet" type="text/css" href="/css/normalize.css"><link rel="stylesheet" type="text/css" href="/css/highlight.css"><link rel="stylesheet" type="text/css" href="/css/very-simple.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/font-awesome/4.5.0/css/font-awesome.min.css"><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="alternate" type="application/atom+xml" href="/atom.xml"></head><body><!-- include the sidebar--><!-- include ./includes/sidebar.jade--><!-- Blog title and subtitle--><header><div class="container header"><a id="logo" href="/." class="title">Geekpy's Blog</a><span class="subtitle"></span><label id="toggle-menu" for="menu" onclick><i class="fa fa-bars"></i></label></div></header><!-- use checkbox hack for toggle nav-bar on small screens--><input id="menu" type="checkbox"><!-- Navigation Links--><nav id="nav"><div class="container"><a href="/" class="sidebar-nav-item active">Home</a><a href="/archives" class="sidebar-nav-item">Archives</a><a href="/about" class="sidebar-nav-item">About</a></div></nav><div id="header-margin-bar"></div><div class="wrapper"><div class="container post-header"><h1>史上最详解Python日期和时间处理（下）</h1></div></div><article><div class="container post"><p>此下篇主要讲解跟时区相关的概念和程序中经常使用的场景，希望通过此文大家可以搞定所有时区相关的编程问题（如果还有不明白的地方，请联系我，我将进一步补充）。</p>
+<p>本文的目录结构如下：</p>
+<ul>
+<li><a href="#%E6%97%B6%E5%8C%BA%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5">时区基本概念</a>
+<ul>
+<li><a href="#%E6%97%B6%E5%8C%BA">时区</a></li>
+<li><a href="#GMT%E5%92%8CUTC">GMT和UTC</a></li>
+<li><a href="#%E6%97%B6%E5%8C%BA%E5%81%8F%E7%A7%BB">时区偏移(Offset)</a></li>
+<li><a href="#%E5%A4%8F%E4%BB%A4%E6%97%B6">夏令时(DST)</a></li>
+</ul>
+</li>
+<li><a href="#%E8%AE%BE%E7%BD%AE%E6%97%B6%E5%8C%BA">设置时区</a>
+<ul>
+<li><a href="#tzinfo">tzinfo</a></li>
+<li><a href="#dateutil">dateutil</a></li>
+<li><a href="#pytz">pytz</a></li>
+</ul>
+</li>
+<li><a href="#%E6%97%B6%E5%8C%BA%E5%A4%84%E7%90%86%E7%9A%84%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5">时区处理的最佳实践</a></li>
+</ul>
+<h2>时区基本概念</h2>
+<h4>时区</h4>
+<p>由于地球自转导致不同地区的人看到太阳升起和落下的时间不同，于是人们就定义了时区的概念，将全球分为24个时区，其中位于英国的本初子午线作为零时区中线，然后向东划分出十二个时区（分别为+1， +2....+12)，向西也划分成十二个时区(分别为-1, -2 .....-12)。其中最早进入新的一天的是+12时区，当+12时区为中午12点时，正好零时区进入第二天（它们相差12小时，所以+12）</p>
+<h4>GMT和UTC</h4>
+<p>GMT(Greenwich Mean Time)，即格林尼治标准时间，也就是本初子午线所在的时区。UTC(Universal Time Coordinated)，即标准世界时间。GMT和UTC虽然表示的时间相同，但是两个是不同的概念，大家注意区分，实践过程中，我们通常使用UTC时间作为标准时间。</p>
+<h4>时区偏移Offset</h4>
+<p>时区偏移(Offset)是指所处时区时间相对于UTC时间的偏移量，比如中国的CST时间其偏移量就是+8，即相对于UTC时间需要+8小时。有些程序会使用秒或者分钟来替代小时，所以使用的偏移量计算时间的时候需要注意具体使用的时间单位。具体可以参考<a href="https://en.wikipedia.org/wiki/UTC_offset" target="_blank" rel="noopener">wiki时区偏移</a></p>
+<h4>夏令时(DST)</h4>
+<p>关于夏令时我觉得<a href="https://blog.jijiechen.com/post/time-zone-and-dst-basics/#%E5%A4%8F%E4%BB%A4%E6%97%B6-dst" target="_blank" rel="noopener">这篇文章</a>已经讲解比较详细了, 大家可以直接参考，在此不再赘述。但是夏令时进一步增加了复杂度，这意味着即使同一个时区，一年中也会随着夏令时和非夏令时而导致offset的变化。</p>
+<h2>设置时区</h2>
+<h4>tzinfo</h4>
+<p>在《上篇》中我们已经说过Python用于表示时间的对象会分为原始的(naive)和有知的(aware)两种，而要表示有知的时间，就必须给相应的对象传递tzinfo参数。tzinfo参数主要用在datetime.datetime对象和datetime.time对象，其类初始化函数定义如下：
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># datetime.datetime</span><br><span class="line">class datetime.datetime(year, month, day[, hour[, minute[, second[, microsecond[, tzinfo]]]]])</span><br><span class="line"></span><br><span class="line"># datetime.time</span><br><span class="line">class datetime.time([hour[, minute[, second[, microsecond[, tzinfo]]]]])</span><br></pre></td></tr></table></figure></p>
+<p>可以看到初始化datetime和time对象时，都有一个tzinfo参数，当我们传递一个tzinfo对象给这个参数的时候我们就可以初始化一个有知的时间对象。</p>
+<p>那么这个tzinfo对象到底是怎么来的呢？
+先来看下Python官网的定义：</p>
+<blockquote>
+<p>This is an abstract base class, meaning that this class should not be instantiated directly. You need to derive a concrete subclass, and (at least) supply implementations of the standard <a href="https://docs.python.org/2/library/datetime.html#datetime.tzinfo" title="datetime.tzinfo" target="_blank" rel="noopener"><code>tzinfo</code></a> methods needed by the <a href="https://docs.python.org/2/library/datetime.html#datetime.datetime" title="datetime.datetime" target="_blank" rel="noopener"><code>datetime</code></a> methods you use. The <a href="https://docs.python.org/2/library/datetime.html#module-datetime" title="datetime: Basic date and time types." target="_blank" rel="noopener"><code>datetime</code></a> module does not supply any concrete subclasses of <a href="https://docs.python.org/2/library/datetime.html#datetime.tzinfo" title="datetime.tzinfo" target="_blank" rel="noopener"><code>tzinfo</code></a>.</p>
+</blockquote>
+<p>从这段定义我们可以看出，tzinfo只是一个抽象类，而且官网已经明确说了不提供相应的实现，那我们怎么做呢？有两种做法：一是自己实现，Python官网还给出了示例代码，参考<a href="https://docs.python.org/2/library/datetime.html#tzinfo-objects" target="_blank" rel="noopener">这里</a>；另一种就是使用我们下边要讲到的dateutil模块。</p>
+<h4>dateutil</h4>
+<ul>
+<li>
+<p>安装dateutil
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install python-dateutil</span><br></pre></td></tr></table></figure></p>
+</li>
+<li>
+<p>简介
+官网对dateutil的介绍就一句话</p>
+</li>
+</ul>
+<blockquote>
+<p>The dateutil module provides powerful extensions to the standard datetime module, available in Python.</p>
+</blockquote>
+<p>看到了吧，专门为拓展datetime而开发的，其中我们感兴趣的主要是如何构造时区tzinfo。</p>
+<ul>
+<li>常见的使用场景：</li>
+</ul>
+<h5>1.转换为相应时区的时间</h5>
+<p><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> dateutil.tz <span class="keyword">as</span> tz</span><br><span class="line"><span class="keyword">from</span> datetime <span class="keyword">import</span> datetime</span><br><span class="line"></span><br><span class="line">my_tz = tz.gettz(<span class="string">'Asia/Shanghai'</span>)</span><br><span class="line">d = datetime(<span class="number">2018</span>, <span class="number">8</span>, <span class="number">20</span>, tzinfo=my_tz)</span><br><span class="line"><span class="comment"># datetime.datetime(2018, 8, 20, 0, 0, tzinfo=tzfile('/usr/share/zoneinfo/Asia/Shanghai'))</span></span><br></pre></td></tr></table></figure></p>
+<p>也就是说通过<code>tz.gettz()</code>我们可以得到一个tzinfo对象从而可以将其作为参数传递给datetime初始化函数。
+通过这种方式，我们就可以表示一个本地时间了，比如我们获取了当前时间后想要表示成NewYork时间（换句话说就是要表示不同地方的当前时间），该怎么处理呢？
+先看正确的做法：
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">NYC = tz.gettz(&apos;America/New_York&apos;)</span><br><span class="line"></span><br><span class="line">now_utc = datetime.now(tz.tzutc())</span><br><span class="line"># datetime.datetime(2018, 8, 25, 8, 15, 53, 143709, tzinfo=tzutc())</span><br><span class="line"></span><br><span class="line">now_utc.astimezone(NYC)</span><br><span class="line"># datetime.datetime(2018, 8, 25, 4, 15, 53, 143709, tzinfo=tzfile(&apos;/usr/share/zoneinfo/America/New_York&apos;))</span><br></pre></td></tr></table></figure></p>
+<p>错误的做法：
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">now = datetime.utcnow()</span><br><span class="line"># datetime.datetime(2018, 8, 25, 8, 17, 21, 161843)</span><br><span class="line">now.astimezone(NYC)  </span><br><span class="line"># datetime.datetime(2018, 8, 24, 20, 17, 21, 161843, tzinfo=tzfile(&apos;/usr/share/zoneinfo/America/New_York&apos;))</span><br></pre></td></tr></table></figure></p>
+<p>为什么会出现这种情况呢，因为单纯的使用的utcnow()得到是一个原始naive time对象，而根据时区转换时，该时间会先从本地时区(+8 Shanghai)转换成UTC时区时间，然后再转化为NewYork时间，因此导致最终多减了8小时。</p>
+<p>另外，有的时候我们获取到的是offset信息而不是时区信息，那么我们也可以将UTC时间转换成对应的当地时间，如下：</p>
+<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"># 通过tzoffset也可以构筑tzinfo对象</span><br><span class="line">now_utc.astimezone(tz.tzoffset(&apos;NewYork&apos;, -14400))</span><br><span class="line"># datetime.datetime(2018, 8, 25, 4, 15, 53, 143709, tzinfo=tzoffset(&apos;NewYork&apos;, -14400))</span><br></pre></td></tr></table></figure></p>
+<h5>2.获取当前的时区信息，并可以做相应转换</h5>
+<p><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> dateutil.tz <span class="keyword">import</span> tzlocal</span><br><span class="line"></span><br><span class="line">tz_local = tzlocal()</span><br><span class="line">type(tz_local)</span><br><span class="line"><span class="comment">#  dateutil.tz.tz.tzlocal</span></span><br></pre></td></tr></table></figure></p>
+<p><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">d = datetime(<span class="number">2018</span>, <span class="number">8</span>, <span class="number">20</span>, <span class="number">9</span>, <span class="number">10</span>, <span class="number">5</span>, tzinfo=tz_local)</span><br><span class="line"><span class="comment"># datetime.datetime(2018, 8, 20, 9, 10, 5, tzinfo=tzlocal())</span></span><br></pre></td></tr></table></figure></p>
+<p><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">d.astimezone(tz.UTC)</span><br><span class="line"><span class="comment">#  datetime.datetime(2018, 8, 20, 1, 10, 5, tzinfo=tzutc())</span></span><br></pre></td></tr></table></figure></p>
+<h4>pytz</h4>
+<p>在时间处理的时候，我们还经常能看到pytz这个库，这个库比较有意思的是，<strong>它与datetime的tzinfo并不完全兼容</strong>，很多时候它是独立的一套处理时间的库。
+我们来看下如下代码(代码来自Paul Ganssle的文章，Paul是dateutil的核心开发者)：
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">import pytz</span><br><span class="line">from datetime import datetime, timedelta</span><br><span class="line"></span><br><span class="line">NYC = pytz.timezone(&apos;America/New_York&apos;)</span><br><span class="line"># 将timezone直接传入datetime初始化函数</span><br><span class="line">dt = datetime(2018, 2, 14, 12, tzinfo=NYC)</span><br><span class="line">print(dt)</span><br><span class="line"># 2018-02-14 12:00:00-04:56</span><br></pre></td></tr></table></figure></p>
+<p>可以看到实际的offset成了-04:56，这就不对了，正确使用pytz的姿势如下：
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">要使用localize方法来转化datetime对象</span><br><span class="line">dt = NYC.localize(datetime(2018, 2, 14, 12))</span><br><span class="line">print(dt)</span><br><span class="line"># 2018-02-14 12:00:00-05:00</span><br></pre></td></tr></table></figure></p>
+<p>再进行一些操作，如下
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">from datetime import timedelta</span><br><span class="line"></span><br><span class="line">dt_spring = dt + timedelta(days=60)</span><br><span class="line">print(dt_spring)</span><br><span class="line"># 2018-04-15 12:00:00-05:00</span><br></pre></td></tr></table></figure></p>
+<p>注意，这里的offset是-5:00，而考虑到夏令时，应当是-4:00，这是由于pytz在之前localize的时候就已经将offset设定好了，其在做其它运算之后也无法改变其offset，所以导致无法针对夏令时调整offset，所以针对pytz，每一次做类似timedelta的运算之后，都需要使用normalize函数进行调整，如下：
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">print(NYC.normalize(dt_spring))</span><br><span class="line"># 2018-04-15 13:00:00-04:00</span><br></pre></td></tr></table></figure></p>
+<p>在项目实践除非对性能有极端要求，并不推荐使用pytz，毕竟不是每个人都熟悉这个库，项目协作过程中很难避免误用。关于pytz和dateutil的性能比较，可以参考Paul Ganssle的这篇文章<a href="https://blog.ganssle.io/articles/2018/03/pytz-fastest-footgun.html" title="Permalink to pytz: The Fastest Footgun in the West" target="_blank" rel="noopener">pytz: The Fastest Footgun in the West</a></p>
+<h2>时区处理的最佳实践</h2>
+<h4>所有中间步骤均使用UTC时间或者时间戳</h4>
+<p>所有中间的存储或者计算均应当使用UTC时间或者Timestamp，只有在最终显示的时候如果需要转换成本地时间，那么再将时间转换为特定时区的时间进行显示。</p>
+<h4>存储timezone信息，而不是offset</h4>
+<p>如果需要针对用户本地时区做时间转换，需要存储timezone的信息，如timezone名称，而不是offset。这是由于有些地区可能有夏令时，offset会改变，所以最好是存时区名称之类的信息，这样通过tzinfo会自动进行调整。</p>
+<h2>Reference</h2>
+<ul>
+<li><a href="https://docs.python.org/2/library/time.html" target="_blank" rel="noopener">time module document</a></li>
+<li><a href="https://docs.python.org/2/library/datetime.html" target="_blank" rel="noopener">datetime module document</a></li>
+<li><a href="http://pytz.sourceforge.net/#introduction" target="_blank" rel="noopener">pytz</a></li>
+<li><a href="https://dateutil.readthedocs.io/en/stable/index.html" target="_blank" rel="noopener">dateutil</a></li>
+<li><a href="https://medium.com/@eleroy/10-things-you-need-to-know-about-date-and-time-in-python-with-datetime-pytz-dateutil-timedelta-309bfbafb3f7" target="_blank" rel="noopener">10 things you need to know about Date and Time in Python</a></li>
+<li><a href="https://blog.jijiechen.com/post/time-zone-and-dst-basics/" target="_blank" rel="noopener">时区和夏令时相关的基本知识</a></li>
+<li><a href="https://blog.ganssle.io/articles/2018/03/pytz-fastest-footgun.html" title="Permalink to pytz: The Fastest Footgun in the West" target="_blank" rel="noopener">pytz: The Fastest Footgun in the West</a></li>
+<li><a href="https://stackoverflow.com/questions/13218506/how-to-get-system-timezone-setting-and-pass-it-to-pytz-timezone/17365806" target="_blank" rel="noopener">StackOverflow</a></li>
+</ul>
+</div><div class="container"><hr></div></article><footer id="footer"><div class="container"><div class="bar"><div class="social"><a href="mailto:rebor.liu@gmail.com" target="_blank"><i class="fa fa-envelope-o"></i></a><a href="https://github.com/geekpy" target="_blank"><i class="fa fa-github"></i></a></div><div class="footer">© 2018 <a href="/" rel="nofollow">geekpy</a>. Powered by <a rel="nofollow" target="_blank" href="https://hexo.io">Hexo</a>. Theme <a target="_blank" href="https://github.com/lotabout/very-simple">very-simple</a>.</div></div></div></footer><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.css"><script src="//cdn.bootcss.com/jquery/2.0.3/jquery.min.js"></script><script src="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.pack.js"></script><script>$(document).ready(function() {
+    $(".fancybox").fancybox();
+});
+</script></body></html>
