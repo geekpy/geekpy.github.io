@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '6.4.2',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="在Pandas的实践过程中，我们经常需要将两个DataFrame合并组合在一起再进行处理，比如将不同来源的数据合并在一起，或者将不同日期的DataFrame合并在一起。DataFrame的合并组合从方向上分，大体上分为两种情况：横向的，纵向的。（这个很容易理解吧）">
+<meta name="keywords" content="pandas">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Pandas系列7-DataFrame之合并组合">
+<meta property="og:url" content="http://yoursite.com/2018/10/06/pandas7/index.html">
+<meta property="og:site_name" content="Geekpy&#39;s Blog">
+<meta property="og:description" content="在Pandas的实践过程中，我们经常需要将两个DataFrame合并组合在一起再进行处理，比如将不同来源的数据合并在一起，或者将不同日期的DataFrame合并在一起。DataFrame的合并组合从方向上分，大体上分为两种情况：横向的，纵向的。（这个很容易理解吧）">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/3959253-72f93e20760715b3.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/3959253-3d710611ff37ed8a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/3959253-11fe4f7fb81567d2.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:updated_time" content="2018-10-06T08:23:27.023Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Pandas系列7-DataFrame之合并组合">
+<meta name="twitter:description" content="在Pandas的实践过程中，我们经常需要将两个DataFrame合并组合在一起再进行处理，比如将不同来源的数据合并在一起，或者将不同日期的DataFrame合并在一起。DataFrame的合并组合从方向上分，大体上分为两种情况：横向的，纵向的。（这个很容易理解吧）">
+<meta name="twitter:image" content="https://upload-images.jianshu.io/upload_images/3959253-72f93e20760715b3.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Geekpy's Blog" type="application/atom+xml" />
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/10/06/pandas7/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Pandas系列7-DataFrame之合并组合 | Geekpy's Blog</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Geekpy's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br />About</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />Tags</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />Categories</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />Archives</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+    
+    
+    <div class="post-block page">
+      <header class="post-header">
+
+<h1 class="post-title" itemprop="name headline">Pandas系列7-DataFrame之合并组合</h1>
+
+<div class="post-meta">
+  
+  
+
+
+  
+  
+  <ul class="breadcrumb">
+    
+      
+      
+        
+          <li><a href="/2018/">2018</a></li>
+          
+            
+          
+        
+      
+    
+      
+      
+        
+          <li><a href="/2018/10/">10</a></li>
+          
+            
+          
+        
+      
+    
+      
+      
+        
+          <li><a href="/2018/10/06/">06</a></li>
+          
+            
+          
+        
+      
+    
+      
+      
+        
+          <li>PANDAS7</li>
+        
+      
+    
+      
+      
+        
+          <li><a href="/2018/10/06//"></a></li>
+          
+            
+          
+        
+      
+    
+  </ul>
+
+
+</div>
+
+</header>
+
+      
+      
+      
+      <div class="post-body">
+        
+        
+          <p>在Pandas的实践过程中，我们经常需要将两个DataFrame合并组合在一起再进行处理，比如将不同来源的数据合并在一起，或者将不同日期的DataFrame合并在一起。DataFrame的合并组合从方向上分，大体上分为两种情况：横向的，纵向的。（这个很容易理解吧）
+<a id="more"></a>
+看下如下的图示（图片来自Pandas官网）
+<img src="https://upload-images.jianshu.io/upload_images/3959253-72f93e20760715b3.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="横向"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/3959253-3d710611ff37ed8a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="纵向"></p>
+<p>另外需要注意的是，两个DataFrame在合在一起的时候，如果针对重叠项（比如都有column B)会有两种不同的处理方式，一种是针对重叠项进行合并处理（比如相加，或者直接取代）；另一种是忽略重叠项，只是简单的组合在一起。前者我们称为合并，后者我们叫做组合。</p>
+<p>另外，在Pandas中有很多不同函数和不同用法，比如有concat, join, merge, append，它们各有不同的使用场景。</p>
+<h2>纵向连接</h2>
+<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">In [45]: import pandas as pd</span><br><span class="line"></span><br><span class="line">In [46]: df = pd.DataFrame(&#123;&quot;name&quot;: [&quot;zhangsan&quot;, &quot;lisi&quot;, &quot;wangwu&quot;], &quot;city&quot;: [&quot;beijing&quot;</span><br><span class="line">    ...: , &quot;beijing&quot;, &quot;shenzhen&quot;], &quot;order&quot;: [12, 33, 67]&#125;)</span><br><span class="line"></span><br><span class="line">In [47]: df</span><br><span class="line">Out[47]:</span><br><span class="line">       city      name  order</span><br><span class="line">0   beijing  zhangsan     12</span><br><span class="line">1   beijing      lisi     33</span><br><span class="line">2  shenzhen    wangwu     67</span><br><span class="line"></span><br><span class="line">In [48]: df2 = pd.DataFrame(&#123;&quot;name&quot;: [&quot;zhanghai&quot;, &quot;liyang&quot;, &quot;wangjing&quot;], &quot;city&quot;: [&quot;sha</span><br><span class="line">    ...: nghai&quot;, &quot;shenzhen&quot;, &quot;chengdu&quot;], &quot;order&quot;: [2, 3, 7]&#125;)</span><br><span class="line"></span><br><span class="line">In [49]: df2</span><br><span class="line">Out[49]:</span><br><span class="line">       city      name  order</span><br><span class="line">0  shanghai  zhanghai      2</span><br><span class="line">1  shenzhen    liyang      3</span><br><span class="line">2   chengdu  wangjing      7</span><br><span class="line"></span><br><span class="line"># concat默认按行拼接(即纵向连接，axis=0), 也可以按列来连接(axis=1)</span><br><span class="line"># 注意concat拼接时，其参数是一个数组 ，因此可以拼接多个DataFrame</span><br><span class="line">In [51]: pd.concat([df, df2])</span><br><span class="line">Out[51]:</span><br><span class="line">       city      name  order</span><br><span class="line">0   beijing  zhangsan     12</span><br><span class="line">1   beijing      lisi     33</span><br><span class="line">2  shenzhen    wangwu     67</span><br><span class="line">0  shanghai  zhanghai      2</span><br><span class="line">1  shenzhen    liyang      3</span><br><span class="line">2   chengdu  wangjing      7</span><br><span class="line"></span><br><span class="line"># append是concat的一种快捷方式，用于将两个DataFrame直接拼接在一起</span><br><span class="line"># append的参数即可以是一个DataFrame，也可以是一个数组，这种情况下可以合并多个DataFrame</span><br><span class="line">In [52]: df.append(df2)</span><br><span class="line">Out[52]:</span><br><span class="line">       city      name  order</span><br><span class="line">0   beijing  zhangsan     12</span><br><span class="line">1   beijing      lisi     33</span><br><span class="line">2  shenzhen    wangwu     67</span><br><span class="line">0  shanghai  zhanghai      2</span><br><span class="line">1  shenzhen    liyang      3</span><br><span class="line">2   chengdu  wangjing      7</span><br></pre></td></tr></table></figure></p>
+<h2>横向连接与合并</h2>
+<p>前面我们已经知道concat不仅可以纵向连接，也可以横向连接
+<figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">In</span> [<span class="number">8</span>]: df3 = pd.concat([df, df2], <span class="attr">join=</span><span class="string">"inner"</span>, <span class="attr">axis=</span><span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">In</span> [<span class="number">9</span>]: df3</span><br><span class="line">Out[<span class="number">9</span>]:</span><br><span class="line">       city      name  <span class="keyword">order</span>      <span class="title">city</span>      name  order</span><br><span class="line"><span class="number">0</span>   beijing  zhangsan     <span class="number">12</span>  shanghai  zhanghai      <span class="number">2</span></span><br><span class="line"><span class="number">1</span>   beijing      lisi     <span class="number">33</span>  shenzhen    liyang      <span class="number">3</span></span><br><span class="line"><span class="number">2</span>  shenzhen    wangwu     <span class="number">67</span>   chengdu  wangjing      <span class="number">7</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 实际上，concat是通过index来作为拼接的依据，什么意思呢，看下面的例子</span></span><br><span class="line"><span class="comment"># 我们重新assign index给df3</span></span><br><span class="line"><span class="keyword">In</span> [<span class="number">12</span>]: df3 = pd.DataFrame(&#123;<span class="string">"name"</span>: [<span class="string">"zhanghai"</span>, <span class="string">"liyang"</span>, <span class="string">"wangjing"</span>], <span class="string">"city"</span>: [<span class="string">"shanghai"</span>, <span class="string">"shenzhen"</span>, <span class="string">"chengdu"</span>], <span class="string">"order"</span>: [<span class="number">2</span>, <span class="number">3</span>, <span class="number">7</span>]&#125;, <span class="attr">index=</span>[</span><br><span class="line">    ...: <span class="number">1</span>, <span class="number">3</span>, <span class="number">9</span>])</span><br><span class="line"></span><br><span class="line"><span class="comment"># df3的row index变为了1， 3， 9</span></span><br><span class="line"><span class="keyword">In</span> [<span class="number">13</span>]: df3</span><br><span class="line">Out[<span class="number">13</span>]:</span><br><span class="line">       city      name  order</span><br><span class="line"><span class="number">1</span>  shanghai  zhanghai      <span class="number">2</span></span><br><span class="line"><span class="number">3</span>  shenzhen    liyang      <span class="number">3</span></span><br><span class="line"><span class="number">9</span>   chengdu  wangjing      <span class="number">7</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 当使用join="outer"的时候，取index的并集，index相同的行会放在同一行，而不同的行会分别列出</span></span><br><span class="line"><span class="keyword">In</span> [<span class="number">14</span>]: df4 = pd.concat([df, df3], <span class="attr">join=</span><span class="string">"outer"</span>, <span class="attr">axis=</span><span class="number">1</span>)</span><br><span class="line"><span class="keyword">In</span> [<span class="number">15</span>]: df4</span><br><span class="line">Out[<span class="number">15</span>]:</span><br><span class="line">       city      name  <span class="keyword">order</span>      <span class="title">city</span>      name  order</span><br><span class="line"><span class="number">0</span>   beijing  zhangsan   <span class="number">12.0</span>       NaN       NaN    NaN</span><br><span class="line"><span class="number">1</span>   beijing      lisi   <span class="number">33.0</span>  shanghai  zhanghai    <span class="number">2.0</span></span><br><span class="line"><span class="number">2</span>  shenzhen    wangwu   <span class="number">67.0</span>       NaN       NaN    NaN</span><br><span class="line"><span class="number">3</span>       NaN       NaN    NaN  shenzhen    liyang    <span class="number">3.0</span></span><br><span class="line"><span class="number">9</span>       NaN       NaN    NaN   chengdu  wangjing    <span class="number">7.0</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 当join="inner"时，我们取交集，index相同的行才会拼接在一起</span></span><br><span class="line"><span class="keyword">In</span> [<span class="number">16</span>]: df5 = pd.concat([df, df3], <span class="attr">join=</span><span class="string">"inner"</span>, <span class="attr">axis=</span><span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">In</span> [<span class="number">17</span>]: df5</span><br><span class="line">Out[<span class="number">17</span>]:</span><br><span class="line">      city  name  <span class="keyword">order</span>      <span class="title">city</span>      name  order</span><br><span class="line"><span class="number">1</span>  beijing  lisi     <span class="number">33</span>  shanghai  zhanghai      <span class="number">2</span></span><br></pre></td></tr></table></figure></p>
+<p>我们看到concat仍然是一种拼接，其根据index进行join，而merge更加灵活，可以根据指定的column来进行合并，如下：
+<figure class="highlight x86asm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">In</span> [<span class="number">18</span>]: df</span><br><span class="line"><span class="keyword">Out</span>[<span class="number">18</span>]:</span><br><span class="line">       city      name  order</span><br><span class="line"><span class="number">0</span>   beijing  zhangsan     <span class="number">12</span></span><br><span class="line"><span class="number">1</span>   beijing      lisi     <span class="number">33</span></span><br><span class="line"><span class="number">2</span>  shenzhen    wangwu     <span class="number">67</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">In</span> [<span class="number">19</span>]: df2</span><br><span class="line"><span class="keyword">Out</span>[<span class="number">19</span>]:</span><br><span class="line">       city      name  order</span><br><span class="line"><span class="number">1</span>  shanghai  zhanghai      <span class="number">2</span></span><br><span class="line"><span class="number">3</span>  shenzhen    liyang      <span class="number">3</span></span><br><span class="line"><span class="number">9</span>   chengdu  wangjing      <span class="number">7</span></span><br><span class="line"></span><br><span class="line"># 根据指定的列<span class="string">"city"</span>进行合并，同时how=<span class="string">"outer"</span>意味着join的方式</span><br><span class="line"># on也可以跟一个list，这样就可以针对多个列进行join</span><br><span class="line"><span class="keyword">In</span> [<span class="number">21</span>]: df6 = df.merge(df2, on=<span class="string">"city"</span>, how=<span class="string">"outer"</span>)</span><br><span class="line"></span><br><span class="line"># 注意同名的列（非on column)，会默认添加<span class="string">"_x"</span>, <span class="string">"_y"</span>后缀</span><br><span class="line"><span class="keyword">In</span> [<span class="number">22</span>]: df6</span><br><span class="line"><span class="keyword">Out</span>[<span class="number">22</span>]:</span><br><span class="line">       city    name_x  order_x    name_y  order_y</span><br><span class="line"><span class="number">0</span>   beijing  zhangsan     <span class="number">12.0</span>       <span class="meta">NaN</span>      <span class="meta">NaN</span></span><br><span class="line"><span class="number">1</span>   beijing      lisi     <span class="number">33.0</span>       <span class="meta">NaN</span>      <span class="meta">NaN</span></span><br><span class="line"><span class="number">2</span>  shenzhen    wangwu     <span class="number">67.0</span>    liyang      <span class="number">3.0</span></span><br><span class="line"><span class="number">3</span>  shanghai       <span class="meta">NaN</span>      <span class="meta">NaN</span>  zhanghai      <span class="number">2.0</span></span><br><span class="line"><span class="number">4</span>   chengdu       <span class="meta">NaN</span>      <span class="meta">NaN</span>  wangjing      <span class="number">7.0</span></span><br></pre></td></tr></table></figure></p>
+<p>可以针对多个列进行join，并重新命名后缀，如下：
+<figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">In</span> [<span class="number">31</span>]: df2</span><br><span class="line">Out[<span class="number">31</span>]:</span><br><span class="line">       city      name  order</span><br><span class="line"><span class="number">1</span>  shanghai  zhanghai      <span class="number">2</span></span><br><span class="line"><span class="number">3</span>  shenzhen    liyang     <span class="number">67</span></span><br><span class="line"><span class="number">9</span>   chengdu  wangjing     <span class="number">33</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">In</span> [<span class="number">32</span>]: df</span><br><span class="line">Out[<span class="number">32</span>]:</span><br><span class="line">       city      name  order</span><br><span class="line"><span class="number">0</span>   beijing  zhangsan     <span class="number">12</span></span><br><span class="line"><span class="number">1</span>   beijing      lisi     <span class="number">33</span></span><br><span class="line"><span class="number">2</span>  shenzhen    wangwu     <span class="number">67</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 这里针对column "city" 和 "order"进行join</span></span><br><span class="line"><span class="comment"># 同时我们可以通过suffixes来为同名的列赋予更有意义的名字</span></span><br><span class="line"><span class="keyword">In</span> [<span class="number">35</span>]: df7 = df.merge(df2, <span class="attr">on=</span>[<span class="string">"city"</span>, <span class="string">"order"</span>], <span class="attr">how=</span><span class="string">"outer"</span>, <span class="attr">suffixes=</span>('_left', '_right'))</span><br><span class="line"></span><br><span class="line"><span class="keyword">In</span> [<span class="number">36</span>]: df7</span><br><span class="line">Out[<span class="number">36</span>]:</span><br><span class="line">       city name_left  <span class="keyword">order</span> <span class="title">name_right</span></span><br><span class="line"><span class="number">0</span>   beijing  zhangsan     <span class="number">12</span>        NaN</span><br><span class="line"><span class="number">1</span>   beijing      lisi     <span class="number">33</span>        NaN</span><br><span class="line"><span class="number">2</span>  shenzhen    wangwu     <span class="number">67</span>     liyang</span><br><span class="line"><span class="number">3</span>  shanghai       NaN      <span class="number">2</span>   zhanghai</span><br><span class="line"><span class="number">4</span>   chengdu       NaN     <span class="number">33</span>   wangjing</span><br></pre></td></tr></table></figure></p>
+<p>关于merge还有几个常用的参数说明如下：
+<strong>left_index &amp; right_index</strong>: 当我们需要通过index来进行join的时候（类似concat），则可以使用left_index 或者right_index.
+<strong>sort</strong>: 默认为False，如果True则将join的key按照字典顺序进行排序，比如我们按照&quot;city&quot;进行join的时候，会按照&quot;city&quot;的字典顺序进行排序。但如果我们不需要排序，则可以将其置为False，以提高性能
+<strong>validate</strong>: 主要针对duplicate的情况，它有以下几个参数可以设置
+“one_to_one” or “1:1”: checks if merge keys are unique in both left and right datasets.
+“one_to_many” or “1:m”: checks if merge keys are unique in left dataset.
+“many_to_one” or “m:1”: checks if merge keys are unique in right dataset.
+“many_to_many” or “m:m”: allowed, but does not result in checks.
+更多关于merge的说明参考如下链接：
+<a href="http://pandas.pydata.org/pandas-docs/stable/merging.html#database-style-dataframe-joining-merging" target="_blank" rel="noopener">关于merge的说明</a></p>
+<p>另外，join是merge的一种简便写法，其底层是通过merge来实现的，如下两种表达方式是相同的。
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">left.join(right, <span class="attribute">on</span>=key_or_keys)</span><br><span class="line">pd.merge(left, right, <span class="attribute">left_on</span>=key_or_keys, <span class="attribute">right_index</span>=<span class="literal">True</span>,</span><br><span class="line">      <span class="attribute">how</span>=<span class="string">'left'</span>, <span class="attribute">sort</span>=<span class="literal">False</span>)</span><br></pre></td></tr></table></figure></p>
+<p>示例：
+<figure class="highlight clean"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"># 示例来自官网</span><br><span class="line">In [<span class="number">85</span>]: left = pd.DataFrame(&#123;<span class="string">'A'</span>: [<span class="string">'A0'</span>, <span class="string">'A1'</span>, <span class="string">'A2'</span>, <span class="string">'A3'</span>],</span><br><span class="line">   ....:                      <span class="string">'B'</span>: [<span class="string">'B0'</span>, <span class="string">'B1'</span>, <span class="string">'B2'</span>, <span class="string">'B3'</span>],</span><br><span class="line">   ....:                      <span class="string">'key'</span>: [<span class="string">'K0'</span>, <span class="string">'K1'</span>, <span class="string">'K0'</span>, <span class="string">'K1'</span>]&#125;)</span><br><span class="line">   ....: </span><br><span class="line"></span><br><span class="line">In [<span class="number">86</span>]: right = pd.DataFrame(&#123;<span class="string">'C'</span>: [<span class="string">'C0'</span>, <span class="string">'C1'</span>],</span><br><span class="line">   ....:                       <span class="string">'D'</span>: [<span class="string">'D0'</span>, <span class="string">'D1'</span>]&#125;,</span><br><span class="line">   ....:                       index=[<span class="string">'K0'</span>, <span class="string">'K1'</span>])</span><br><span class="line">   ....: </span><br><span class="line"></span><br><span class="line">In [<span class="number">87</span>]: result = left.join(right, on=<span class="string">'key'</span>)</span><br></pre></td></tr></table></figure></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/3959253-11fe4f7fb81567d2.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="merging_join_key_columns.png">
+需要注意的是当要join的两个DataFrame有同名的列时，必须指定suffix，否则会报错，如下：
+<figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">In [<span class="number">45</span>]: df</span><br><span class="line">Out[<span class="number">45</span>]:</span><br><span class="line">       city      name  <span class="keyword">order</span></span><br><span class="line"><span class="keyword">0 </span>  <span class="keyword">beijing </span> zhangsan     <span class="number">12</span></span><br><span class="line"><span class="number">1</span>   <span class="keyword">beijing </span>     lisi     <span class="number">33</span></span><br><span class="line"><span class="number">2</span>  <span class="keyword">shenzhen </span>   wangwu     <span class="number">67</span></span><br><span class="line"></span><br><span class="line">In [<span class="number">46</span>]: df2</span><br><span class="line">Out[<span class="number">46</span>]:</span><br><span class="line">       city      name  <span class="keyword">order</span></span><br><span class="line"><span class="keyword">1 </span> <span class="keyword">shanghai </span> zhanghai      <span class="number">2</span></span><br><span class="line"><span class="number">3</span>  <span class="keyword">shenzhen </span>   liyang     <span class="number">67</span></span><br><span class="line"><span class="number">9</span>   chengdu  wangjing     <span class="number">33</span></span><br><span class="line"></span><br><span class="line">In [<span class="number">47</span>]: df.<span class="keyword">join(df2, </span>lsuffix=<span class="string">"_left"</span>, rsuffix=<span class="string">"_right"</span>)</span><br><span class="line">Out[<span class="number">47</span>]:</span><br><span class="line">  city_left name_left  <span class="keyword">order_left </span>city_right name_right  <span class="keyword">order_right</span></span><br><span class="line"><span class="keyword">0 </span>  <span class="keyword">beijing </span> zhangsan          <span class="number">12</span>        NaN        NaN          NaN</span><br><span class="line"><span class="number">1</span>   <span class="keyword">beijing </span>     lisi          <span class="number">33</span>   <span class="keyword">shanghai </span>  zhanghai          <span class="number">2</span>.<span class="number">0</span></span><br><span class="line"><span class="number">2</span>  <span class="keyword">shenzhen </span>   wangwu          <span class="number">67</span>        NaN        NaN          NaN</span><br></pre></td></tr></table></figure></p>
+
+        
+      </div>
+      
+      
+      
+    </div>
+    
+
+
+  
+  
+  <ul class="breadcrumb">
+    
+      
+      
+        
+          <li><a href="/2018/">2018</a></li>
+          
+            
+          
+        
+      
+    
+      
+      
+        
+          <li><a href="/2018/10/">10</a></li>
+          
+            
+          
+        
+      
+    
+      
+      
+        
+          <li><a href="/2018/10/06/">06</a></li>
+          
+            
+          
+        
+      
+    
+      
+      
+        
+          <li>PANDAS7</li>
+        
+      
+    
+      
+      
+        
+          <li><a href="/2018/10/06//"></a></li>
+          
+            
+          
+        
+      
+    
+  </ul>
+
+
+    
+    
+    
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">geekpy</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">29</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">5</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">21</span>
+                    <span class="site-state-item-name">tags</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/geekpy" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:rebor.liu@gmail.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">纵向连接</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">横向连接与合并</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">geekpy</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> v3.7.1</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Muse</a> v6.4.2</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'OCjgmQiFa9gpVkDabM6KTb8g-gzGzoHsz',
+        appKey: 'Ie7XE2V6spB6Q6C1W2GU9drV',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script>
+    
+    function showTime(Counter) {
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      Counter('get', '/classes/Counter', { where: JSON.stringify({ url: { "$in": entries } }) })
+        .done(function ({ results }) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.url;
+            var time = item.time;
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function ({ responseJSON }) {
+          console.log("LeanCloud Counter Error: " + responseJSON.code + " " + responseJSON.error);
+        });
+    }
+    
+
+    $(function() {
+      $.get('https://app-router.leancloud.cn/2/route?appId=' + "OCjgmQiFa9gpVkDabM6KTb8g-gzGzoHsz")
+        .done(function ({ api_server }) {
+          var Counter = function (method, url, data) {
+            return $.ajax({
+              method: method,
+              url: `https://${api_server}/1.1${url}`,
+              headers: {
+                'X-LC-Id': "OCjgmQiFa9gpVkDabM6KTb8g-gzGzoHsz",
+                'X-LC-Key': "Ie7XE2V6spB6Q6C1W2GU9drV",
+                'Content-Type': 'application/json',
+              },
+              data: data,
+            });
+          };
+          
+          if ($('.post-title-link').length >= 1) {
+            showTime(Counter);
+          }
+          
+        })
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
