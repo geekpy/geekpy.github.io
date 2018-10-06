@@ -108,20 +108,20 @@
 
 
 
-  <meta name="description" content="主要是笔者在项目实践中总结的关于Celery使用的一些最佳实践，欢迎补充 &amp;lt;!--more--&amp;gt; 写在前面 本最佳实践是基于作者有限的经验，欢迎大家共同讨论，可以持续维护此最佳实践。另本文中所使用的环境为Mac&amp;amp;Ubuntu环境，软件版本如下：  Celery (4.1.0) Flask (0.12.1) RabbitMQ(3.6.9) librabbitmq (1.6.1)">
-<meta name="keywords" content="computer, programming, data science, deep learning">
+  <meta name="description" content="主要是笔者在项目实践中总结的关于Celery使用的一些最佳实践，欢迎补充">
+<meta name="keywords" content="flask,celery">
 <meta property="og:type" content="article">
 <meta property="og:title" content="在Flask中使用Celery的最佳实践">
 <meta property="og:url" content="http://yoursite.com/2018/02/22/flask_celery/index.html">
 <meta property="og:site_name" content="Geekpy&#39;s Blog">
-<meta property="og:description" content="主要是笔者在项目实践中总结的关于Celery使用的一些最佳实践，欢迎补充 &amp;lt;!--more--&amp;gt; 写在前面 本最佳实践是基于作者有限的经验，欢迎大家共同讨论，可以持续维护此最佳实践。另本文中所使用的环境为Mac&amp;amp;Ubuntu环境，软件版本如下：  Celery (4.1.0) Flask (0.12.1) RabbitMQ(3.6.9) librabbitmq (1.6.1)">
+<meta property="og:description" content="主要是笔者在项目实践中总结的关于Celery使用的一些最佳实践，欢迎补充">
 <meta property="og:locale" content="default">
 <meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3959253-5674ca727b61be6d.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
 <meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3959253-43eac6585498fc34.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
-<meta property="og:updated_time" content="2018-08-12T10:10:02.073Z">
+<meta property="og:updated_time" content="2018-10-06T05:29:01.902Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="在Flask中使用Celery的最佳实践">
-<meta name="twitter:description" content="主要是笔者在项目实践中总结的关于Celery使用的一些最佳实践，欢迎补充 &amp;lt;!--more--&amp;gt; 写在前面 本最佳实践是基于作者有限的经验，欢迎大家共同讨论，可以持续维护此最佳实践。另本文中所使用的环境为Mac&amp;amp;Ubuntu环境，软件版本如下：  Celery (4.1.0) Flask (0.12.1) RabbitMQ(3.6.9) librabbitmq (1.6.1)">
+<meta name="twitter:description" content="主要是笔者在项目实践中总结的关于Celery使用的一些最佳实践，欢迎补充">
 <meta name="twitter:image" content="http://upload-images.jianshu.io/upload_images/3959253-5674ca727b61be6d.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
 
 
@@ -373,7 +373,7 @@
         
         
           <p>主要是笔者在项目实践中总结的关于Celery使用的一些最佳实践，欢迎补充</p>
-<p>&lt;!--more--&gt;</p>
+<p><a id="more"></a></p>
 <h2>写在前面</h2>
 <p>本最佳实践是基于作者有限的经验，欢迎大家共同讨论，可以持续维护此最佳实践。另本文中所使用的环境为Mac&amp;Ubuntu环境，软件版本如下：</p>
 <ul>
@@ -386,18 +386,18 @@
 <p>简单来说Celery是一个异步的任务队列，当我们需要将一些任务(比如一些需要长时间操作的任务)异步操作的时候，这时候Celery就可以帮到我们，另外Celery还支持定时任务(类似Crontab)。详细的介绍可以参考<a href="http://www.celeryproject.org/" target="_blank" rel="noopener">官网</a></p>
 <h2>使用RabbitMQ作为Broker</h2>
 <p>RabbitMQ是官方推荐使用的Broker，它实际是一个消息中间件，负责消息的路由分发，安装RabbitMQ如下：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"># install on Ubuntu</span><br><span class="line">apt-get update</span><br><span class="line">apt-get install rabbitmq-server -yq</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># install on Ubuntu</span></span><br><span class="line">apt-<span class="builtin-name">get</span> update</span><br><span class="line">apt-<span class="builtin-name">get</span> install rabbitmq-server -yq</span><br></pre></td></tr></table></figure></p>
 <p>需要注意的是，线上环境我们需要创建新的账号，并将guest账号删除，操作如下：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">rabbitmqctl add_user myuser mypassword  # 新增用户</span><br><span class="line">rabbitmqctl add_vhost myvhost  # 新增vhost，以使用不同的命名空间</span><br><span class="line">rabbitmqctl set_permissions -p myvhost myuser &quot;.*&quot; &quot;.*&quot; &quot;.*&quot;  # 设置权限</span><br><span class="line">rabbitmqctl  delete_user guest  # 安全原因，删除guest</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">rabbitmqctl <span class="keyword">add_user </span>myuser mypassword  <span class="comment"># 新增用户</span></span><br><span class="line">rabbitmqctl <span class="keyword">add_vhost </span>myvhost  <span class="comment"># 新增vhost，以使用不同的命名空间</span></span><br><span class="line">rabbitmqctl set_permissions -p myvhost myuser <span class="string">".*"</span> <span class="string">".*"</span> <span class="string">".*"</span>  <span class="comment"># 设置权限</span></span><br><span class="line">rabbitmqctl  delete_user guest  <span class="comment"># 安全原因，删除guest</span></span><br></pre></td></tr></table></figure></p>
 <p>注意：vhost是一个虚拟空间，用于区分不同类型的消息
 然后，在Celery的配置中配置broker URL
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CELERY_BROKER_URL = &apos;amqp://myuser:mypassword@localhost:5672/myvhost&apos;</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">CELERY_BROKER_URL</span> = <span class="string">'amqp://myuser:mypassword@localhost:5672/myvhost'</span></span><br></pre></td></tr></table></figure></p>
 <p>注意：当使用amqp协议头时，如果安装有<code>librabbitmq</code>则使用<code>librabbitmq</code>，否则使用pyamqp</p>
 <h2>Celery的日志输出</h2>
 <p>在task中想要输出日志，最好的方法是通过如下方式
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">from celery.utils.log import get_task_logger</span><br><span class="line"></span><br><span class="line">lg = get_task_logger(__name__)</span><br><span class="line"></span><br><span class="line">@celery.task</span><br><span class="line">def log_test():</span><br><span class="line">    lg.debug(&quot;in log_test()&quot;)</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> celery.utils.log <span class="keyword">import</span> get_task_logger</span><br><span class="line"></span><br><span class="line">lg = get_task_logger(__name__)</span><br><span class="line"></span><br><span class="line"><span class="meta">@celery.task</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">log_test</span><span class="params">()</span>:</span></span><br><span class="line">    lg.debug(<span class="string">"in log_test()"</span>)</span><br></pre></td></tr></table></figure></p>
 <p>但是仅如此会发现所有的日志最后都跑到shell窗口的stdout当中，原来必须得在启动celery的时候使用-f option来指定输出文件，如下：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">celery -A main.celery worker -l debug -f log/celery/celery_task.log &amp;</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">celery -A main<span class="selector-class">.celery</span> worker -l debug -f log/celery/celery_task<span class="selector-class">.log</span> &amp;</span><br></pre></td></tr></table></figure></p>
 <p>-A：指定celery实例
 worker: 启动worker进程
 -l：指定log level，这里指定log level为debug level
@@ -405,16 +405,16 @@ worker: 启动worker进程
 <h2>使用Redis作为backend</h2>
 <p>当使用Redis作为存储后端的时候，我们可以通过设置DB number来使得Celery的结果存储与其它数据存储隔离开来，比如在笔者的项目中，redis还用作缓存的存储后端，因此为了区分，Celery在使用Redis的时候使用的DB number是1（默认是0），关于Redis DB number可以参考<a href="http://blog.teeceepee.com/blog/2015/02/14/redis-db-number/" target="_blank" rel="noopener">这里</a>.
 因此我们的backend设置如下：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CELERY_RESULT_BACKEND = &apos;redis://localhost:6379/1&apos; # 最后的数字1代表DB number</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CELERY_RESULT_BACKEND = 'redis://localhost:<span class="number">6379</span>/1' <span class="meta"># 最后的数字1代表DB number</span></span><br></pre></td></tr></table></figure></p>
 <p>查看Celery任务的结果可以通过Redis-cli连接Redis数据库进行查看
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&gt; redis-cli</span><br><span class="line">&gt; select 1 # 这里选择DB 1， 也可以在使用redis-cli -n 1来进入指定的DB</span><br><span class="line">&gt; get key # 获取指定key对应的结果</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;</span><span class="bash"> redis-cli</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> select 1 <span class="comment"># 这里选择DB 1， 也可以在使用redis-cli -n 1来进入指定的DB</span></span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> get key <span class="comment"># 获取指定key对应的结果</span></span></span><br></pre></td></tr></table></figure></p>
 <p><img src="http://upload-images.jianshu.io/upload_images/3959253-5674ca727b61be6d.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="redis-cli.jpg"></p>
 <h2>调试代码</h2>
 <p>我认为此处是非常重要的一个技巧，即在调试代码的时候，我们可以将<code>delay</code>或者<code>apply_async</code>先去掉，直接调用worker的函数进行同步调试，调试成功后再加上<code>delay</code>或者<code>apply_async</code> method</p>
 <h2>Celery可能会遇到的坑</h2>
 <h4>Celery4.x版本使用librabbitmq的问题</h4>
 <p>Celery 4.x版本在使用librabbitmq时，会出现类似这样的错误
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Received and deleted unknown message.  Wrong destination?!?</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Received <span class="keyword">and</span> deleted unknown <span class="keyword">message</span>.  Wrong destination?!?</span><br></pre></td></tr></table></figure></p>
 <p>完整错误如图：
 <img src="http://upload-images.jianshu.io/upload_images/3959253-43eac6585498fc34.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="celeryerror"></p>
 <p>解决这个问题有两个方式：</p>
@@ -427,27 +427,27 @@ Github上Robert Kopaczewski详细解释了这个问题，原文如下：</li>
 </blockquote>
 <ol start="2">
 <li>另一种方式是不使用librabbitmq, 通过pip uninstall librabbitmq, 并且更改broker配置的协议头为'pyamqp',如下，也可以解决这个问题。
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">BROKER_URL = &apos;pyamqp://guest:guest@localhost:5672/%2F&apos;</span><br></pre></td></tr></table></figure></li>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">BROKER_URL</span> = <span class="string">'pyamqp://guest:guest@localhost:5672/%2F'</span></span><br></pre></td></tr></table></figure></li>
 </ol>
 <p>由于librabbitmq的性能优势，我们还是推荐方式1来解决该问题。</p>
 <h4>RabbitMQ远程连接问题</h4>
 <p>如果RabbitMQ与Celery不在同一台机器上，除在Celery配置的时候要将<code>BROKER_URL</code>设置为正确的IP地址外，还需要将Rabbitmq的配置文件<code>/usr/local/etc/rabbitmq/rabbitmq-env.conf</code>中的<code>NODE_IP_ADDRESS</code>更改为0.0.0.0
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">NODE_IP_ADDRESS=0.0.0.0</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">NODE_IP_ADDRESS=<span class="number">0.0</span><span class="number">.0</span><span class="number">.0</span></span><br></pre></td></tr></table></figure></p>
 <h4>Celery import问题</h4>
-<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">The message has been ignored and discarded.</span><br><span class="line"></span><br><span class="line">Did you remember to import the module containing this task?</span><br><span class="line">Or maybe you&apos;re using relative imports?</span><br><span class="line"></span><br><span class="line">Please see</span><br><span class="line">http://docs.celeryq.org/en/latest/internals/protocol.html</span><br><span class="line">for more information.</span><br><span class="line"></span><br><span class="line">The full contents of the message body was:</span><br><span class="line">&apos;\x8e\xa7expires\xc0\xa3utc\xc3\xa4args\x91\x85\xa3tid\xb85971a43d47f84bb278f77fc2\xa3sen\xa2A1\xa2tt\xa2ar\xa2co\xc4\x00\xa1t\xa4like\xa5chord\xc0\xa9callbacks\xc0\xa8errbacks\xc0\xa7taskset\xc0\xa2id\xc4$c133dbf8-2c89-4311-b7cf-c377041058ec\xa7retries\x00\xa4task\xd9$tasks.messageTasks.send_like_message\xa5group\xc0\xa9timelimit\x92\xc0\xc0\xa3eta\xc0\xa6kwargs\x80&apos; (239b)</span><br><span class="line">Traceback (most recent call last):</span><br><span class="line">  File &quot;/Users/liufeng/.pyenv/versions/2.7.13/envs/kaopu_backend/lib/python2.7/site-packages/celery/worker/consumer/consumer.py&quot;, line 561, in on_task_received</span><br><span class="line">    strategy = strategies[type_]</span><br><span class="line">KeyError: u&apos;tasks.messageTasks.send_like_message&apos;</span><br></pre></td></tr></table></figure></p>
+<p><figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">The message has been ignored and discarded.</span><br><span class="line"></span><br><span class="line">Did you remember to import the module containing this task?</span><br><span class="line">Or maybe you're using relative imports?</span><br><span class="line"></span><br><span class="line">Please see</span><br><span class="line">http://docs.celeryq.org/en/latest/internals/protocol.html</span><br><span class="line">for more information.</span><br><span class="line"></span><br><span class="line">The full contents of the message body was:</span><br><span class="line">'<span class="tag">\<span class="name">x</span></span>8e<span class="tag">\<span class="name">xa</span></span>7expires<span class="tag">\<span class="name">xc</span></span>0<span class="tag">\<span class="name">xa</span></span>3utc<span class="tag">\<span class="name">xc</span></span>3<span class="tag">\<span class="name">xa</span></span>4args<span class="tag">\<span class="name">x</span></span>91<span class="tag">\<span class="name">x</span></span>85<span class="tag">\<span class="name">xa</span></span>3tid<span class="tag">\<span class="name">xb</span></span>85971a43d47f84bb278f77fc2<span class="tag">\<span class="name">xa</span></span>3sen<span class="tag">\<span class="name">xa</span></span>2A1<span class="tag">\<span class="name">xa</span></span>2tt<span class="tag">\<span class="name">xa</span></span>2ar<span class="tag">\<span class="name">xa</span></span>2co<span class="tag">\<span class="name">xc</span></span>4<span class="tag">\<span class="name">x</span></span>00<span class="tag">\<span class="name">xa</span></span>1t<span class="tag">\<span class="name">xa</span></span>4like<span class="tag">\<span class="name">xa</span></span>5chord<span class="tag">\<span class="name">xc</span></span>0<span class="tag">\<span class="name">xa</span></span>9callbacks<span class="tag">\<span class="name">xc</span></span>0<span class="tag">\<span class="name">xa</span></span>8errbacks<span class="tag">\<span class="name">xc</span></span>0<span class="tag">\<span class="name">xa</span></span>7taskset<span class="tag">\<span class="name">xc</span></span>0<span class="tag">\<span class="name">xa</span></span>2id<span class="tag">\<span class="name">xc</span></span>4<span class="formula">$c133dbf8-2c89-4311-b7cf-c377041058ec<span class="tag">\<span class="name">xa</span></span>7retries<span class="tag">\<span class="name">x</span></span>00<span class="tag">\<span class="name">xa</span></span>4task<span class="tag">\<span class="name">xd</span></span>9$</span>tasks.messageTasks.send_like_message<span class="tag">\<span class="name">xa</span></span>5group<span class="tag">\<span class="name">xc</span></span>0<span class="tag">\<span class="name">xa</span></span>9timelimit<span class="tag">\<span class="name">x</span></span>92<span class="tag">\<span class="name">xc</span></span>0<span class="tag">\<span class="name">xc</span></span>0<span class="tag">\<span class="name">xa</span></span>3eta<span class="tag">\<span class="name">xc</span></span>0<span class="tag">\<span class="name">xa</span></span>6kwargs<span class="tag">\<span class="name">x</span></span>80' (239b)</span><br><span class="line">Traceback (most recent call last):</span><br><span class="line">  File "/Users/liufeng/.pyenv/versions/2.7.13/envs/kaopu_backend/lib/python2.7/site-packages/celery/worker/consumer/consumer.py", line 561, in on_task_received</span><br><span class="line">    strategy = strategies[type_]</span><br><span class="line">KeyError: u'tasks.messageTasks.send_like_message'</span><br></pre></td></tr></table></figure></p>
 <p>出现这条错误是由于我们的tasks跟celery并不是在同一个文件中，即不是同一个module，当我们通过如下命令启动task worker时，实际只加载了app module，而没有加载tasks相关的module
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">celery -A app.celery worker -l info</span><br><span class="line">`</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">celery</span> -A app.celery worker -l <span class="literal">info</span></span><br><span class="line">`</span><br></pre></td></tr></table></figure></p>
 <p>要解决这个问题，必须为celery配置文件添加import参数，如下
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">app.config[&apos;imports&apos;] = [&apos;tasks.messageTasks&apos;]</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight prolog"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">app.config[<span class="string">'imports'</span>] = [<span class="string">'tasks.messageTasks'</span>]</span><br></pre></td></tr></table></figure></p>
 <h4>Celery unregistered task问题</h4>
 <p>在开发过程中遇到了这样一个问题
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">[2017-08-31 15:38:19,605: ERROR/MainProcess] Received unregistered task of type u&apos;app.tasks.messageTasks.send_follow_message&apos;.</span><br><span class="line">The message has been ignored and discarded.</span><br><span class="line"></span><br><span class="line">Did you remember to import the module containing this task?</span><br><span class="line">Or maybe you&apos;re using relative imports?</span><br><span class="line"></span><br><span class="line">Please see</span><br><span class="line">http://docs.celeryq.org/en/latest/internals/protocol.html</span><br><span class="line">for more information.</span><br><span class="line"></span><br><span class="line">The full contents of the message body was:</span><br><span class="line">&apos;\x8e\xa7expires\xc0\xa3utc\xc3\xa4args\x91\x86\xa6sender\xa5Jenny\xa9target_id\xb859a5313847f84be534ad7d46\xabtarget_type\xa4user\xa7content\xc4\x00\xa8receiver\xb859a5313847f84be534ad7d46\xa4type\xa6follow\xa5chord\xc0\xa9callbacks\xc0\xa8errbacks\xc0\xa7taskset\xc0\xa2id\xc4$a4d40c14-1976-41a6-a753-d2a495929920\xa7retries\x00\xa4task\xd9*app.tasks.messageTasks.send_follow_message\xa5group\xc0\xa9timelimit\x92\xc0\xc0\xa3eta\xc0\xa6kwargs\x80&apos; (312b)</span><br><span class="line">Traceback (most recent call last):</span><br><span class="line">  File &quot;/Users/liufeng/.pyenv/versions/2.7.13/envs/kaopu_backend/lib/python2.7/site-packages/celery/worker/consumer/consumer.py&quot;, line 561, in on_task_received</span><br><span class="line">    strategy = strategies[type_]</span><br><span class="line">KeyError: u&apos;app.tasks.messageTasks.send_follow_message&apos;</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">[2017-08-31 15:38:19,605: ERROR/MainProcess] Received unregistered task of type u'app.tasks.messageTasks.send_follow_message'.</span><br><span class="line">The message has been ignored and discarded.</span><br><span class="line"></span><br><span class="line">Did you remember to import the module containing this task?</span><br><span class="line">Or maybe you're using relative imports?</span><br><span class="line"></span><br><span class="line">Please see</span><br><span class="line">http://docs.celeryq.org/en/latest/internals/protocol.html</span><br><span class="line">for more information.</span><br><span class="line"></span><br><span class="line">The full contents of the message body was:</span><br><span class="line">'<span class="tag">\<span class="name">x</span></span>8e<span class="tag">\<span class="name">xa</span></span>7expires<span class="tag">\<span class="name">xc</span></span>0<span class="tag">\<span class="name">xa</span></span>3utc<span class="tag">\<span class="name">xc</span></span>3<span class="tag">\<span class="name">xa</span></span>4args<span class="tag">\<span class="name">x</span></span>91<span class="tag">\<span class="name">x</span></span>86<span class="tag">\<span class="name">xa</span></span>6sender<span class="tag">\<span class="name">xa</span></span>5Jenny<span class="tag">\<span class="name">xa</span></span>9target_id<span class="tag">\<span class="name">xb</span></span>859a5313847f84be534ad7d46<span class="tag">\<span class="name">xabtarget</span></span>_type<span class="tag">\<span class="name">xa</span></span>4user<span class="tag">\<span class="name">xa</span></span>7content<span class="tag">\<span class="name">xc</span></span>4<span class="tag">\<span class="name">x</span></span>00<span class="tag">\<span class="name">xa</span></span>8receiver<span class="tag">\<span class="name">xb</span></span>859a5313847f84be534ad7d46<span class="tag">\<span class="name">xa</span></span>4type<span class="tag">\<span class="name">xa</span></span>6follow<span class="tag">\<span class="name">xa</span></span>5chord<span class="tag">\<span class="name">xc</span></span>0<span class="tag">\<span class="name">xa</span></span>9callbacks<span class="tag">\<span class="name">xc</span></span>0<span class="tag">\<span class="name">xa</span></span>8errbacks<span class="tag">\<span class="name">xc</span></span>0<span class="tag">\<span class="name">xa</span></span>7taskset<span class="tag">\<span class="name">xc</span></span>0<span class="tag">\<span class="name">xa</span></span>2id<span class="tag">\<span class="name">xc</span></span>4<span class="formula">$a4d40c14-1976-41a6-a753-d2a495929920<span class="tag">\<span class="name">xa</span></span>7retries<span class="tag">\<span class="name">x</span></span>00<span class="tag">\<span class="name">xa</span></span>4task<span class="tag">\<span class="name">xd</span></span>9*app.tasks.messageTasks.send_follow_message<span class="tag">\<span class="name">xa</span></span>5group<span class="tag">\<span class="name">xc</span></span>0<span class="tag">\<span class="name">xa</span></span>9timelimit<span class="tag">\<span class="name">x</span></span>92<span class="tag">\<span class="name">xc</span></span>0<span class="tag">\<span class="name">xc</span></span>0<span class="tag">\<span class="name">xa</span></span>3eta<span class="tag">\<span class="name">xc</span></span>0<span class="tag">\<span class="name">xa</span></span>6kwargs<span class="tag">\<span class="name">x</span></span>80' (312b)</span></span><br><span class="line"><span class="formula">Traceback (most recent call last):</span></span><br><span class="line"><span class="formula">  File "/Users/liufeng/.pyenv/versions/2.7.13/envs/kaopu_backend/lib/python2.7/site-packages/celery/worker/consumer/consumer.py", line 561, in on_task_received</span></span><br><span class="line"><span class="formula">    strategy = strategies[type_]</span></span><br><span class="line"><span class="formula">KeyError: u'app.tasks.messageTasks.send_follow_message'</span></span><br></pre></td></tr></table></figure></p>
 <p>解决这个问题，最开始是根据提示，将所有涉及到task的module全部加上<code>from __future__ import absolute_import</code> 之后运行之后还是不行，后来发现是由于之前启动时使用的是app module， 但是我的代码已经改成了main.py，所以重新启动了celery，最后问题解决</p>
 <h4>使用镜像迁移系统也依然需要重新添加rabbitmq的用户</h4>
 <p>问题最开始是发现无法点赞，也无法Follow用户，通过http消息发现出现502错误，于是登录到服务器检查，发现应用服务本身没有任何报错，于是又去查看Celery的日志，结果发现出现如下错误：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[2017-11-13 16:32:01,243: ERROR/MainProcess] consumer: Cannot connect to amqp://celeryuser:**@loc      alhost:5672/celeryvhost: Couldn&apos;t log in: a socket error occurred.</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight vhdl"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="number">2017</span>-<span class="number">11</span>-<span class="number">13</span> <span class="number">16</span>:<span class="number">32</span>:<span class="number">01</span>,<span class="number">243</span>: <span class="literal">ERROR</span>/MainProcess] consumer: Cannot connect <span class="keyword">to</span> amqp://celeryuser:**@loc      alhost:<span class="number">5672</span>/celeryvhost: Couldn<span class="symbol">'t</span> log <span class="keyword">in</span>: a socket <span class="literal">error</span> occurred.</span><br></pre></td></tr></table></figure></p>
 <p>经过一番搜索发现网上的评论主要是说URL不对的情况下会出现这种情况，但是我的URL没有改过啊，那又会是什么问题呢？继续看，发现有人提到了权限问题，于是又是一番检查，发现RabbitMQ中并没有原先设置的用户（我使用的是原系统的镜像，原以为用户也是已经设置好的）
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># 查看有哪些用户</span><br><span class="line">rabbitmqctl  list_users</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看有哪些用户</span></span><br><span class="line"><span class="attribute">rabbitmqctl</span>  list_users</span><br></pre></td></tr></table></figure></p>
 <p>然后就简单了，按照步骤创建用户，vhost，再赋予权限，删除guest，然后就终于都连好了</p>
 <p>另外，发现从镜像复制系统后，RabbitMQ并不能正常工作，必须杀掉原先的进程，重新启动</p>
 <h4>更改task的代码后，重启Celery</h4>
@@ -583,6 +583,25 @@ Github上Robert Kopaczewski详细解释了这个问题，原文如下：</li>
               
 
               
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">4</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
 
               
                 
@@ -605,7 +624,35 @@ Github上Robert Kopaczewski详细解释了这个问题，原文如下：</li>
                     
                       
                     
-                    <span class="site-state-item-count">7</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">21</span>
                     <span class="site-state-item-name">tags</span>
                   </a>
                 </div>
@@ -857,6 +904,75 @@ Github上Robert Kopaczewski详细解释了这个问题，原文如下：</li>
 
 
   
+
+  
+  <script>
+    
+    function showTime(Counter) {
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      Counter('get', '/classes/Counter', { where: JSON.stringify({ url: { "$in": entries } }) })
+        .done(function ({ results }) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.url;
+            var time = item.time;
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function ({ responseJSON }) {
+          console.log("LeanCloud Counter Error: " + responseJSON.code + " " + responseJSON.error);
+        });
+    }
+    
+
+    $(function() {
+      $.get('https://app-router.leancloud.cn/2/route?appId=' + "OCjgmQiFa9gpVkDabM6KTb8g-gzGzoHsz")
+        .done(function ({ api_server }) {
+          var Counter = function (method, url, data) {
+            return $.ajax({
+              method: method,
+              url: `https://${api_server}/1.1${url}`,
+              headers: {
+                'X-LC-Id': "OCjgmQiFa9gpVkDabM6KTb8g-gzGzoHsz",
+                'X-LC-Key': "Ie7XE2V6spB6Q6C1W2GU9drV",
+                'Content-Type': 'application/json',
+              },
+              data: data,
+            });
+          };
+          
+          if ($('.post-title-link').length >= 1) {
+            showTime(Counter);
+          }
+          
+        })
+    });
+  </script>
+
+
 
   
 

@@ -108,18 +108,18 @@
 
 
 
-  <meta name="description" content="在Pandas中我们往往需要先定位数据才能进行相应的赋值、修改等后续操作，因此定位是Pandas中非常重要的一环，本文将详解Pandas中的各种定位方式。 &amp;lt;!--more--&amp;gt; 在Pandas中我们主要通过以下几个函数来定位DataFrame中的特定数据  iloc loc iat at  总的来说，分为两种：   一种是通过lables(即row index和column name">
+  <meta name="description" content="在Pandas中我们往往需要先定位数据才能进行相应的赋值、修改等后续操作，因此定位是Pandas中非常重要的一环，本文将详解Pandas中的各种定位方式。">
 <meta name="keywords" content="computer, programming, data science, deep learning">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Pandas系列2-DataFrame之数据定位">
 <meta property="og:url" content="http://yoursite.com/2018/06/15/Pandas系列2-DataFrame之数据定位/index.html">
 <meta property="og:site_name" content="Geekpy&#39;s Blog">
-<meta property="og:description" content="在Pandas中我们往往需要先定位数据才能进行相应的赋值、修改等后续操作，因此定位是Pandas中非常重要的一环，本文将详解Pandas中的各种定位方式。 &amp;lt;!--more--&amp;gt; 在Pandas中我们主要通过以下几个函数来定位DataFrame中的特定数据  iloc loc iat at  总的来说，分为两种：   一种是通过lables(即row index和column name">
+<meta property="og:description" content="在Pandas中我们往往需要先定位数据才能进行相应的赋值、修改等后续操作，因此定位是Pandas中非常重要的一环，本文将详解Pandas中的各种定位方式。">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2018-08-12T10:05:16.900Z">
+<meta property="og:updated_time" content="2018-10-06T05:29:01.903Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Pandas系列2-DataFrame之数据定位">
-<meta name="twitter:description" content="在Pandas中我们往往需要先定位数据才能进行相应的赋值、修改等后续操作，因此定位是Pandas中非常重要的一环，本文将详解Pandas中的各种定位方式。 &amp;lt;!--more--&amp;gt; 在Pandas中我们主要通过以下几个函数来定位DataFrame中的特定数据  iloc loc iat at  总的来说，分为两种：   一种是通过lables(即row index和column name">
+<meta name="twitter:description" content="在Pandas中我们往往需要先定位数据才能进行相应的赋值、修改等后续操作，因此定位是Pandas中非常重要的一环，本文将详解Pandas中的各种定位方式。">
 
 
 
@@ -370,7 +370,7 @@
         
         
           <p>在Pandas中我们往往需要先定位数据才能进行相应的赋值、修改等后续操作，因此定位是Pandas中非常重要的一环，本文将详解Pandas中的各种定位方式。</p>
-<p>&lt;!--more--&gt;</p>
+<p><a id="more"></a></p>
 <p>在Pandas中我们主要通过以下几个函数来定位DataFrame中的特定数据</p>
 <ul>
 <li>iloc</li>
@@ -390,10 +390,10 @@
 <p>loc和at的区别在于， loc可以选择特定的行或列，但是at只能定位某个特定的值，标量值。一般情况下，我们iloc和loc更加通用，而at, iat有一定的性能提升。</p>
 <p>具体示例可以参考Reference中StackOverflow的示例
 下面展示一些特别的：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line">In [630]: df</span><br><span class="line">Out[630]:</span><br><span class="line">           age  color    food  height  score state</span><br><span class="line">Jane        30   blue   Steak     165    4.6    NY</span><br><span class="line">Nick         2  green    Lamb      70    8.3    TX</span><br><span class="line">Aaron       12    red   Mango     120    9.0    FL</span><br><span class="line">Penelope     4  white   Apple      80    3.3    AL</span><br><span class="line">Dean        32   gray  Cheese     180    1.8    AK</span><br><span class="line">Christina   33  black   Melon     172    9.5    TX</span><br><span class="line">Cornelia    69    red   Beans     150    2.2    TX</span><br><span class="line"></span><br><span class="line"># 选择某一行数据</span><br><span class="line">In [631]: df.loc[&apos;Dean&apos;]</span><br><span class="line">Out[631]:</span><br><span class="line">age           32</span><br><span class="line">color       gray</span><br><span class="line">food      Cheese</span><br><span class="line">height       180</span><br><span class="line">score        1.8</span><br><span class="line">state         AK</span><br><span class="line">Name: Dean, dtype: object</span><br><span class="line"></span><br><span class="line"># 选择某一列数据，逗号前面是行的label，逗号后边是列的label，使用&quot;:&quot;来表示选取所有的，本例是选取所有的行，当&apos;:&apos;在逗号后边时表示选取所有的列，但通常我们可以省略。</span><br><span class="line">In [241]: df.loc[:, &apos;color&apos;]</span><br><span class="line">Out[241]:</span><br><span class="line">Jane          blue</span><br><span class="line">Nick         green</span><br><span class="line">Aaron          red</span><br><span class="line">Penelope     white</span><br><span class="line">Dean          gray</span><br><span class="line">Christina    black</span><br><span class="line">Cornelia       red</span><br><span class="line">Name: color, dtype: object</span><br><span class="line"># 也可以如下选取一列，但是与前者是有区别的，具体参考Reference中的《Returning a view versus a copy》</span><br><span class="line">In [632]: df.loc[:][&apos;color&apos;]</span><br><span class="line">Out[632]:</span><br><span class="line">Jane          blue</span><br><span class="line">Nick         green</span><br><span class="line">Aaron          red</span><br><span class="line">Penelope     white</span><br><span class="line">Dean          gray</span><br><span class="line">Christina    black</span><br><span class="line">Cornelia       red</span><br><span class="line">Name: color, dtype: object</span><br><span class="line"></span><br><span class="line"># 选择某几行数据，注意无论选择多行还是多列，都需要将其label放在一个数组当中，而选择单个行或列，则不需要放在数组当中</span><br><span class="line">In [634]: df.loc[[&apos;Nick&apos;, &apos;Dean&apos;]]</span><br><span class="line">Out[634]:</span><br><span class="line">      age  color    food  height  score state</span><br><span class="line">Nick    2  green    Lamb      70    8.3    TX</span><br><span class="line">Dean   32   gray  Cheese     180    1.8    AK</span><br><span class="line"></span><br><span class="line"># 注意以下这种用法不行，这是由于Pandas会认为逗号后边是列的label</span><br><span class="line">df.loc[&apos;Nick&apos;, &apos;Dean&apos;]</span><br><span class="line"></span><br><span class="line"># 选择范围</span><br><span class="line">In [636]: df.loc[&apos;Nick&apos;:&apos;Christina&apos;]</span><br><span class="line">Out[636]:</span><br><span class="line">           age  color    food  height  score state</span><br><span class="line">Nick         2  green    Lamb      70    8.3    TX</span><br><span class="line">Aaron       12    red   Mango     120    9.0    FL</span><br><span class="line">Penelope     4  white   Apple      80    3.3    AL</span><br><span class="line">Dean        32   gray  Cheese     180    1.8    AK</span><br><span class="line">Christina   33  black   Melon     172    9.5    TX</span><br><span class="line"></span><br><span class="line"># iloc的特定用法, 可以用-1这样index来获取最后一行的数据</span><br><span class="line">In [637]: df.iloc[[1, -1]]</span><br><span class="line">Out[637]:</span><br><span class="line">          age  color   food  height  score state</span><br><span class="line">Nick        2  green   Lamb      70    8.3    TX</span><br><span class="line">Cornelia   69    red  Beans     150    2.2    TX</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight processing"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line">In [<span class="number">630</span>]: df</span><br><span class="line">Out[<span class="number">630</span>]:</span><br><span class="line">           age  <span class="built_in">color</span>    food  <span class="built_in">height</span>  score state</span><br><span class="line">Jane        <span class="number">30</span>   <span class="built_in">blue</span>   Steak     <span class="number">165</span>    <span class="number">4.6</span>    NY</span><br><span class="line">Nick         <span class="number">2</span>  <span class="built_in">green</span>    Lamb      <span class="number">70</span>    <span class="number">8.3</span>    TX</span><br><span class="line">Aaron       <span class="number">12</span>    <span class="built_in">red</span>   Mango     <span class="number">120</span>    <span class="number">9.0</span>    FL</span><br><span class="line">Penelope     <span class="number">4</span>  white   Apple      <span class="number">80</span>    <span class="number">3.3</span>    AL</span><br><span class="line">Dean        <span class="number">32</span>   gray  Cheese     <span class="number">180</span>    <span class="number">1.8</span>    AK</span><br><span class="line">Christina   <span class="number">33</span>  black   Melon     <span class="number">172</span>    <span class="number">9.5</span>    TX</span><br><span class="line">Cornelia    <span class="number">69</span>    <span class="built_in">red</span>   Beans     <span class="number">150</span>    <span class="number">2.2</span>    TX</span><br><span class="line"></span><br><span class="line"># 选择某一行数据</span><br><span class="line">In [<span class="number">631</span>]: df.loc[<span class="string">'Dean'</span>]</span><br><span class="line">Out[<span class="number">631</span>]:</span><br><span class="line">age           <span class="number">32</span></span><br><span class="line"><span class="built_in">color</span>       gray</span><br><span class="line">food      Cheese</span><br><span class="line"><span class="built_in">height</span>       <span class="number">180</span></span><br><span class="line">score        <span class="number">1.8</span></span><br><span class="line">state         AK</span><br><span class="line">Name: Dean, dtype: object</span><br><span class="line"></span><br><span class="line"># 选择某一列数据，逗号前面是行的label，逗号后边是列的label，使用<span class="string">":"</span>来表示选取所有的，本例是选取所有的行，当<span class="string">':'</span>在逗号后边时表示选取所有的列，但通常我们可以省略。</span><br><span class="line">In [<span class="number">241</span>]: df.loc[:, <span class="string">'color'</span>]</span><br><span class="line">Out[<span class="number">241</span>]:</span><br><span class="line">Jane          <span class="built_in">blue</span></span><br><span class="line">Nick         <span class="built_in">green</span></span><br><span class="line">Aaron          <span class="built_in">red</span></span><br><span class="line">Penelope     white</span><br><span class="line">Dean          gray</span><br><span class="line">Christina    black</span><br><span class="line">Cornelia       <span class="built_in">red</span></span><br><span class="line">Name: <span class="built_in">color</span>, dtype: object</span><br><span class="line"># 也可以如下选取一列，但是与前者是有区别的，具体参考Reference中的《Returning a view versus a <span class="built_in">copy</span>》</span><br><span class="line">In [<span class="number">632</span>]: df.loc[:][<span class="string">'color'</span>]</span><br><span class="line">Out[<span class="number">632</span>]:</span><br><span class="line">Jane          <span class="built_in">blue</span></span><br><span class="line">Nick         <span class="built_in">green</span></span><br><span class="line">Aaron          <span class="built_in">red</span></span><br><span class="line">Penelope     white</span><br><span class="line">Dean          gray</span><br><span class="line">Christina    black</span><br><span class="line">Cornelia       <span class="built_in">red</span></span><br><span class="line">Name: <span class="built_in">color</span>, dtype: object</span><br><span class="line"></span><br><span class="line"># 选择某几行数据，注意无论选择多行还是多列，都需要将其label放在一个数组当中，而选择单个行或列，则不需要放在数组当中</span><br><span class="line">In [<span class="number">634</span>]: df.loc[[<span class="string">'Nick'</span>, <span class="string">'Dean'</span>]]</span><br><span class="line">Out[<span class="number">634</span>]:</span><br><span class="line">      age  <span class="built_in">color</span>    food  <span class="built_in">height</span>  score state</span><br><span class="line">Nick    <span class="number">2</span>  <span class="built_in">green</span>    Lamb      <span class="number">70</span>    <span class="number">8.3</span>    TX</span><br><span class="line">Dean   <span class="number">32</span>   gray  Cheese     <span class="number">180</span>    <span class="number">1.8</span>    AK</span><br><span class="line"></span><br><span class="line"># 注意以下这种用法不行，这是由于Pandas会认为逗号后边是列的label</span><br><span class="line">df.loc[<span class="string">'Nick'</span>, <span class="string">'Dean'</span>]</span><br><span class="line"></span><br><span class="line"># 选择范围</span><br><span class="line">In [<span class="number">636</span>]: df.loc[<span class="string">'Nick'</span>:<span class="string">'Christina'</span>]</span><br><span class="line">Out[<span class="number">636</span>]:</span><br><span class="line">           age  <span class="built_in">color</span>    food  <span class="built_in">height</span>  score state</span><br><span class="line">Nick         <span class="number">2</span>  <span class="built_in">green</span>    Lamb      <span class="number">70</span>    <span class="number">8.3</span>    TX</span><br><span class="line">Aaron       <span class="number">12</span>    <span class="built_in">red</span>   Mango     <span class="number">120</span>    <span class="number">9.0</span>    FL</span><br><span class="line">Penelope     <span class="number">4</span>  white   Apple      <span class="number">80</span>    <span class="number">3.3</span>    AL</span><br><span class="line">Dean        <span class="number">32</span>   gray  Cheese     <span class="number">180</span>    <span class="number">1.8</span>    AK</span><br><span class="line">Christina   <span class="number">33</span>  black   Melon     <span class="number">172</span>    <span class="number">9.5</span>    TX</span><br><span class="line"></span><br><span class="line"># iloc的特定用法, 可以用<span class="number">-1</span>这样index来获取最后一行的数据</span><br><span class="line">In [<span class="number">637</span>]: df.iloc[[<span class="number">1</span>, <span class="number">-1</span>]]</span><br><span class="line">Out[<span class="number">637</span>]:</span><br><span class="line">          age  <span class="built_in">color</span>   food  <span class="built_in">height</span>  score state</span><br><span class="line">Nick        <span class="number">2</span>  <span class="built_in">green</span>   Lamb      <span class="number">70</span>    <span class="number">8.3</span>    TX</span><br><span class="line">Cornelia   <span class="number">69</span>    <span class="built_in">red</span>  Beans     <span class="number">150</span>    <span class="number">2.2</span>    TX</span><br></pre></td></tr></table></figure></p>
 <p>数据定位是后续条件过滤、赋值以及各种转换的基础，一定要熟练掌握。</p>
 <p>另外，在定位某一个具体的元素的时候，loc和at并不完全相同</p>
-<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"># loc支持以下两种定位方式</span><br><span class="line">In [726]: df.loc[&apos;Jane&apos;, &apos;score&apos;]</span><br><span class="line">Out[726]: 4.6</span><br><span class="line"></span><br><span class="line">In [727]: df.loc[&apos;Jane&apos;][&apos;score&apos;]</span><br><span class="line">Out[727]: 4.6</span><br><span class="line"></span><br><span class="line"># 但是at只支持第一种定位方式</span><br><span class="line">In [729]: df.at[&apos;Nick&apos;, &apos;height&apos;]</span><br><span class="line">Out[729]: 181</span><br><span class="line"></span><br><span class="line">In [730]: df.at[&apos;Nick&apos;][&apos;height&apos;]</span><br><span class="line">---------------------------------------------------------------------------</span><br><span class="line">TypeError                                 Traceback (most recent call last)</span><br><span class="line">&lt;ipython-input-730-948408df1727&gt; in &lt;module&gt;()</span><br><span class="line">----&gt; 1 df.at[&apos;Nick&apos;][&apos;height&apos;]</span><br><span class="line"></span><br><span class="line">~/.pyenv/versions/3.6.4/envs/data_analysis/lib/python3.6/site-packages/pandas/core/indexing.py in __getitem__(self, key)</span><br><span class="line">   1867</span><br><span class="line">   1868         key = self._convert_key(key)</span><br><span class="line">-&gt; 1869         return self.obj._get_value(*key, takeable=self._takeable)</span><br><span class="line">   1870</span><br><span class="line">   1871     def __setitem__(self, key, value):</span><br><span class="line"></span><br><span class="line">TypeError: _get_value() missing 1 required positional argument: &apos;col&apos;</span><br></pre></td></tr></table></figure></p>
+<p><figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># loc支持以下两种定位方式</span></span><br><span class="line">In [<span class="number">726</span>]: df.loc[<span class="string">'Jane'</span>, <span class="string">'score'</span>]</span><br><span class="line">Out[<span class="number">726</span>]: <span class="number">4.6</span></span><br><span class="line"></span><br><span class="line">In [<span class="number">727</span>]: df.loc[<span class="string">'Jane'</span>][<span class="string">'score'</span>]</span><br><span class="line">Out[<span class="number">727</span>]: <span class="number">4.6</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 但是at只支持第一种定位方式</span></span><br><span class="line">In [<span class="number">729</span>]: df.at[<span class="string">'Nick'</span>, <span class="string">'height'</span>]</span><br><span class="line">Out[<span class="number">729</span>]: <span class="number">181</span></span><br><span class="line"></span><br><span class="line">In [<span class="number">730</span>]: df.at[<span class="string">'Nick'</span>][<span class="string">'height'</span>]</span><br><span class="line">---------------------------------------------------------------------------</span><br><span class="line">TypeError                                 Traceback (most recent call last)</span><br><span class="line">&lt;ipython-input-<span class="number">730</span>-<span class="number">948408</span>df1727&gt; <span class="keyword">in</span> &lt;<span class="keyword">module</span>&gt;()</span><br><span class="line">----&gt; <span class="number">1</span> df.at[<span class="string">'Nick'</span>][<span class="string">'height'</span>]</span><br><span class="line"></span><br><span class="line">~<span class="regexp">/.pyenv/versions</span><span class="regexp">/3.6.4/envs</span><span class="regexp">/data_analysis/lib</span><span class="regexp">/python3.6/site</span>-packages/pandas/core/indexing.py <span class="keyword">in</span> __getitem_<span class="number">_</span>(<span class="keyword">self</span>, key)</span><br><span class="line">   <span class="number">1867</span></span><br><span class="line">   <span class="number">1868</span>         key = <span class="keyword">self</span>._convert_key(key)</span><br><span class="line">-&gt; <span class="number">1869</span>         <span class="keyword">return</span> <span class="keyword">self</span>.obj._get_value(*key, takeable=<span class="keyword">self</span>._takeable)</span><br><span class="line">   <span class="number">1870</span></span><br><span class="line">   <span class="number">1871</span>     <span class="function"><span class="keyword">def</span> <span class="title">__setitem__</span></span>(<span class="keyword">self</span>, key, value)<span class="symbol">:</span></span><br><span class="line"></span><br><span class="line"><span class="symbol">TypeError:</span> _get_value() missing <span class="number">1</span> required positional <span class="symbol">argument:</span> <span class="string">'col'</span></span><br></pre></td></tr></table></figure></p>
 <p>有两点需要说明：</p>
 <ul>
 <li>在针对特定元素赋值的时候最好使用at来进行操作，性能提升还是很明显的。</li>
@@ -535,6 +535,25 @@
               
 
               
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">4</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
 
               
                 
@@ -557,7 +576,35 @@
                     
                       
                     
-                    <span class="site-state-item-count">7</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">21</span>
                     <span class="site-state-item-name">tags</span>
                   </a>
                 </div>
@@ -809,6 +856,75 @@
 
 
   
+
+  
+  <script>
+    
+    function showTime(Counter) {
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      Counter('get', '/classes/Counter', { where: JSON.stringify({ url: { "$in": entries } }) })
+        .done(function ({ results }) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.url;
+            var time = item.time;
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function ({ responseJSON }) {
+          console.log("LeanCloud Counter Error: " + responseJSON.code + " " + responseJSON.error);
+        });
+    }
+    
+
+    $(function() {
+      $.get('https://app-router.leancloud.cn/2/route?appId=' + "OCjgmQiFa9gpVkDabM6KTb8g-gzGzoHsz")
+        .done(function ({ api_server }) {
+          var Counter = function (method, url, data) {
+            return $.ajax({
+              method: method,
+              url: `https://${api_server}/1.1${url}`,
+              headers: {
+                'X-LC-Id': "OCjgmQiFa9gpVkDabM6KTb8g-gzGzoHsz",
+                'X-LC-Key': "Ie7XE2V6spB6Q6C1W2GU9drV",
+                'Content-Type': 'application/json',
+              },
+              data: data,
+            });
+          };
+          
+          if ($('.post-title-link').length >= 1) {
+            showTime(Counter);
+          }
+          
+        })
+    });
+  </script>
+
+
 
   
 

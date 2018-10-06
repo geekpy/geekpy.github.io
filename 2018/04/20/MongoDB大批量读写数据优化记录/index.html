@@ -108,18 +108,18 @@
 
 
 
-  <meta name="description" content="本文主要阐述了MongoDB大批量数据读写过程中的一些优化技巧 &amp;lt;!--more--&amp;gt; 用批量写入代替单个写入 最开始，我的代码逻辑是这样的： 12for uid, data in user_dict.items():    user_collection.insert_one(&amp;#123;&amp;apos;uid&amp;apos;:uid, &amp;apos;user_data&amp;apos;: data">
+  <meta name="description" content="本文主要阐述了MongoDB大批量数据读写过程中的一些优化技巧">
 <meta name="keywords" content="computer, programming, data science, deep learning">
 <meta property="og:type" content="article">
 <meta property="og:title" content="MongoDB大批量读写数据优化记录">
 <meta property="og:url" content="http://yoursite.com/2018/04/20/MongoDB大批量读写数据优化记录/index.html">
 <meta property="og:site_name" content="Geekpy&#39;s Blog">
-<meta property="og:description" content="本文主要阐述了MongoDB大批量数据读写过程中的一些优化技巧 &amp;lt;!--more--&amp;gt; 用批量写入代替单个写入 最开始，我的代码逻辑是这样的： 12for uid, data in user_dict.items():    user_collection.insert_one(&amp;#123;&amp;apos;uid&amp;apos;:uid, &amp;apos;user_data&amp;apos;: data">
+<meta property="og:description" content="本文主要阐述了MongoDB大批量数据读写过程中的一些优化技巧">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2018-08-12T10:07:41.645Z">
+<meta property="og:updated_time" content="2018-10-06T05:29:01.902Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="MongoDB大批量读写数据优化记录">
-<meta name="twitter:description" content="本文主要阐述了MongoDB大批量数据读写过程中的一些优化技巧 &amp;lt;!--more--&amp;gt; 用批量写入代替单个写入 最开始，我的代码逻辑是这样的： 12for uid, data in user_dict.items():    user_collection.insert_one(&amp;#123;&amp;apos;uid&amp;apos;:uid, &amp;apos;user_data&amp;apos;: data">
+<meta name="twitter:description" content="本文主要阐述了MongoDB大批量数据读写过程中的一些优化技巧">
 
 
 
@@ -370,12 +370,12 @@
         
         
           <p>本文主要阐述了MongoDB大批量数据读写过程中的一些优化技巧</p>
-<p>&lt;!--more--&gt;</p>
+<p><a id="more"></a></p>
 <h2>用批量写入代替单个写入</h2>
 <p>最开始，我的代码逻辑是这样的：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">for uid, data in user_dict.items():</span><br><span class="line">    user_collection.insert_one(&#123;&apos;uid&apos;:uid, &apos;user_data&apos;: data&#125;)</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> uid, <span class="keyword">data</span> <span class="keyword">in</span> user_dict.items():</span><br><span class="line">    user_collection.insert_one(&#123;<span class="string">'uid'</span>:uid, <span class="string">'user_data'</span>: <span class="keyword">data</span>&#125;)</span><br></pre></td></tr></table></figure></p>
 <p>这种方法在数据量较小时可以很好的工作，但是当数据量非常大时，此种操作会非常慢，我们需要通过批量写入的方式来写入数据。
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">user_data = (&#123;&apos;uid&apos;: uid, &apos;user_data&apos;: data&#125; for uid, data in user_dict.items())</span><br><span class="line">user_collection.insert_many(user_data)</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">user_data = (&#123;<span class="string">'uid'</span>: uid, <span class="string">'user_data'</span>: <span class="keyword">data</span>&#125; <span class="keyword">for</span> uid, <span class="keyword">data</span> <span class="keyword">in</span> user_dict.items())</span><br><span class="line">user_collection.insert_many(user_data)</span><br></pre></td></tr></table></figure></p>
 <h2>调整insert_many参数</h2>
 <p>再来看是否可以通过调整insert_many参数来进一步优化性能。</p>
 <ul>
@@ -384,17 +384,17 @@
 <li>session: 关于session，请参考References中的Client Session链接。</li>
 </ul>
 <p>修改后的代码如下：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">user_data = (&#123;&apos;uid&apos;: uid, &apos;user_data&apos;: data&#125; for uid, data in user_dict.items())</span><br><span class="line">user_collection.insert_many(user_data, ordere=False, bypass_document_validation=True)</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight lasso"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">user_data = (&#123;<span class="string">'uid'</span>: uid, <span class="string">'user_data'</span>: <span class="built_in">data</span>&#125; for uid, <span class="built_in">data</span> <span class="keyword">in</span> user_dict.items())</span><br><span class="line">user_collection.insert_many(user_data, ordere=<span class="literal">False</span>, bypass_document_validation=<span class="literal">True</span>)</span><br></pre></td></tr></table></figure></p>
 <p>最终性能的提升是非常明显的，时间量级从天降为分钟。</p>
 <h2>批量更新</h2>
 <p>前面的例子在插入操作时非常有效，但是对于更新操作由于update_many无法针对每一个doc进行更新，如本例中针对每一个uid进行更新，那么就需要使用<code>bulk_write</code>操作。
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">from pymongo import UpdateOne</span><br><span class="line"></span><br><span class="line">update_operations = []</span><br><span class="line">for uid, user_data in user_dict.items():</span><br><span class="line">    op = UpdateOne(&#123;&apos;uid&apos;: uid&#125;, &#123;&apos;$set&apos;: &#123;&apos;user_data&apos;: user_data&#125;&#125;, upsert=True)</span><br><span class="line">    update_operations.append(op)</span><br><span class="line"></span><br><span class="line">user_collection.bulk_write(update_operations, ordered=False, bypass_document_validation=True)</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight sqf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pymongo import UpdateOne</span><br><span class="line"></span><br><span class="line">update_operations = []</span><br><span class="line"><span class="keyword">for</span> uid, user_data <span class="built_in">in</span> user_dict.<span class="built_in">items</span>():</span><br><span class="line">    op = UpdateOne(&#123;<span class="string">'uid'</span>: uid&#125;, &#123;<span class="string">'$set'</span>: &#123;<span class="string">'user_data'</span>: user_data&#125;&#125;, upsert=<span class="literal">True</span>)</span><br><span class="line">    update_operations.<span class="built_in">append</span>(op)</span><br><span class="line"></span><br><span class="line">user_collection.bulk_write(update_operations, ordered=<span class="literal">False</span>, bypass_document_validation=<span class="literal">True</span>)</span><br></pre></td></tr></table></figure></p>
 <h2>批量读取</h2>
 <p>批量读取我们可以使用<code>$in</code>操作符，但是需要注意的是如果<code>$in</code>针对的list过大，那么可能会导致报错<code>pymongo.errors.DocumentTooLarge</code>, 目前我的做法是将大的list分割成1000个一段，然后分段查询
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">list_length = len(uid_list)</span><br><span class="line">iter_size = 1000</span><br><span class="line">current = 0</span><br><span class="line">while current &lt; list_length:</span><br><span class="line">    end = current + iter_size</span><br><span class="line">    uid_segment = uid_list[current: end]</span><br><span class="line">    result_cursor = mongo_collection.find(&#123;&quot;uid&quot;: &#123;&quot;$in&quot;: uid_segment&#125;&#125;)</span><br><span class="line">    for user_info in result_cursor:</span><br><span class="line">        # do something</span><br><span class="line">        ...</span><br><span class="line">    current = current + iter_size</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight nix"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">list_length</span> = len(uid_list)</span><br><span class="line"><span class="attr">iter_size</span> = <span class="number">1000</span></span><br><span class="line"><span class="attr">current</span> = <span class="number">0</span></span><br><span class="line">while current &lt; list_length:</span><br><span class="line">    <span class="attr">end</span> = current + iter_size</span><br><span class="line">    <span class="attr">uid_segment</span> = uid_list[current: end]</span><br><span class="line">    <span class="attr">result_cursor</span> = mongo_collection.find(&#123;<span class="string">"uid"</span>: &#123;<span class="string">"$in"</span>: uid_segment&#125;&#125;)</span><br><span class="line">    for user_info <span class="keyword">in</span> result_cursor:</span><br><span class="line">        <span class="comment"># do something</span></span><br><span class="line">        ...</span><br><span class="line">    <span class="attr">current</span> = current + iter_size</span><br></pre></td></tr></table></figure></p>
 <h2>异常处理</h2>
 <p>在实践过程中，会遇到异常的情况，尤其是写入的时候，可能由于各种原因导致写入失败，因此需要catch exception，并打印详细信息，如下：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">try:</span><br><span class="line">    user_collection.insert_many(</span><br><span class="line">        data_iter, ordered=False, bypass_document_validation=True)</span><br><span class="line">except BulkWriteError as e:</span><br><span class="line">    lg.error(e.details)</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">try:</span><br><span class="line">    user_collection.insert_many(</span><br><span class="line">        data_iter, <span class="attribute">ordered</span>=<span class="literal">False</span>, <span class="attribute">bypass_document_validation</span>=<span class="literal">True</span>)</span><br><span class="line">except BulkWriteError as e:</span><br><span class="line">    lg.<span class="builtin-name">error</span>(e.details)</span><br></pre></td></tr></table></figure></p>
 <h2>References:</h2>
 <ul>
 <li><a href="http://api.mongodb.com/python/current/api/pymongo/collection.html" target="_blank" rel="noopener">PyMongo API</a></li>
@@ -532,6 +532,25 @@
               
 
               
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">4</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
 
               
                 
@@ -554,7 +573,35 @@
                     
                       
                     
-                    <span class="site-state-item-count">7</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">21</span>
                     <span class="site-state-item-name">tags</span>
                   </a>
                 </div>
@@ -806,6 +853,75 @@
 
 
   
+
+  
+  <script>
+    
+    function showTime(Counter) {
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      Counter('get', '/classes/Counter', { where: JSON.stringify({ url: { "$in": entries } }) })
+        .done(function ({ results }) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.url;
+            var time = item.time;
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function ({ responseJSON }) {
+          console.log("LeanCloud Counter Error: " + responseJSON.code + " " + responseJSON.error);
+        });
+    }
+    
+
+    $(function() {
+      $.get('https://app-router.leancloud.cn/2/route?appId=' + "OCjgmQiFa9gpVkDabM6KTb8g-gzGzoHsz")
+        .done(function ({ api_server }) {
+          var Counter = function (method, url, data) {
+            return $.ajax({
+              method: method,
+              url: `https://${api_server}/1.1${url}`,
+              headers: {
+                'X-LC-Id': "OCjgmQiFa9gpVkDabM6KTb8g-gzGzoHsz",
+                'X-LC-Key': "Ie7XE2V6spB6Q6C1W2GU9drV",
+                'Content-Type': 'application/json',
+              },
+              data: data,
+            });
+          };
+          
+          if ($('.post-title-link').length >= 1) {
+            showTime(Counter);
+          }
+          
+        })
+    });
+  </script>
+
+
 
   
 

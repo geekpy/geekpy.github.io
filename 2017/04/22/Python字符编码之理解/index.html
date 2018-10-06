@@ -108,18 +108,18 @@
 
 
 
-  <meta name="description" content="在从普通程序员进阶到优秀程序员的路上，字符编码是一个不得不跨过去的坎，我们几乎所有的程序都会涉及到字符处理，如果跨不过这个坎，那么几乎注定会面对一些坑。 &amp;lt;!--more--&amp;gt; 本篇文章试图通过实际的例子来阐释字符编码解码的过程，从而能够更加清晰地认识程序到底是怎样处理字符的。在进入正文之前，你需要先了解字符集和字符编码的区别，需要知道什么是Unicode，什么是UTF-8，GBK等基">
+  <meta name="description" content="在从普通程序员进阶到优秀程序员的路上，字符编码是一个不得不跨过去的坎，我们几乎所有的程序都会涉及到字符处理，如果跨不过这个坎，那么几乎注定会面对一些坑。">
 <meta name="keywords" content="computer, programming, data science, deep learning">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Python字符编码之理解">
 <meta property="og:url" content="http://yoursite.com/2017/04/22/Python字符编码之理解/index.html">
 <meta property="og:site_name" content="Geekpy&#39;s Blog">
-<meta property="og:description" content="在从普通程序员进阶到优秀程序员的路上，字符编码是一个不得不跨过去的坎，我们几乎所有的程序都会涉及到字符处理，如果跨不过这个坎，那么几乎注定会面对一些坑。 &amp;lt;!--more--&amp;gt; 本篇文章试图通过实际的例子来阐释字符编码解码的过程，从而能够更加清晰地认识程序到底是怎样处理字符的。在进入正文之前，你需要先了解字符集和字符编码的区别，需要知道什么是Unicode，什么是UTF-8，GBK等基">
+<meta property="og:description" content="在从普通程序员进阶到优秀程序员的路上，字符编码是一个不得不跨过去的坎，我们几乎所有的程序都会涉及到字符处理，如果跨不过这个坎，那么几乎注定会面对一些坑。">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2018-08-12T08:02:56.392Z">
+<meta property="og:updated_time" content="2018-10-06T05:29:01.903Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Python字符编码之理解">
-<meta name="twitter:description" content="在从普通程序员进阶到优秀程序员的路上，字符编码是一个不得不跨过去的坎，我们几乎所有的程序都会涉及到字符处理，如果跨不过这个坎，那么几乎注定会面对一些坑。 &amp;lt;!--more--&amp;gt; 本篇文章试图通过实际的例子来阐释字符编码解码的过程，从而能够更加清晰地认识程序到底是怎样处理字符的。在进入正文之前，你需要先了解字符集和字符编码的区别，需要知道什么是Unicode，什么是UTF-8，GBK等基">
+<meta name="twitter:description" content="在从普通程序员进阶到优秀程序员的路上，字符编码是一个不得不跨过去的坎，我们几乎所有的程序都会涉及到字符处理，如果跨不过这个坎，那么几乎注定会面对一些坑。">
 
 
 
@@ -370,16 +370,16 @@
         
         
           <p>在从普通程序员进阶到优秀程序员的路上，字符编码是一个不得不跨过去的坎，我们几乎所有的程序都会涉及到字符处理，如果跨不过这个坎，那么几乎注定会面对一些坑。
-&lt;!--more--&gt;
-本篇文章试图通过实际的例子来阐释字符编码解码的过程，从而能够更加清晰地认识程序到底是怎样处理字符的。在进入正文之前，你需要先了解字符集和字符编码的区别，需要知道什么是Unicode，什么是UTF-8，GBK等基本概念，如果你不了解，请移步下面的几篇文章：
+<a id="more"></a></p>
+<p>本篇文章试图通过实际的例子来阐释字符编码解码的过程，从而能够更加清晰地认识程序到底是怎样处理字符的。在进入正文之前，你需要先了解字符集和字符编码的区别，需要知道什么是Unicode，什么是UTF-8，GBK等基本概念，如果你不了解，请移步下面的几篇文章：
 <a href="http://noalgo.info/571.html" target="_blank" rel="noopener">字符编码详解</a>
 <a href="http://www.ruanyifeng.com/blog/2007/10/ascii_unicode_and_utf-8.html" target="_blank" rel="noopener">字符编码笔记</a>
 之后，我们试想一下，程序处理字符的过程是怎样的？我想最开始一定是先打开一个编辑器，把程序写出来，然后将程序保存为一个源文件（Python中就是.py文件），所以我们先从文件的存储开始说起。</p>
 <h3>源文件的存储</h3>
 <p>我们在编辑器中写的代码都是字符形式存在的，而当我们要将这些字符存储到硬盘时，必须有一个编码过程，因为计算机只能认识0/1序列，所以这些字符就必须通过一些编码规则转化成二进制序列，然后再存储到硬盘。比如我们写了下面一段程序
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">s = &apos;你好&apos;</span><br><span class="line">print repr(s), s</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">s = <span class="string">'你好'</span></span><br><span class="line"><span class="built_in">print</span> repr(s), s</span><br></pre></td></tr></table></figure></p>
 <p>当我们存储该文件时，如果是以GB2312编码方式进行存储的，那么文件的二进制表示是这样的
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">➜  testProgram hexdump -C gb2312encodingfile.py</span><br><span class="line">00000000  73 20 3d 20 27 c4 e3 ba  c3 27 0a 70 72 69 6e 74  |s = &apos;....&apos;.print|</span><br><span class="line">00000010  20 72 65 70 72 28 73 29  2c 20 73 0a              | repr(s), s.|</span><br><span class="line">0000001c</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">➜  testProgram hexdump -C gb2312encodingfile.py</span><br><span class="line"><span class="number">00000000</span>  <span class="number">73</span> <span class="number">20</span> <span class="number">3</span>d <span class="number">20</span> <span class="number">27</span> c4 e3 ba  c3 <span class="number">27</span> <span class="number">0</span>a <span class="number">70</span> <span class="number">72</span> <span class="number">69</span> <span class="number">6</span>e <span class="number">74</span>  |s = '....'.print|</span><br><span class="line"><span class="number">00000010</span>  <span class="number">20</span> <span class="number">72</span> <span class="number">65</span> <span class="number">70</span> <span class="number">72</span> <span class="number">28</span> <span class="number">73</span> <span class="number">29</span>  <span class="number">2</span>c <span class="number">20</span> <span class="number">73</span> <span class="number">0</span>a              | repr(s), s.|</span><br><span class="line"><span class="number">0000001</span>c</span><br></pre></td></tr></table></figure></p>
 <p>这里73代表<code>s</code>
 20代表<code>空格</code>
 3d代表<code>=</code>
@@ -388,7 +388,7 @@ c4 e3代表<code>你</code>
 ba c3代表<code>好</code>，以此类推
 在这里可以看出汉字在GB2312中是用两个字节来表示的。
 我们再使用utf-8来存储同样的一段代码，看看其二进制表示是什么样子
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">➜  testProgram hexdump -C utf8encodingfile.py</span><br><span class="line">00000000  73 20 3d 20 27 e4 bd a0  e5 a5 bd 27 0a 70 72 69  |s = &apos;......&apos;.pri|</span><br><span class="line">00000010  6e 74 20 72 65 70 72 28  73 29 2c 20 73 0a        |nt repr(s), s.|</span><br><span class="line">0000001e</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">➜  testProgram hexdump -C utf8encodingfile.py</span><br><span class="line"><span class="number">00000000</span>  <span class="number">73</span> <span class="number">20</span> <span class="number">3</span>d <span class="number">20</span> <span class="number">27</span> e4 bd a0  e5 a5 bd <span class="number">27</span> <span class="number">0</span>a <span class="number">70</span> <span class="number">72</span> <span class="number">69</span>  |s = '......'.pri|</span><br><span class="line"><span class="number">00000010</span>  <span class="number">6</span>e <span class="number">74</span> <span class="number">20</span> <span class="number">72</span> <span class="number">65</span> <span class="number">70</span> <span class="number">72</span> <span class="number">28</span>  <span class="number">73</span> <span class="number">29</span> <span class="number">2</span>c <span class="number">20</span> <span class="number">73</span> <span class="number">0</span>a        |nt repr(s), s.|</span><br><span class="line"><span class="number">0000001</span>e</span><br></pre></td></tr></table></figure></p>
 <p>同样的这里73代表<code>s</code>
 20代表<code>空格</code>
 3d代表<code>=</code>
@@ -400,40 +400,40 @@ e5 a5 bd代表<code>好</code></p>
 <h3>源代码执行</h3>
 <p>源代码执行的时候，Python解释器首先会将源文件load进内存当中，然后一行行开始读取文件并解释执行。</p>
 <p>但是这里需要注意的是，如果是str字符串，python解释器只会读取其二进制码流，假设我们使用的是gb2312encodingfile.py，那么s指向的字符串<code>你好</code>读进内存后的表示就是<code>c4 e3 ba c3</code>, 当我们使用print打印的时候，如果是在Windows的console上执行，则可以正确执行，显示如下
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">➜  testProgram python gb2312encodingfile.py</span><br><span class="line">&apos;\xc4\xe3\xba\xc3&apos; 你好</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight taggerscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">➜  testProgram python gb2312encodingfile.py</span><br><span class="line">'<span class="symbol">\x</span>c4<span class="symbol">\x</span>e3<span class="symbol">\x</span>ba<span class="symbol">\x</span>c3' 你好</span><br></pre></td></tr></table></figure></p>
 <p>但是在Linux上或者mac上无法正确执行，显示如下：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">➜  testProgram python gb2312encodingfile.py</span><br><span class="line">&apos;\xc4\xe3\xba\xc3&apos; ���</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight taggerscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">➜  testProgram python gb2312encodingfile.py</span><br><span class="line">'<span class="symbol">\x</span>c4<span class="symbol">\x</span>e3<span class="symbol">\x</span>ba<span class="symbol">\x</span>c3' ���</span><br></pre></td></tr></table></figure></p>
 <p>这是由于Windows console默认是GBK编解码的(GB2312的扩展)，所以可以将<code>\xc4\xe3\xba\xc3</code>正确解码显示成汉字<code>你好</code>，但是在Linux或者Mac上，console的默认编解码方式是UTF-8，所以也就无法将<code>\xc4\xe3\xba\xc3</code>正确显示出来。</p>
 <p>另外一个小插曲是，如果代码中有汉字，需要在文件开头声明编码方式(#-*- coding: utf-8 <em>-</em> 或者# coding=utf8)，否则解释器默认使用ASCII编码方式去打开源文件，这样就会报错，如下</p>
-<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">➜  testProgram python gb2312encodingfile.py</span><br><span class="line">  File &quot;gb2312encodingfile.py&quot;, line 1</span><br><span class="line">SyntaxError: Non-UTF-8 code starting with &apos;\xc4&apos; in file gb2312encodingfile.py on line 1, but no encoding declared; see http://python.org/dev/peps/pep-0263/ for details</span><br></pre></td></tr></table></figure></p>
+<p><figure class="highlight stata"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">➜  testProgram python gb2312encodingfile.py</span><br><span class="line">  <span class="keyword">File</span> <span class="string">"gb2312encodingfile.py"</span>, <span class="keyword">line</span> 1</span><br><span class="line">SyntaxError: Non-UTF-8 code starting with '\xc4' <span class="keyword">in</span> <span class="keyword">file</span> gb2312encodingfile.py <span class="keyword">on</span> <span class="keyword">line</span> 1, but <span class="keyword">no</span> encoding declared; see http:<span class="comment">//python.org/dev/peps/pep-0263/ for details</span></span><br></pre></td></tr></table></figure></p>
 <p>但是如果我们的字符串是unicode对象的字符串，那么Python解释器会将字符串的字节序列先进行<em>解码</em>，然后再将解码后的字节序列的引用赋给s，可以更改utf8encodingfile.py代码如下：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">#-*- coding: utf-8 -*-</span><br><span class="line">s = &apos;你好&apos;</span><br><span class="line">print repr(s), s</span><br><span class="line"></span><br><span class="line">u = u&apos;你好&apos;</span><br><span class="line">print repr(u), u</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#-*- coding: utf-8 -*-</span></span><br><span class="line">s = <span class="string">'你好'</span></span><br><span class="line"><span class="keyword">print</span> repr(s), s</span><br><span class="line"></span><br><span class="line">u = <span class="string">u'你好'</span></span><br><span class="line"><span class="keyword">print</span> repr(u), u</span><br></pre></td></tr></table></figure></p>
 <p>保存后，使用hexdump查看其二进制编码如下：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">➜  testProgram hexdump -C utf8encodingfile.py</span><br><span class="line">00000000  23 2d 2a 2d 20 63 6f 64  69 6e 67 3a 20 75 74 66  |#-*- coding: utf|</span><br><span class="line">00000010  2d 38 20 2d 2a 2d 0a 73  20 3d 20 27 e4 bd a0 e5  |-8 -*-.s = &apos;....|</span><br><span class="line">00000020  a5 bd 27 0a 70 72 69 6e  74 20 72 65 70 72 28 73  |..&apos;.print repr(s|</span><br><span class="line">00000030  29 2c 20 73 0a 0a 75 20  3d 20 75 27 e4 bd a0 e5  |), s..u = u&apos;....|</span><br><span class="line">00000040  a5 bd 27 0a 70 72 69 6e  74 20 72 65 70 72 28 75  |..&apos;.print repr(u|</span><br><span class="line">00000050  29 2c 20 75 0a                                    |), u.|</span><br><span class="line">00000055</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight tap"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">➜  testProgram hexdump -C utf8encodingfile.py</span><br><span class="line">00000000 <span class="number"> 23 </span>2d 2a 2d<span class="number"> 20 </span>63 6f<span class="number"> 64 </span><span class="number"> 69 </span>6e<span class="number"> 67 </span>3a<span class="number"> 20 </span>75<span class="number"> 74 </span>66  |<span class="comment">#-*- coding: utf|</span></span><br><span class="line">00000010  2d<span class="number"> 38 </span>20 2d 2a 2d 0a<span class="number"> 73 </span><span class="number"> 20 </span>3d<span class="number"> 20 </span>27 e4 bd a0 e5  |-8 -*-.s = '....|</span><br><span class="line">00000020  a5 bd<span class="number"> 27 </span>0a<span class="number"> 70 </span>72<span class="number"> 69 </span>6e <span class="number"> 74 </span>20<span class="number"> 72 </span>65<span class="number"> 70 </span>72<span class="number"> 28 </span>73  |..'.print repr(s|</span><br><span class="line">00000030 <span class="number"> 29 </span>2c<span class="number"> 20 </span>73 0a 0a<span class="number"> 75 </span>20  3d<span class="number"> 20 </span>75<span class="number"> 27 </span>e4 bd a0 e5  |), s..u = u'....|</span><br><span class="line">00000040  a5 bd<span class="number"> 27 </span>0a<span class="number"> 70 </span>72<span class="number"> 69 </span>6e <span class="number"> 74 </span>20<span class="number"> 72 </span>65<span class="number"> 70 </span>72<span class="number"> 28 </span>75  |..'.print repr(u|</span><br><span class="line">00000050 <span class="number"> 29 </span>2c<span class="number"> 20 </span>75 0a                                    |), u.|</span><br><span class="line">00000055</span><br></pre></td></tr></table></figure></p>
 <p>仔细观察会发现两个<code>你好</code>字符串都编码成了<code>e4 bd a0 e5 a5 bd</code>
 然后在mac上执行，结果如下：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">➜  testProgram python utf8encodingfile.py</span><br><span class="line">&apos;\xe4\xbd\xa0\xe5\xa5\xbd&apos; 你好</span><br><span class="line">u&apos;\u4f60\u597d&apos; 你好</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">➜  testProgram python utf8encodingfile.py</span><br><span class="line"><span class="string">'\xe4\xbd\xa0\xe5\xa5\xbd'</span> 你好</span><br><span class="line"><span class="string">u'\u4f60\u597d'</span> 你好</span><br></pre></td></tr></table></figure></p>
 <p>可以看出s指向的字节序列是<code>\xe4\xbd\xa0\xe5\xa5\xbd</code>，而u指向的字节序列是<code>\u4f60\u597d</code> (也就是将e4 bd a0 e5 a5 bd 解码成了\u4f60\u597d)</p>
 <p>但是如果我们更改的是gb2312encodingfile.py，并使用gb2312编码保存，再执行这个程序看看会是什么结果。
 结果直接报错：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">➜  testProgram python gb2312encodingfile.py</span><br><span class="line">  File &quot;gb2312encodingfile.py&quot;, line 5</span><br><span class="line">    u = u&apos;���&apos;</span><br><span class="line">SyntaxError: (unicode error) &apos;utf8&apos; codec can&apos;t decode byte 0xc4 in position 0: invalid continuation byte</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">➜  testProgram python gb2312encodingfile.py</span><br><span class="line">  File <span class="string">"gb2312encodingfile.py"</span>, line <span class="number">5</span></span><br><span class="line">    u = <span class="string">u'���'</span></span><br><span class="line">SyntaxError: (unicode error) <span class="string">'utf8'</span> codec can<span class="string">'t decode byte 0xc4 in position 0: invalid continuation byte</span></span><br></pre></td></tr></table></figure></p>
 <p>这是由于Python解释器尝试用声明的utf-8编码方式去解码gb2312编码的字节序列，所以造成了这样的错误。</p>
 <p>至此我们已经知道了Python如何读写源文件的，那么Python执行的时候又是如何读写外部文件的呢？</p>
 <h3>文件读写</h3>
 <p>现在我们使用如下代码尝试将字符串写到文件当中，注意源码保存使用utf-8, 文件名为utf8encodingfile_write.py
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#-*- coding: utf-8 -*-</span><br><span class="line">s = &apos;你好&apos;</span><br><span class="line">with open(&apos;stroutput.txt&apos;, &apos;w&apos;) as f:</span><br><span class="line">    f.write(s)</span><br><span class="line"></span><br><span class="line">u = u&apos;你好&apos;</span><br><span class="line">with open(&apos;unicodeoutput.txt&apos;, &apos;w&apos;) as f:</span><br><span class="line">    f.write(u)</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#-*- coding: utf-8 -*-</span></span><br><span class="line">s = <span class="string">'你好'</span></span><br><span class="line"><span class="keyword">with</span> open(<span class="string">'stroutput.txt'</span>, <span class="string">'w'</span>) <span class="keyword">as</span> f:</span><br><span class="line">    f.write(s)</span><br><span class="line"></span><br><span class="line">u = <span class="string">u'你好'</span></span><br><span class="line"><span class="keyword">with</span> open(<span class="string">'unicodeoutput.txt'</span>, <span class="string">'w'</span>) <span class="keyword">as</span> f:</span><br><span class="line">    f.write(u)</span><br></pre></td></tr></table></figure></p>
 <p>在mac上执行，结果如下：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">➜  testProgram python utf8encodingfile_write.py</span><br><span class="line">Traceback (most recent call last):</span><br><span class="line">  File &quot;utf8encodingfile_write.py&quot;, line 8, in &lt;module&gt;</span><br><span class="line">    f.write(u)</span><br><span class="line">UnicodeEncodeError: &apos;ascii&apos; codec can&apos;t encode characters in position 0-1: ordinal not in range(128)</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight vhdl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">➜  testProgram python utf8encodingfile_write.py</span><br><span class="line">Traceback (most recent call last):</span><br><span class="line">  <span class="keyword">File</span> <span class="string">"utf8encodingfile_write.py"</span>, <span class="literal">line</span> <span class="number">8</span>, <span class="keyword">in</span> &lt;module&gt;</span><br><span class="line">    f.write(u)</span><br><span class="line">UnicodeEncodeError: <span class="symbol">'ascii</span>' codec can<span class="symbol">'t</span> encode characters <span class="keyword">in</span> position <span class="number">0</span>-<span class="number">1</span>: ordinal <span class="keyword">not</span> <span class="keyword">in</span> <span class="keyword">range</span>(<span class="number">128</span>)</span><br></pre></td></tr></table></figure></p>
 <p>*'ascii' codec can't encode characters in position 0-1: ordinal not in range(128)*说明系统在写文件编码的时候尝试使用ASCII来进行编码，可是我们明明已经声明了使用utf-8啊。</p>
 <p>原来文件头声明使用utf-8，只是用于解释器去解释源码文件的时候使用，当我们调用write去写一个文件的时候，会调用系统默认的编码设置来进行编码。我们来看下系统默认的编码是什么：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; import sys</span><br><span class="line">&gt;&gt;&gt; sys.getdefaultencoding()</span><br><span class="line">&apos;ascii&apos;</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;</span>&gt; import sys</span><br><span class="line"><span class="meta">&gt;&gt;</span>&gt; sys.getdefaultencoding()</span><br><span class="line"><span class="string">'ascii'</span></span><br></pre></td></tr></table></figure></p>
 <p>果然，系统默认就是ascii编码方式。
 解决这个问题有两种方式，一种是修改系统默认的编码方式，另一种是在open的时候指定编码方式，其中第二种显然更加优雅一些。
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"># 通过修改系统默认编码方式来实现utf-8编码</span><br><span class="line">import sys</span><br><span class="line">reload(sys) # 这里必须reload一下才能找到setdefaultencoding method</span><br><span class="line">sys.setdefaultencoding(&apos;utf-8&apos;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># 通过在codecs.open中设置编码方式</span><br><span class="line">import codecs</span><br><span class="line"></span><br><span class="line">with codecs.open(&quot;filename&quot;, &quot;w&quot;, encoding=&quot;utf-8&quot;) as f:</span><br><span class="line">    f.write(u)</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight oxygene"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"># 通过修改系统默认编码方式来实现utf-<span class="number">8</span>编码</span><br><span class="line">import sys</span><br><span class="line">reload(sys) # 这里必须reload一下才能找到setdefaultencoding <span class="function"><span class="keyword">method</span></span></span><br><span class="line"><span class="function"><span class="title">sys</span>.<span class="title">setdefaultencoding</span><span class="params">(<span class="string">'utf-8'</span>)</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"># 通过在<span class="title">codecs</span>.<span class="title">open</span>中设置编码方式</span></span><br><span class="line"><span class="function"><span class="title">import</span> <span class="title">codecs</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"><span class="title">with</span> <span class="title">codecs</span>.<span class="title">open</span><span class="params">("filename", "w", encoding="utf-8")</span> <span class="title">as</span> <span class="title">f</span>:</span></span><br><span class="line">    f.write(u)</span><br></pre></td></tr></table></figure></p>
 <p>同样的，当我们读取一个文件的时候，也可以通过codecs.open来设定编解码方式，但是首先我们需要知道这个要读取的文件的编码方式，假设文件是以utf-8的方式进行编码的，读取的时候就可以如下：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">import codecs</span><br><span class="line"></span><br><span class="line">with open(&quot;somefile&quot;, &quot;r&quot;, encoding=&quot;utf-8&quot;) as f:</span><br><span class="line">    content = f.read()</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight livecodeserver"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">import codecs</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">"somefile"</span>, <span class="string">"r"</span>, encoding=<span class="string">"utf-8"</span>) <span class="keyword">as</span> f:</span><br><span class="line">    content = f.<span class="built_in">read</span>()</span><br></pre></td></tr></table></figure></p>
 <p>另外，有时我们并非从文件中读取，而是直接使用了一个非标准字符，这是就需要使用decode先解码
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># if not decode, will raise exception: &apos;ascii&apos; codec can&apos;t</span><br><span class="line"># decode byte 0xe2 in position 0: ordinal not in range(128)</span><br><span class="line">dash = &apos;–&apos;.decode(&quot;utf8&quot;)</span><br><span class="line">if dash in title:</span><br><span class="line">    title = title.split(dash)[0]</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight maxima"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># <span class="keyword">if</span> <span class="keyword">not</span> decode, will raise exception: '<span class="built_in">ascii</span>' codec can't</span><br><span class="line"># decode byte <span class="number">0xe2</span> <span class="keyword">in</span> <span class="built_in">position</span> <span class="number">0</span>: ordinal <span class="keyword">not</span> <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">128</span>)</span><br><span class="line">dash = '–'.decode(<span class="string">"utf8"</span>)</span><br><span class="line"><span class="keyword">if</span> dash <span class="keyword">in</span> <span class="built_in">title</span>:</span><br><span class="line">    <span class="built_in">title</span> = <span class="built_in">title</span>.<span class="built_in">split</span>(dash)[<span class="number">0</span>]</span><br></pre></td></tr></table></figure></p>
 <p>至此，关于Python编码就讲完了，如果你有收获，就请点个赞鼓励下吧！</p>
 
         
@@ -566,6 +566,25 @@ e5 a5 bd代表<code>好</code></p>
               
 
               
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">4</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
 
               
                 
@@ -588,7 +607,35 @@ e5 a5 bd代表<code>好</code></p>
                     
                       
                     
-                    <span class="site-state-item-count">7</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">21</span>
                     <span class="site-state-item-name">tags</span>
                   </a>
                 </div>
@@ -840,6 +887,75 @@ e5 a5 bd代表<code>好</code></p>
 
 
   
+
+  
+  <script>
+    
+    function showTime(Counter) {
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      Counter('get', '/classes/Counter', { where: JSON.stringify({ url: { "$in": entries } }) })
+        .done(function ({ results }) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.url;
+            var time = item.time;
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function ({ responseJSON }) {
+          console.log("LeanCloud Counter Error: " + responseJSON.code + " " + responseJSON.error);
+        });
+    }
+    
+
+    $(function() {
+      $.get('https://app-router.leancloud.cn/2/route?appId=' + "OCjgmQiFa9gpVkDabM6KTb8g-gzGzoHsz")
+        .done(function ({ api_server }) {
+          var Counter = function (method, url, data) {
+            return $.ajax({
+              method: method,
+              url: `https://${api_server}/1.1${url}`,
+              headers: {
+                'X-LC-Id': "OCjgmQiFa9gpVkDabM6KTb8g-gzGzoHsz",
+                'X-LC-Key': "Ie7XE2V6spB6Q6C1W2GU9drV",
+                'Content-Type': 'application/json',
+              },
+              data: data,
+            });
+          };
+          
+          if ($('.post-title-link').length >= 1) {
+            showTime(Counter);
+          }
+          
+        })
+    });
+  </script>
+
+
 
   
 

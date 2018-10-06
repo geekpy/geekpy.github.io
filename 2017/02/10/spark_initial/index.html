@@ -108,19 +108,19 @@
 
 
 
-  <meta name="description" content="我们在初始化SparkConf时，或者提交Spark任务时，都会有master参数需要设置，如下： &amp;lt;!--more--&amp;gt; 12conf = SparkConf().setAppName(appName).setMaster(master)sc = SparkContext(conf=conf) 1234/bin/spark-submit \        --cluster clus">
-<meta name="keywords" content="computer, programming, data science, deep learning">
+  <meta name="description" content="我们在初始化SparkConf时，或者提交Spark任务时，都会有master参数需要设置，如下：">
+<meta name="keywords" content="spark">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Spark启动时的master参数以及Spark的部署方式">
 <meta property="og:url" content="http://yoursite.com/2017/02/10/spark_initial/index.html">
 <meta property="og:site_name" content="Geekpy&#39;s Blog">
-<meta property="og:description" content="我们在初始化SparkConf时，或者提交Spark任务时，都会有master参数需要设置，如下： &amp;lt;!--more--&amp;gt; 12conf = SparkConf().setAppName(appName).setMaster(master)sc = SparkContext(conf=conf) 1234/bin/spark-submit \        --cluster clus">
+<meta property="og:description" content="我们在初始化SparkConf时，或者提交Spark任务时，都会有master参数需要设置，如下：">
 <meta property="og:locale" content="default">
 <meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3959253-8988e02415d0df29.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
-<meta property="og:updated_time" content="2018-08-12T10:12:24.246Z">
+<meta property="og:updated_time" content="2018-10-06T05:29:01.903Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Spark启动时的master参数以及Spark的部署方式">
-<meta name="twitter:description" content="我们在初始化SparkConf时，或者提交Spark任务时，都会有master参数需要设置，如下： &amp;lt;!--more--&amp;gt; 12conf = SparkConf().setAppName(appName).setMaster(master)sc = SparkContext(conf=conf) 1234/bin/spark-submit \        --cluster clus">
+<meta name="twitter:description" content="我们在初始化SparkConf时，或者提交Spark任务时，都会有master参数需要设置，如下：">
 <meta name="twitter:image" content="http://upload-images.jianshu.io/upload_images/3959253-8988e02415d0df29.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
 
 
@@ -372,9 +372,9 @@
         
         
           <p>我们在初始化SparkConf时，或者提交Spark任务时，都会有master参数需要设置，如下：</p>
-<p>&lt;!--more--&gt;</p>
-<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">conf = SparkConf().setAppName(appName).setMaster(master)</span><br><span class="line">sc = SparkContext(conf=conf)</span><br></pre></td></tr></table></figure></p>
-<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">/bin/spark-submit \</span><br><span class="line">        --cluster cluster_name \</span><br><span class="line">        --master yarn-cluster \</span><br><span class="line">        ...</span><br></pre></td></tr></table></figure></p>
+<p><a id="more"></a>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">conf</span> = SparkConf().setAppName(appName).setMaster(master)</span><br><span class="line"><span class="attr">sc</span> = SparkContext(conf=conf)</span><br></pre></td></tr></table></figure></p>
+<p><figure class="highlight haml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/bin/spark-submit \</span></span><br><span class="line">        -<span class="ruby">-cluster cluster_name \</span></span><br><span class="line"><span class="ruby">        --master yarn-cluster \</span></span><br><span class="line"><span class="ruby">        ...</span></span><br></pre></td></tr></table></figure></p>
 <p>但是这个master到底是何含义呢？文档说是设定master url，但是啥是master url呢？说到这就必须先要了解下Spark的部署方式了。</p>
 <p>我们要部署Spark这套计算框架，有多种方式，可以部署到一台计算机，也可以是多台(cluster)。我们要去计算数据，就必须要有计算机帮我们计算，当然计算机越多(集群规模越大)，我们的计算力就越强。但有时候我们只想在本机做个试验或者小型的计算，因此直接部署在单机上也是可以的。Spark部署方式可以用如下图形展示：</p>
 <p><img src="http://upload-images.jianshu.io/upload_images/3959253-8988e02415d0df29.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="Spark部署方式"></p>
@@ -387,18 +387,18 @@
 <li>local[*]: 这种模式直接帮你按照cpu最多cores来设置线程数了。</li>
 </ul>
 <p>使用示例：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">/bin/spark-submit \</span><br><span class="line">        --cluster cluster_name \</span><br><span class="line">        --master local[*] \</span><br><span class="line">        ...</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight haml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/bin/spark-submit \</span></span><br><span class="line">        -<span class="ruby">-cluster cluster_name \</span></span><br><span class="line"><span class="ruby">        --master local[*] \</span></span><br><span class="line"><span class="ruby">        ...</span></span><br></pre></td></tr></table></figure></p>
 <p>总而言之这几种local模式都是运行在本地的单机版模式，通常用于练手和测试，而实际的大规模计算就需要下面要介绍的cluster模式。</p>
 <h3>cluster模式</h3>
 <p>cluster模式肯定就是运行很多机器上了，但是它又分为以下三种模式，区别在于谁去管理资源调度。（说白了，就好像后勤管家，哪里需要资源，后勤管家要负责调度这些资源）</p>
 <h4>standalone模式</h4>
 <p>这种模式下，Spark会自己负责资源的管理调度。它将cluster中的机器分为master机器和worker机器，master通常就一个，可以简单的理解为那个后勤管家，worker就是负责干计算任务活的苦劳力。具体怎么配置可以参考<a href="http://spark.apache.org/docs/latest/spark-standalone.html" target="_blank" rel="noopener">Spark Standalone Mode</a>
 使用standalone模式示例：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">/bin/spark-submit \</span><br><span class="line">        --cluster cluster_name \</span><br><span class="line">        --master spark://host:port \</span><br><span class="line">        ...</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">/bin/spark-submit</span> \</span><br><span class="line">        <span class="params">--cluster</span> cluster_name \</span><br><span class="line">        <span class="params">--master</span> spark:<span class="string">//host</span><span class="function">:port</span> \</span><br><span class="line">        <span class="string">...</span></span><br></pre></td></tr></table></figure></p>
 <p>--master就是指定master那台机器的地址和端口，我想这也正是--master参数名称的由来吧。</p>
 <h4>mesos模式</h4>
 <p>这里就很好理解了，如果使用mesos来管理资源调度，自然就应该用mesos模式了，示例如下：</p>
-<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">/bin/spark-submit \</span><br><span class="line">        --cluster cluster_name \</span><br><span class="line">        --master mesos://host:port \</span><br><span class="line">        ...</span><br></pre></td></tr></table></figure></p>
+<p><figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">/bin/spark-submit</span> \</span><br><span class="line">        <span class="params">--cluster</span> cluster_name \</span><br><span class="line">        <span class="params">--master</span> mesos:<span class="string">//host</span><span class="function">:port</span> \</span><br><span class="line">        <span class="string">...</span></span><br></pre></td></tr></table></figure></p>
 <h4>yarn模式</h4>
 <p>同样，如果采用yarn来管理资源调度，就应该用yarn模式，由于很多时候我们需要和mapreduce使用同一个集群，所以都采用Yarn来管理资源调度，这也是生产环境大多采用yarn模式的原因。yarn模式又分为yarn cluster模式和yarn client模式：</p>
 <ul>
@@ -406,7 +406,7 @@
 <li>yarn client: 这个是说Spark Driver和ApplicationMaster进程均在本机运行，而计算任务在cluster上。</li>
 </ul>
 <p>使用示例：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">/bin/spark-submit \</span><br><span class="line">        --cluster cluster_name \</span><br><span class="line">        --master yarn-cluster \</span><br><span class="line">        ...</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight haml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/bin/spark-submit \</span></span><br><span class="line">        -<span class="ruby">-cluster cluster_name \</span></span><br><span class="line"><span class="ruby">        --master yarn-cluster \</span></span><br><span class="line"><span class="ruby">        ...</span></span><br></pre></td></tr></table></figure></p>
 
         
       </div>
@@ -538,6 +538,25 @@
               
 
               
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">4</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
 
               
                 
@@ -560,7 +579,35 @@
                     
                       
                     
-                    <span class="site-state-item-count">7</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">21</span>
                     <span class="site-state-item-name">tags</span>
                   </a>
                 </div>
@@ -812,6 +859,75 @@
 
 
   
+
+  
+  <script>
+    
+    function showTime(Counter) {
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      Counter('get', '/classes/Counter', { where: JSON.stringify({ url: { "$in": entries } }) })
+        .done(function ({ results }) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.url;
+            var time = item.time;
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function ({ responseJSON }) {
+          console.log("LeanCloud Counter Error: " + responseJSON.code + " " + responseJSON.error);
+        });
+    }
+    
+
+    $(function() {
+      $.get('https://app-router.leancloud.cn/2/route?appId=' + "OCjgmQiFa9gpVkDabM6KTb8g-gzGzoHsz")
+        .done(function ({ api_server }) {
+          var Counter = function (method, url, data) {
+            return $.ajax({
+              method: method,
+              url: `https://${api_server}/1.1${url}`,
+              headers: {
+                'X-LC-Id': "OCjgmQiFa9gpVkDabM6KTb8g-gzGzoHsz",
+                'X-LC-Key': "Ie7XE2V6spB6Q6C1W2GU9drV",
+                'Content-Type': 'application/json',
+              },
+              data: data,
+            });
+          };
+          
+          if ($('.post-title-link').length >= 1) {
+            showTime(Counter);
+          }
+          
+        })
+    });
+  </script>
+
+
 
   
 

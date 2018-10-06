@@ -108,20 +108,20 @@
 
 
 
-  <meta name="description" content="本文主要通过源码分析Flask-Login插件，并详述其使用方法 &amp;lt;!-- more --&amp;gt; 关于Flask登录认证的详细过程请参见拙作&amp;lt;&amp;lt;使用Flask实现用户登陆认证的详细过程&amp;gt;&amp;gt;一文，而本文则偏重于详细介绍Flask-Login的原理，代码的解析。 首次登陆 我们首先来看一下首次登录验证的流程图：  Flask-Login在登录过程中主要负责：  将用户对">
+  <meta name="description" content="本文主要通过源码分析Flask-Login插件，并详述其使用方法">
 <meta name="keywords" content="flask">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Flask-Login详解">
 <meta property="og:url" content="http://yoursite.com/2017/10/12/Flask-Login/index.html">
 <meta property="og:site_name" content="Geekpy&#39;s Blog">
-<meta property="og:description" content="本文主要通过源码分析Flask-Login插件，并详述其使用方法 &amp;lt;!-- more --&amp;gt; 关于Flask登录认证的详细过程请参见拙作&amp;lt;&amp;lt;使用Flask实现用户登陆认证的详细过程&amp;gt;&amp;gt;一文，而本文则偏重于详细介绍Flask-Login的原理，代码的解析。 首次登陆 我们首先来看一下首次登录验证的流程图：  Flask-Login在登录过程中主要负责：  将用户对">
+<meta property="og:description" content="本文主要通过源码分析Flask-Login插件，并详述其使用方法">
 <meta property="og:locale" content="default">
 <meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3959253-b34989af4a0d0b2c.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
 <meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3959253-7ea20e139da6e2ae.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
-<meta property="og:updated_time" content="2018-10-05T14:24:37.606Z">
+<meta property="og:updated_time" content="2018-10-06T05:33:02.243Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Flask-Login详解">
-<meta name="twitter:description" content="本文主要通过源码分析Flask-Login插件，并详述其使用方法 &amp;lt;!-- more --&amp;gt; 关于Flask登录认证的详细过程请参见拙作&amp;lt;&amp;lt;使用Flask实现用户登陆认证的详细过程&amp;gt;&amp;gt;一文，而本文则偏重于详细介绍Flask-Login的原理，代码的解析。 首次登陆 我们首先来看一下首次登录验证的流程图：  Flask-Login在登录过程中主要负责：  将用户对">
+<meta name="twitter:description" content="本文主要通过源码分析Flask-Login插件，并详述其使用方法">
 <meta name="twitter:image" content="http://upload-images.jianshu.io/upload_images/3959253-b34989af4a0d0b2c.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
 
 
@@ -373,7 +373,7 @@
         
         
           <p>本文主要通过源码分析Flask-Login插件，并详述其使用方法</p>
-<p>&lt;!-- more --&gt;</p>
+<p><a id="more"></a></p>
 <p>关于Flask登录认证的详细过程请参见拙作<a href="http://geekpy.github.io/2016/12/06/flask_login_detail/" target="_blank" rel="noopener">&lt;&lt;使用Flask实现用户登陆认证的详细过程&gt;&gt;</a>一文，而本文则偏重于详细介绍Flask-Login的原理，代码的解析。</p>
 <h3>首次登陆</h3>
 <p>我们首先来看一下首次登录验证的流程图：</p>
@@ -576,6 +576,25 @@
               
 
               
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">4</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
 
               
                 
@@ -598,7 +617,35 @@
                     
                       
                     
-                    <span class="site-state-item-count">7</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">21</span>
                     <span class="site-state-item-name">tags</span>
                   </a>
                 </div>
@@ -850,6 +897,75 @@
 
 
   
+
+  
+  <script>
+    
+    function showTime(Counter) {
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      Counter('get', '/classes/Counter', { where: JSON.stringify({ url: { "$in": entries } }) })
+        .done(function ({ results }) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.url;
+            var time = item.time;
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function ({ responseJSON }) {
+          console.log("LeanCloud Counter Error: " + responseJSON.code + " " + responseJSON.error);
+        });
+    }
+    
+
+    $(function() {
+      $.get('https://app-router.leancloud.cn/2/route?appId=' + "OCjgmQiFa9gpVkDabM6KTb8g-gzGzoHsz")
+        .done(function ({ api_server }) {
+          var Counter = function (method, url, data) {
+            return $.ajax({
+              method: method,
+              url: `https://${api_server}/1.1${url}`,
+              headers: {
+                'X-LC-Id': "OCjgmQiFa9gpVkDabM6KTb8g-gzGzoHsz",
+                'X-LC-Key': "Ie7XE2V6spB6Q6C1W2GU9drV",
+                'Content-Type': 'application/json',
+              },
+              data: data,
+            });
+          };
+          
+          if ($('.post-title-link').length >= 1) {
+            showTime(Counter);
+          }
+          
+        })
+    });
+  </script>
+
+
 
   
 

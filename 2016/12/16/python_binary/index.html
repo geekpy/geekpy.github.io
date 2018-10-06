@@ -108,20 +108,20 @@
 
 
 
-  <meta name="description" content="我们都知道在计算机中所有的信息最终都是以二进制的0和1来表示，而有些算法是通过操作bit位来进行运算的，这就需要我们了解Python中如何去表示二进制，又如何是进行位运算的。 &amp;lt;!--more--&amp;gt; 二进制的表示 首先在Python中可以通过以&amp;quot;0b&amp;quot;或者&amp;quot;-0b&amp;quot;开头的字符串来表示二进制，如下所示 1234print 0b101 # 输出5pr">
+  <meta name="description" content="我们都知道在计算机中所有的信息最终都是以二进制的0和1来表示，而有些算法是通过操作bit位来进行运算的，这就需要我们了解Python中如何去表示二进制，又如何是进行位运算的。">
 <meta name="keywords" content="computer, programming, data science, deep learning">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Python二进制表示和位操作">
 <meta property="og:url" content="http://yoursite.com/2016/12/16/python_binary/index.html">
 <meta property="og:site_name" content="Geekpy&#39;s Blog">
-<meta property="og:description" content="我们都知道在计算机中所有的信息最终都是以二进制的0和1来表示，而有些算法是通过操作bit位来进行运算的，这就需要我们了解Python中如何去表示二进制，又如何是进行位运算的。 &amp;lt;!--more--&amp;gt; 二进制的表示 首先在Python中可以通过以&amp;quot;0b&amp;quot;或者&amp;quot;-0b&amp;quot;开头的字符串来表示二进制，如下所示 1234print 0b101 # 输出5pr">
+<meta property="og:description" content="我们都知道在计算机中所有的信息最终都是以二进制的0和1来表示，而有些算法是通过操作bit位来进行运算的，这就需要我们了解Python中如何去表示二进制，又如何是进行位运算的。">
 <meta property="og:locale" content="default">
 <meta property="og:image" content="https://segmentfault.com/img/bVp6Ux">
 <meta property="og:image" content="https://segmentfault.com/img/bVp6Uv">
-<meta property="og:updated_time" content="2018-08-12T10:13:22.978Z">
+<meta property="og:updated_time" content="2018-10-06T05:29:01.905Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Python二进制表示和位操作">
-<meta name="twitter:description" content="我们都知道在计算机中所有的信息最终都是以二进制的0和1来表示，而有些算法是通过操作bit位来进行运算的，这就需要我们了解Python中如何去表示二进制，又如何是进行位运算的。 &amp;lt;!--more--&amp;gt; 二进制的表示 首先在Python中可以通过以&amp;quot;0b&amp;quot;或者&amp;quot;-0b&amp;quot;开头的字符串来表示二进制，如下所示 1234print 0b101 # 输出5pr">
+<meta name="twitter:description" content="我们都知道在计算机中所有的信息最终都是以二进制的0和1来表示，而有些算法是通过操作bit位来进行运算的，这就需要我们了解Python中如何去表示二进制，又如何是进行位运算的。">
 <meta name="twitter:image" content="https://segmentfault.com/img/bVp6Ux">
 
 
@@ -373,23 +373,23 @@
         
         
           <p>我们都知道在计算机中所有的信息最终都是以二进制的0和1来表示，而有些算法是通过操作bit位来进行运算的，这就需要我们了解Python中如何去表示二进制，又如何是进行位运算的。</p>
-<p>&lt;!--more--&gt;</p>
+<p><a id="more"></a></p>
 <h3>二进制的表示</h3>
 <p>首先在Python中可以通过以&quot;0b&quot;或者&quot;-0b&quot;开头的字符串来表示二进制，如下所示
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">print 0b101 # 输出5</span><br><span class="line">print 0b10  # 输出2</span><br><span class="line">print 0b111 # 输出7</span><br><span class="line">print -0b101 # 输出-5</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight maxima"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">print</span> <span class="number">0b101</span> # 输出<span class="number">5</span></span><br><span class="line"><span class="built_in">print</span> <span class="number">0b10</span>  # 输出<span class="number">2</span></span><br><span class="line"><span class="built_in">print</span> <span class="number">0b111</span> # 输出<span class="number">7</span></span><br><span class="line"><span class="built_in">print</span> -<span class="number">0b101</span> # 输出-<span class="number">5</span></span><br></pre></td></tr></table></figure></p>
 <p>由此可知我们用二进制表示的数字在打印之后会变成我们更为熟悉的十进制数，更容易被人理解。
 当我们需要看十进制数字的二进制表示时，可以使用bin函数
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bin(5)  # 输出0b101</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight maxima"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bin(<span class="number">5</span>)  # 输出<span class="number">0b101</span></span><br></pre></td></tr></table></figure></p>
 <h3>二进制的位操作</h3>
 <p>首先一点需要明确的是所有的运算（包括位操作）在计算机内部都是通过补码形式来进行运算的，关于补码可以参考文章<a href="https://www.cnblogs.com/zhangziqiu/archive/2011/03/30/ComputerCode.htmlhttp://note.youdao.com/" target="_blank" rel="noopener">原码，反码和补码</a>，计算机内部运算示意图如下：
 <img src="https://segmentfault.com/img/bVp6Ux" alt="image"></p>
 <p>在Python中提供了如下二进制的位操作：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;  #右移</span><br><span class="line">&lt;&lt;  #左移</span><br><span class="line">|   #位或 </span><br><span class="line">&amp;   #位与</span><br><span class="line">^   #位异或</span><br><span class="line">~   #非</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;  <span class="comment">#右移</span></span><br><span class="line">&lt;&lt;  <span class="comment">#左移</span></span><br><span class="line">|   <span class="comment">#位或 </span></span><br><span class="line">&amp;   <span class="comment">#位与</span></span><br><span class="line">^   <span class="comment">#位异或</span></span><br><span class="line">~   <span class="comment">#非</span></span><br></pre></td></tr></table></figure></p>
 <p>位运算法则：</p>
 <p><img src="https://segmentfault.com/img/bVp6Uv" alt="image"></p>
 <p>下面我们分别来看下：</p>
 <h5>左移</h5>
-<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">0b11 &lt;&lt; 2   #输出为12, 即0b1100</span><br><span class="line">5 &lt;&lt; 2      #输出为20, 即0b10100</span><br><span class="line">-2 &lt;&lt; 2     #输出为-8</span><br><span class="line">5 &lt;&lt; 64     #输出为92233720368547758080L</span><br></pre></td></tr></table></figure></p>
+<p><figure class="highlight maxima"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">0b11</span> &lt;&lt; <span class="number">2</span>   #输出为<span class="number">12</span>, 即<span class="number">0b1100</span></span><br><span class="line"><span class="number">5</span> &lt;&lt; <span class="number">2</span>      #输出为<span class="number">20</span>, 即<span class="number">0b10100</span></span><br><span class="line">-<span class="number">2</span> &lt;&lt; <span class="number">2</span>     #输出为-<span class="number">8</span></span><br><span class="line"><span class="number">5</span> &lt;&lt; <span class="number">64</span>     #输出为92233720368547758080L</span><br></pre></td></tr></table></figure></p>
 <ol>
 <li>以0b11为例，0b11的补码就是0b11，所以左移就是将所有的0和1的位置进行左移，移位之后将空位补0。</li>
 <li>负数的左移相对来说就比较复杂，以-2 &lt;&lt; 2为例，-2的原码是10000000000000000000000000000010（32位系统），其补码为11111111111111111111111111111110，左移之后变为11111111111111111111111111111000，再转化为原码即10000000000000000000000000001000，也就是-8，也就是-2*(2**2)=-8</li>
@@ -397,33 +397,33 @@
 <li>左移操作相当于乘以2**n，以5 &lt;&lt; 3为例，相当于5*(2**3),结果为40。</li>
 </ol>
 <h5>右移</h5>
-<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">0b11 &gt;&gt; 1   #输出为1, 即0b1</span><br><span class="line">5 &gt;&gt; 1      #输出为2，即0b10</span><br><span class="line">-8 &gt;&gt; 3     #输出为-1</span><br></pre></td></tr></table></figure></p>
+<p><figure class="highlight maxima"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">0b11</span> &gt;&gt; <span class="number">1</span>   #输出为<span class="number">1</span>, 即<span class="number">0b1</span></span><br><span class="line"><span class="number">5</span> &gt;&gt; <span class="number">1</span>      #输出为<span class="number">2</span>，即<span class="number">0b10</span></span><br><span class="line">-<span class="number">8</span> &gt;&gt; <span class="number">3</span>     #输出为-<span class="number">1</span></span><br></pre></td></tr></table></figure></p>
 <ol>
 <li>在Python中如果符号位为0，则右移后高位补0，如果符号位为1，则高位补1；</li>
 <li>同样需要先转化为补码再进行计算，以-8 &gt;&gt; 3为例，-8的原码为10...01000,相应的补码为11...11000,右移后变为1...1,相应的原码为10...01,即-1。</li>
 <li>右移操作相当于除以2**n，8 &gt;&gt; 3相当于8/(2**3)=1</li>
 </ol>
 <h5>或</h5>
-<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">0b110 | 0b101   #输出7,即0b111</span><br><span class="line">-0b001 | 0b101  #输出-1</span><br></pre></td></tr></table></figure></p>
+<p><figure class="highlight maxima"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">0b110</span> | <span class="number">0b101</span>   #输出<span class="number">7</span>,即<span class="number">0b111</span></span><br><span class="line">-<span class="number">0b001</span> | <span class="number">0b101</span>  #输出-<span class="number">1</span></span><br></pre></td></tr></table></figure></p>
 <p>同样是转化为补码后再进行或运算, 只要有一位有1就为1。
 所以或运算常常用于mask技术中的打开开关，即针对某一位把其置为1
 比如将某个数字的第三位置为1，我们可以将mask设置为0b100，然后再或运算
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mask = 0b100</span><br><span class="line">0b110000 | mask  #turn on bit 3</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight maxima"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mask = <span class="number">0b100</span></span><br><span class="line"><span class="number">0b110000</span> | mask  #turn on bit <span class="number">3</span></span><br></pre></td></tr></table></figure></p>
 <h5>与</h5>
-<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0b110 &amp; 0b011   #输出2，即0b010</span><br></pre></td></tr></table></figure></p>
+<p><figure class="highlight maxima"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">0b110</span> &amp; <span class="number">0b011</span>   #输出<span class="number">2</span>，即<span class="number">0b010</span></span><br></pre></td></tr></table></figure></p>
 <p>与运算常常用于mask技术的关闭开关，即针对某一位把其置为0
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mask = 0b10</span><br><span class="line">0b111111 &amp; mask  #turn off bit 2</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight maxima"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mask = <span class="number">0b10</span></span><br><span class="line"><span class="number">0b111111</span> &amp; mask  #turn off bit <span class="number">2</span></span><br></pre></td></tr></table></figure></p>
 <h5>异或</h5>
-<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">0b111 ^ 0b111   #输出0</span><br><span class="line">0b100 ^ 0b111   #输出3</span><br></pre></td></tr></table></figure></p>
+<p><figure class="highlight maxima"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">0b111</span> ^ <span class="number">0b111</span>   #输出<span class="number">0</span></span><br><span class="line"><span class="number">0b100</span> ^ <span class="number">0b111</span>   #输出<span class="number">3</span></span><br></pre></td></tr></table></figure></p>
 <p>异或常用于将所有的位反转
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0b1010 ^ 0b1111  #输出5，即0b0101</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight maxima"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">0b1010</span> ^ <span class="number">0b1111</span>  #输出<span class="number">5</span>，即<span class="number">0b0101</span></span><br></pre></td></tr></table></figure></p>
 <h5>非</h5>
-<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">~0b101  #输出2，即0b010</span><br><span class="line">~-3     #输出2</span><br></pre></td></tr></table></figure></p>
+<p><figure class="highlight maxima"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">~<span class="number">0b101</span>  #输出<span class="number">2</span>，即<span class="number">0b010</span></span><br><span class="line">~-<span class="number">3</span>     #输出<span class="number">2</span></span><br></pre></td></tr></table></figure></p>
 <p>非运算就是把0变1，1变0，唯一需要注意的是取非时符号位也会变换，比如-3，原码是10...011,补码是11...101,取非后变为00...010,由于符号位为0，所以对应的原码即为其本身，即2。</p>
 <h3>二进制工具</h3>
 <h5>bitarray</h5>
 <p>关于bit有一个很有用的Packag叫做bitarray，其中bitarray对象可以帮助我们存储0，1值或者Boolean值，并像list一样进行操作。
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">from bitarray import bitarray</span><br><span class="line"></span><br><span class="line">#初始化一个有10个bit位的数组，初始值为0</span><br><span class="line">a = bitarray(10)</span><br><span class="line"></span><br><span class="line">#可以像操作list一样操作bitarray对象</span><br><span class="line">a[1:8] = 1</span><br><span class="line"></span><br><span class="line">#bitarray还提供了一些特殊的方法，如：all()</span><br><span class="line">#当bitarray中所有的元素都为1时，all()返回为True</span><br><span class="line">if a.all():</span><br><span class="line">    print &quot;all bits are True.&quot;</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight livecodeserver"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">from</span> bitarray import bitarray</span><br><span class="line"></span><br><span class="line"><span class="comment">#初始化一个有10个bit位的数组，初始值为0</span></span><br><span class="line"><span class="keyword">a</span> = bitarray(<span class="number">10</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">#可以像操作list一样操作bitarray对象</span></span><br><span class="line"><span class="keyword">a</span>[<span class="number">1</span>:<span class="number">8</span>] = <span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#bitarray还提供了一些特殊的方法，如：all()</span></span><br><span class="line"><span class="comment">#当bitarray中所有的元素都为1时，all()返回为True</span></span><br><span class="line"><span class="keyword">if</span> <span class="keyword">a</span>.all():</span><br><span class="line">    print <span class="string">"all bits are True."</span></span><br></pre></td></tr></table></figure></p>
 <p>关于bitarrary的说明详见Github上的<a href="https://github.com/ilanschnell/bitarrayhttp://note.youdao.com/" target="_blank" rel="noopener">bitarray项目</a></p>
 <h3>位运算的应用</h3>
 <p>常见的应用如判断奇偶数 X &amp; 0x1，变换符号位 ~X + 1，数字交换等，详细可以看参考链接中的文章
@@ -497,10 +497,10 @@
 <li>移位后与第3个字节的数值相加得到PID的值。</li>
 </ol>
 <p>要实现第一步，首先就要用到位操作中常用的mask技术，即通过将对应位为0的数值进行&amp;操作
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0b10110111 &amp; 0b00011111 #将高位的3位进行mask关闭操作，使得其值被去除</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight maxima"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">0b10110111</span> &amp; <span class="number">0b00011111</span> #将高位的<span class="number">3</span>位进行mask关闭操作，使得其值被去除</span><br></pre></td></tr></table></figure></p>
 <p>要实现第二步，就需要用到左移操作，左移操作之后与第三个字节的数值相加就是实际的PID值
 完整代码实现如下：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">def get_package_pid(package):</span><br><span class="line">    if package is None:</span><br><span class="line">        raise Exception(&quot;get_package_pid param package is None.&quot;)</span><br><span class="line">    return ((ord(package[1]) &amp; 0x1f) &lt;&lt; 8) + ord(package[2])</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight ada"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">def get_package_pid(<span class="keyword">package</span>):</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">package</span> <span class="title"></span><span class="keyword">is</span> None:</span><br><span class="line">        <span class="keyword">raise</span> <span class="keyword">Exception</span>(<span class="string">"get_package_pid param package is None."</span>)</span><br><span class="line">    <span class="keyword">return</span> ((ord(<span class="keyword">package</span>[<span class="number">1</span>]) &amp; <span class="number">0</span>x1f) &lt;&lt; <span class="number">8</span>) + ord(<span class="keyword">package</span>[<span class="number">2</span>])</span><br></pre></td></tr></table></figure></p>
 <p>注:</p>
 <p>1, ord()将byte串转化为对应的数字从而进行位运算；</p>
 <p>2, 0x1f是十六进制表示，转化为二进制就是0b00011111.</p>
@@ -640,6 +640,25 @@
               
 
               
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">4</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
 
               
                 
@@ -662,7 +681,35 @@
                     
                       
                     
-                    <span class="site-state-item-count">7</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">21</span>
                     <span class="site-state-item-name">tags</span>
                   </a>
                 </div>
@@ -914,6 +961,75 @@
 
 
   
+
+  
+  <script>
+    
+    function showTime(Counter) {
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      Counter('get', '/classes/Counter', { where: JSON.stringify({ url: { "$in": entries } }) })
+        .done(function ({ results }) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.url;
+            var time = item.time;
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function ({ responseJSON }) {
+          console.log("LeanCloud Counter Error: " + responseJSON.code + " " + responseJSON.error);
+        });
+    }
+    
+
+    $(function() {
+      $.get('https://app-router.leancloud.cn/2/route?appId=' + "OCjgmQiFa9gpVkDabM6KTb8g-gzGzoHsz")
+        .done(function ({ api_server }) {
+          var Counter = function (method, url, data) {
+            return $.ajax({
+              method: method,
+              url: `https://${api_server}/1.1${url}`,
+              headers: {
+                'X-LC-Id': "OCjgmQiFa9gpVkDabM6KTb8g-gzGzoHsz",
+                'X-LC-Key': "Ie7XE2V6spB6Q6C1W2GU9drV",
+                'Content-Type': 'application/json',
+              },
+              data: data,
+            });
+          };
+          
+          if ($('.post-title-link').length >= 1) {
+            showTime(Counter);
+          }
+          
+        })
+    });
+  </script>
+
+
 
   
 

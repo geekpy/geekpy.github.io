@@ -367,7 +367,7 @@
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2018-08-12 18:07:41" itemprop="dateModified" datetime="2018-08-12T18:07:41+08:00">2018-08-12</time>
+                <time title="Modified: 2018-10-06 13:29:01" itemprop="dateModified" datetime="2018-10-06T13:29:01+08:00">2018-10-06</time>
               
             
           </span>
@@ -390,6 +390,17 @@
 
           
           
+             <span id="/2018/04/20/MongoDB大批量读写数据优化记录/" class="leancloud_visitors" data-flag-title="MongoDB大批量读写数据优化记录">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">Views: </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
 
           
 
@@ -411,41 +422,15 @@
 
       
         
-          
-            <p>本文主要阐述了MongoDB大批量数据读写过程中的一些优化技巧</p>
-<p>&lt;!--more--&gt;</p>
-<h2>用批量写入代替单个写入</h2>
-<p>最开始，我的代码逻辑是这样的：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">for uid, data in user_dict.items():</span><br><span class="line">    user_collection.insert_one(&#123;&apos;uid&apos;:uid, &apos;user_data&apos;: data&#125;)</span><br></pre></td></tr></table></figure></p>
-<p>这种方法在数据量较小时可以很好的工作，但是当数据量非常大时，此种操作会非常慢，我们需要通过批量写入的方式来写入数据。
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">user_data = (&#123;&apos;uid&apos;: uid, &apos;user_data&apos;: data&#125; for uid, data in user_dict.items())</span><br><span class="line">user_collection.insert_many(user_data)</span><br></pre></td></tr></table></figure></p>
-<h2>调整insert_many参数</h2>
-<p>再来看是否可以通过调整insert_many参数来进一步优化性能。</p>
-<ul>
-<li>ordered: 这个参数为True时，迫使MongoDB按顺序同步插入数据；而如果为False，则MongoDB会并发的不按固定顺序进行批量插入。显然当我们对性能有要求时，将该参数设为False是非常必要的。</li>
-<li>bypass_document_validation: MongoDB3.2之后加入了document validation功能，用于验证写入的文档是否符合collection制定的规则，具体可以参考reference中的链接。而既然是验证就肯定需要花费时间，当我们对性能有极致要求时，也可以将此参数设为True，从而越过验证，直接写入。</li>
-<li>session: 关于session，请参考References中的Client Session链接。</li>
-</ul>
-<p>修改后的代码如下：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">user_data = (&#123;&apos;uid&apos;: uid, &apos;user_data&apos;: data&#125; for uid, data in user_dict.items())</span><br><span class="line">user_collection.insert_many(user_data, ordere=False, bypass_document_validation=True)</span><br></pre></td></tr></table></figure></p>
-<p>最终性能的提升是非常明显的，时间量级从天降为分钟。</p>
-<h2>批量更新</h2>
-<p>前面的例子在插入操作时非常有效，但是对于更新操作由于update_many无法针对每一个doc进行更新，如本例中针对每一个uid进行更新，那么就需要使用<code>bulk_write</code>操作。
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">from pymongo import UpdateOne</span><br><span class="line"></span><br><span class="line">update_operations = []</span><br><span class="line">for uid, user_data in user_dict.items():</span><br><span class="line">    op = UpdateOne(&#123;&apos;uid&apos;: uid&#125;, &#123;&apos;$set&apos;: &#123;&apos;user_data&apos;: user_data&#125;&#125;, upsert=True)</span><br><span class="line">    update_operations.append(op)</span><br><span class="line"></span><br><span class="line">user_collection.bulk_write(update_operations, ordered=False, bypass_document_validation=True)</span><br></pre></td></tr></table></figure></p>
-<h2>批量读取</h2>
-<p>批量读取我们可以使用<code>$in</code>操作符，但是需要注意的是如果<code>$in</code>针对的list过大，那么可能会导致报错<code>pymongo.errors.DocumentTooLarge</code>, 目前我的做法是将大的list分割成1000个一段，然后分段查询
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">list_length = len(uid_list)</span><br><span class="line">iter_size = 1000</span><br><span class="line">current = 0</span><br><span class="line">while current &lt; list_length:</span><br><span class="line">    end = current + iter_size</span><br><span class="line">    uid_segment = uid_list[current: end]</span><br><span class="line">    result_cursor = mongo_collection.find(&#123;&quot;uid&quot;: &#123;&quot;$in&quot;: uid_segment&#125;&#125;)</span><br><span class="line">    for user_info in result_cursor:</span><br><span class="line">        # do something</span><br><span class="line">        ...</span><br><span class="line">    current = current + iter_size</span><br></pre></td></tr></table></figure></p>
-<h2>异常处理</h2>
-<p>在实践过程中，会遇到异常的情况，尤其是写入的时候，可能由于各种原因导致写入失败，因此需要catch exception，并打印详细信息，如下：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">try:</span><br><span class="line">    user_collection.insert_many(</span><br><span class="line">        data_iter, ordered=False, bypass_document_validation=True)</span><br><span class="line">except BulkWriteError as e:</span><br><span class="line">    lg.error(e.details)</span><br></pre></td></tr></table></figure></p>
-<h2>References:</h2>
-<ul>
-<li><a href="http://api.mongodb.com/python/current/api/pymongo/collection.html" target="_blank" rel="noopener">PyMongo API</a></li>
-<li><a href="http://www.shangyang.me/2017/08/22/mongodb-basic-09-document-validation/" target="_blank" rel="noopener">MongoDB document validation</a></li>
-<li><a href="https://docs.mongodb.com/manual/core/read-isolation-consistency-recency/#sessions" target="_blank" rel="noopener">Client Session</a></li>
-</ul>
-
-          
+          <p>本文主要阐述了MongoDB大批量数据读写过程中的一些优化技巧</p>
+<p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/04/20/MongoDB大批量读写数据优化记录/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -455,7 +440,9 @@
     
     
     
-
+    <div>
+      
+    </div>
     
 
     
@@ -560,11 +547,29 @@
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2018-08-12 18:10:02" itemprop="dateModified" datetime="2018-08-12T18:10:02+08:00">2018-08-12</time>
+                <time title="Modified: 2018-10-06 13:29:01" itemprop="dateModified" datetime="2018-10-06T13:29:01+08:00">2018-10-06</time>
               
             
           </span>
 
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Flask/" itemprop="url" rel="index"><span itemprop="name">Flask</span></a></span>
+
+                
+                
+              
+            </span>
           
 
           
@@ -582,6 +587,17 @@
           
 
           
+          
+             <span id="/2018/02/22/flask_celery/" class="leancloud_visitors" data-flag-title="在Flask中使用Celery的最佳实践">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">Views: </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
           
 
           
@@ -604,89 +620,15 @@
 
       
         
-          
-            <p>主要是笔者在项目实践中总结的关于Celery使用的一些最佳实践，欢迎补充</p>
-<p>&lt;!--more--&gt;</p>
-<h2>写在前面</h2>
-<p>本最佳实践是基于作者有限的经验，欢迎大家共同讨论，可以持续维护此最佳实践。另本文中所使用的环境为Mac&amp;Ubuntu环境，软件版本如下：</p>
-<ul>
-<li>Celery (4.1.0)</li>
-<li>Flask (0.12.1)</li>
-<li>RabbitMQ(3.6.9)</li>
-<li>librabbitmq (1.6.1)</li>
-</ul>
-<h2>介绍</h2>
-<p>简单来说Celery是一个异步的任务队列，当我们需要将一些任务(比如一些需要长时间操作的任务)异步操作的时候，这时候Celery就可以帮到我们，另外Celery还支持定时任务(类似Crontab)。详细的介绍可以参考<a href="http://www.celeryproject.org/" target="_blank" rel="noopener">官网</a></p>
-<h2>使用RabbitMQ作为Broker</h2>
-<p>RabbitMQ是官方推荐使用的Broker，它实际是一个消息中间件，负责消息的路由分发，安装RabbitMQ如下：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"># install on Ubuntu</span><br><span class="line">apt-get update</span><br><span class="line">apt-get install rabbitmq-server -yq</span><br></pre></td></tr></table></figure></p>
-<p>需要注意的是，线上环境我们需要创建新的账号，并将guest账号删除，操作如下：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">rabbitmqctl add_user myuser mypassword  # 新增用户</span><br><span class="line">rabbitmqctl add_vhost myvhost  # 新增vhost，以使用不同的命名空间</span><br><span class="line">rabbitmqctl set_permissions -p myvhost myuser &quot;.*&quot; &quot;.*&quot; &quot;.*&quot;  # 设置权限</span><br><span class="line">rabbitmqctl  delete_user guest  # 安全原因，删除guest</span><br></pre></td></tr></table></figure></p>
-<p>注意：vhost是一个虚拟空间，用于区分不同类型的消息
-然后，在Celery的配置中配置broker URL
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CELERY_BROKER_URL = &apos;amqp://myuser:mypassword@localhost:5672/myvhost&apos;</span><br></pre></td></tr></table></figure></p>
-<p>注意：当使用amqp协议头时，如果安装有<code>librabbitmq</code>则使用<code>librabbitmq</code>，否则使用pyamqp</p>
-<h2>Celery的日志输出</h2>
-<p>在task中想要输出日志，最好的方法是通过如下方式
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">from celery.utils.log import get_task_logger</span><br><span class="line"></span><br><span class="line">lg = get_task_logger(__name__)</span><br><span class="line"></span><br><span class="line">@celery.task</span><br><span class="line">def log_test():</span><br><span class="line">    lg.debug(&quot;in log_test()&quot;)</span><br></pre></td></tr></table></figure></p>
-<p>但是仅如此会发现所有的日志最后都跑到shell窗口的stdout当中，原来必须得在启动celery的时候使用-f option来指定输出文件，如下：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">celery -A main.celery worker -l debug -f log/celery/celery_task.log &amp;</span><br></pre></td></tr></table></figure></p>
-<p>-A：指定celery实例
-worker: 启动worker进程
--l：指定log level，这里指定log level为debug level
--f：指定输出的日志文件</p>
-<h2>使用Redis作为backend</h2>
-<p>当使用Redis作为存储后端的时候，我们可以通过设置DB number来使得Celery的结果存储与其它数据存储隔离开来，比如在笔者的项目中，redis还用作缓存的存储后端，因此为了区分，Celery在使用Redis的时候使用的DB number是1（默认是0），关于Redis DB number可以参考<a href="http://blog.teeceepee.com/blog/2015/02/14/redis-db-number/" target="_blank" rel="noopener">这里</a>.
-因此我们的backend设置如下：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CELERY_RESULT_BACKEND = &apos;redis://localhost:6379/1&apos; # 最后的数字1代表DB number</span><br></pre></td></tr></table></figure></p>
-<p>查看Celery任务的结果可以通过Redis-cli连接Redis数据库进行查看
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&gt; redis-cli</span><br><span class="line">&gt; select 1 # 这里选择DB 1， 也可以在使用redis-cli -n 1来进入指定的DB</span><br><span class="line">&gt; get key # 获取指定key对应的结果</span><br></pre></td></tr></table></figure></p>
-<p><img src="http://upload-images.jianshu.io/upload_images/3959253-5674ca727b61be6d.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="redis-cli.jpg"></p>
-<h2>调试代码</h2>
-<p>我认为此处是非常重要的一个技巧，即在调试代码的时候，我们可以将<code>delay</code>或者<code>apply_async</code>先去掉，直接调用worker的函数进行同步调试，调试成功后再加上<code>delay</code>或者<code>apply_async</code> method</p>
-<h2>Celery可能会遇到的坑</h2>
-<h4>Celery4.x版本使用librabbitmq的问题</h4>
-<p>Celery 4.x版本在使用librabbitmq时，会出现类似这样的错误
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Received and deleted unknown message.  Wrong destination?!?</span><br></pre></td></tr></table></figure></p>
-<p>完整错误如图：
-<img src="http://upload-images.jianshu.io/upload_images/3959253-43eac6585498fc34.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="celeryerror"></p>
-<p>解决这个问题有两个方式：</p>
-<ol>
-<li>推荐方式，更改配置项<em>task_protocol</em>为1。
-Github上Robert Kopaczewski详细解释了这个问题，原文如下：</li>
-</ol>
-<blockquote>
-<p>Apparently librabbitmq issue is related to new default protocol in celery 4.x. You can switch to previous protocol version by either putting CELERY_TASK_PROTOCOL = 1 in your settings if you're using Django or settings app.conf.task_protocol = 1 in celeryconf.py.</p>
-</blockquote>
-<ol start="2">
-<li>另一种方式是不使用librabbitmq, 通过pip uninstall librabbitmq, 并且更改broker配置的协议头为'pyamqp',如下，也可以解决这个问题。
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">BROKER_URL = &apos;pyamqp://guest:guest@localhost:5672/%2F&apos;</span><br></pre></td></tr></table></figure></li>
-</ol>
-<p>由于librabbitmq的性能优势，我们还是推荐方式1来解决该问题。</p>
-<h4>RabbitMQ远程连接问题</h4>
-<p>如果RabbitMQ与Celery不在同一台机器上，除在Celery配置的时候要将<code>BROKER_URL</code>设置为正确的IP地址外，还需要将Rabbitmq的配置文件<code>/usr/local/etc/rabbitmq/rabbitmq-env.conf</code>中的<code>NODE_IP_ADDRESS</code>更改为0.0.0.0
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">NODE_IP_ADDRESS=0.0.0.0</span><br></pre></td></tr></table></figure></p>
-<h4>Celery import问题</h4>
-<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">The message has been ignored and discarded.</span><br><span class="line"></span><br><span class="line">Did you remember to import the module containing this task?</span><br><span class="line">Or maybe you&apos;re using relative imports?</span><br><span class="line"></span><br><span class="line">Please see</span><br><span class="line">http://docs.celeryq.org/en/latest/internals/protocol.html</span><br><span class="line">for more information.</span><br><span class="line"></span><br><span class="line">The full contents of the message body was:</span><br><span class="line">&apos;\x8e\xa7expires\xc0\xa3utc\xc3\xa4args\x91\x85\xa3tid\xb85971a43d47f84bb278f77fc2\xa3sen\xa2A1\xa2tt\xa2ar\xa2co\xc4\x00\xa1t\xa4like\xa5chord\xc0\xa9callbacks\xc0\xa8errbacks\xc0\xa7taskset\xc0\xa2id\xc4$c133dbf8-2c89-4311-b7cf-c377041058ec\xa7retries\x00\xa4task\xd9$tasks.messageTasks.send_like_message\xa5group\xc0\xa9timelimit\x92\xc0\xc0\xa3eta\xc0\xa6kwargs\x80&apos; (239b)</span><br><span class="line">Traceback (most recent call last):</span><br><span class="line">  File &quot;/Users/liufeng/.pyenv/versions/2.7.13/envs/kaopu_backend/lib/python2.7/site-packages/celery/worker/consumer/consumer.py&quot;, line 561, in on_task_received</span><br><span class="line">    strategy = strategies[type_]</span><br><span class="line">KeyError: u&apos;tasks.messageTasks.send_like_message&apos;</span><br></pre></td></tr></table></figure></p>
-<p>出现这条错误是由于我们的tasks跟celery并不是在同一个文件中，即不是同一个module，当我们通过如下命令启动task worker时，实际只加载了app module，而没有加载tasks相关的module
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">celery -A app.celery worker -l info</span><br><span class="line">`</span><br></pre></td></tr></table></figure></p>
-<p>要解决这个问题，必须为celery配置文件添加import参数，如下
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">app.config[&apos;imports&apos;] = [&apos;tasks.messageTasks&apos;]</span><br></pre></td></tr></table></figure></p>
-<h4>Celery unregistered task问题</h4>
-<p>在开发过程中遇到了这样一个问题
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">[2017-08-31 15:38:19,605: ERROR/MainProcess] Received unregistered task of type u&apos;app.tasks.messageTasks.send_follow_message&apos;.</span><br><span class="line">The message has been ignored and discarded.</span><br><span class="line"></span><br><span class="line">Did you remember to import the module containing this task?</span><br><span class="line">Or maybe you&apos;re using relative imports?</span><br><span class="line"></span><br><span class="line">Please see</span><br><span class="line">http://docs.celeryq.org/en/latest/internals/protocol.html</span><br><span class="line">for more information.</span><br><span class="line"></span><br><span class="line">The full contents of the message body was:</span><br><span class="line">&apos;\x8e\xa7expires\xc0\xa3utc\xc3\xa4args\x91\x86\xa6sender\xa5Jenny\xa9target_id\xb859a5313847f84be534ad7d46\xabtarget_type\xa4user\xa7content\xc4\x00\xa8receiver\xb859a5313847f84be534ad7d46\xa4type\xa6follow\xa5chord\xc0\xa9callbacks\xc0\xa8errbacks\xc0\xa7taskset\xc0\xa2id\xc4$a4d40c14-1976-41a6-a753-d2a495929920\xa7retries\x00\xa4task\xd9*app.tasks.messageTasks.send_follow_message\xa5group\xc0\xa9timelimit\x92\xc0\xc0\xa3eta\xc0\xa6kwargs\x80&apos; (312b)</span><br><span class="line">Traceback (most recent call last):</span><br><span class="line">  File &quot;/Users/liufeng/.pyenv/versions/2.7.13/envs/kaopu_backend/lib/python2.7/site-packages/celery/worker/consumer/consumer.py&quot;, line 561, in on_task_received</span><br><span class="line">    strategy = strategies[type_]</span><br><span class="line">KeyError: u&apos;app.tasks.messageTasks.send_follow_message&apos;</span><br></pre></td></tr></table></figure></p>
-<p>解决这个问题，最开始是根据提示，将所有涉及到task的module全部加上<code>from __future__ import absolute_import</code> 之后运行之后还是不行，后来发现是由于之前启动时使用的是app module， 但是我的代码已经改成了main.py，所以重新启动了celery，最后问题解决</p>
-<h4>使用镜像迁移系统也依然需要重新添加rabbitmq的用户</h4>
-<p>问题最开始是发现无法点赞，也无法Follow用户，通过http消息发现出现502错误，于是登录到服务器检查，发现应用服务本身没有任何报错，于是又去查看Celery的日志，结果发现出现如下错误：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[2017-11-13 16:32:01,243: ERROR/MainProcess] consumer: Cannot connect to amqp://celeryuser:**@loc      alhost:5672/celeryvhost: Couldn&apos;t log in: a socket error occurred.</span><br></pre></td></tr></table></figure></p>
-<p>经过一番搜索发现网上的评论主要是说URL不对的情况下会出现这种情况，但是我的URL没有改过啊，那又会是什么问题呢？继续看，发现有人提到了权限问题，于是又是一番检查，发现RabbitMQ中并没有原先设置的用户（我使用的是原系统的镜像，原以为用户也是已经设置好的）
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># 查看有哪些用户</span><br><span class="line">rabbitmqctl  list_users</span><br></pre></td></tr></table></figure></p>
-<p>然后就简单了，按照步骤创建用户，vhost，再赋予权限，删除guest，然后就终于都连好了</p>
-<p>另外，发现从镜像复制系统后，RabbitMQ并不能正常工作，必须杀掉原先的进程，重新启动</p>
-<h4>更改task的代码后，重启Celery</h4>
-<p>需要注意的是，在更改task的代码后，必须重新启动Celery，否则代码改动无法生效，可能导致一些意外的问题</p>
-
-          
+          <p>主要是笔者在项目实践中总结的关于Celery使用的一些最佳实践，欢迎补充</p>
+<p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/02/22/flask_celery/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -696,7 +638,9 @@ Github上Robert Kopaczewski详细解释了这个问题，原文如下：</li>
     
     
     
-
+    <div>
+      
+    </div>
     
 
     
@@ -801,11 +745,29 @@ Github上Robert Kopaczewski详细解释了这个问题，原文如下：</li>
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2018-08-12 18:08:41" itemprop="dateModified" datetime="2018-08-12T18:08:41+08:00">2018-08-12</time>
+                <time title="Modified: 2018-10-06 13:29:01" itemprop="dateModified" datetime="2018-10-06T13:29:01+08:00">2018-10-06</time>
               
             
           </span>
 
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/python/" itemprop="url" rel="index"><span itemprop="name">python</span></a></span>
+
+                
+                
+              
+            </span>
           
 
           
@@ -823,6 +785,17 @@ Github上Robert Kopaczewski详细解释了这个问题，原文如下：</li>
           
 
           
+          
+             <span id="/2018/02/12/Python-collections-deque-vs--Queue-Queue-vs--multiprocessing-Queue/" class="leancloud_visitors" data-flag-title="Python collections.deque vs. Queue.Queue vs. multiprocessing.Queue">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">Views: </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
           
 
           
@@ -845,46 +818,15 @@ Github上Robert Kopaczewski详细解释了这个问题，原文如下：</li>
 
       
         
-          
-            <p>总体上来说，当需要在进程间通信的时候需要使用multiprocessing.Queue; 当在同一个进程当中，而需要多线程之间通信的时候，可以使用Queue.Queue；而至于collections.deque一般就是在同一个线程当中，作为一种数据结构来使用的。下面分别讲述一下它们的用法：</p>
-<p>&lt;!--more--&gt;</p>
-<h3>multiprocessing.Queue</h3>
-<p>multiprocessing提供了两种进程间通信机制，一种是我们要说的Queue，另外一种是Pipe。而实际上Queue也是通过Pipe来实现的。具体可以参考<a href="https://docs.python.org/2/library/multiprocessing.html#exchanging-objects-between-processes" target="_blank" rel="noopener">进程间通信</a>
-Queue常用methods：</p>
-<ul>
-<li>Queue.qsize(): 返回queue中item的数量，注意这个数量并不准确,  not reliable</li>
-<li>Queue.empty(): return True if queue is empty,  not reliable</li>
-<li>Queue.full(): return True if queue is full,  not reliable</li>
-<li>Queue.put(item[, block[, timeout]]): block表示是否阻塞，默认为True即阻塞，如果设定了timeout，则阻塞timeout时长，如果仍然没有空余的slot，则raise Queue.full exception。如果block=False，那么就不阻塞，当queue full时，直接报Queue.full exception。</li>
-<li>Queue.put_nowait(item): Equivalent to put(item, False)</li>
-<li>Queue.get([block[, timeout]])</li>
-<li>Queue.get_nowait(): Equivalent to get(False)</li>
-</ul>
-<p>示例：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">from multiprocessing import Process, Queue</span><br><span class="line"></span><br><span class="line">def f(q):</span><br><span class="line">    q.put([42, None, &apos;hello&apos;])</span><br><span class="line"></span><br><span class="line">if __name__ == &apos;__main__&apos;:</span><br><span class="line">    q = Queue()</span><br><span class="line">    p = Process(target=f, args=(q,))</span><br><span class="line">    p.start()</span><br><span class="line">    print q.get()    # prints &quot;[42, None, &apos;hello&apos;]&quot;</span><br><span class="line">    p.join()</span><br></pre></td></tr></table></figure></p>
-<p><strong>需要注意的是Queue不提供join()和task_done()，因此在producer process中无法确保所有的task均已经被处理, 如果需要join and task_done就需要使用multiprocessing.JoinableQueue，详情参看<a href="https://docs.python.org/2/library/multiprocessing.html?highlight=multiprocessing#multiprocessing.JoinableQueue" target="_blank" rel="noopener">JoinableQueue</a></strong></p>
-<h3>Queue.Queue</h3>
-<p>Queue.Queue通常用于同一个进程中的不同线程间的通信，其提供的方法与multiprocessing.Queue类似，但是多出了两个methods如下：</p>
-<ul>
-<li>task_done(): 用于告知任务完成</li>
-<li>join(): 用于等待队列中所有的任务完成。具体使用见下图
-<img src="http://upload-images.jianshu.io/upload_images/3959253-0e780f8002f768ac.jpeg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="queue"></li>
-</ul>
-<h3>collections.deque</h3>
-<p>主要用于队列这种数据结构，通过append和popleft来实现队列的FIFO机制。常用方法如下：</p>
-<ul>
-<li>extendleft</li>
-<li>appendleft</li>
-<li>popleft</li>
-<li>extend</li>
-<li>append</li>
-<li>pop
-具体参考<a href="https://docs.python.org/2/library/collections.html?highlight=deque#deque-objects" target="_blank" rel="noopener">官网</a>
-示例：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; from collections import deque</span><br><span class="line">&gt;&gt;&gt; d = deque(&apos;ghi&apos;)                 # make a new deque with three items</span><br><span class="line">&gt;&gt;&gt; for elem in d:                   # iterate over the deque&apos;s elements</span><br><span class="line">...     print elem.upper()</span><br><span class="line">G</span><br><span class="line">H</span><br><span class="line">I</span><br><span class="line"></span><br><span class="line">&gt;&gt;&gt; d.append(&apos;j&apos;)                    # add a new entry to the right side</span><br><span class="line">&gt;&gt;&gt; d.appendleft(&apos;f&apos;)                # add a new entry to the left side</span><br><span class="line">&gt;&gt;&gt; d                                # show the representation of the deque</span><br><span class="line">deque([&apos;f&apos;, &apos;g&apos;, &apos;h&apos;, &apos;i&apos;, &apos;j&apos;])</span><br><span class="line"></span><br><span class="line">&gt;&gt;&gt; d.pop()                          # return and remove the rightmost item</span><br><span class="line">&apos;j&apos;</span><br><span class="line">&gt;&gt;&gt; d.popleft()                      # return and remove the leftmost item</span><br><span class="line">&apos;f&apos;</span><br><span class="line">&gt;&gt;&gt; list(d)                          # list the contents of the deque</span><br><span class="line">[&apos;g&apos;, &apos;h&apos;, &apos;i&apos;]</span><br><span class="line">&gt;&gt;&gt; d[0]                             # peek at leftmost item</span><br><span class="line">&apos;g&apos;</span><br><span class="line">&gt;&gt;&gt; d[-1]                            # peek at rightmost item</span><br><span class="line">&apos;i&apos;</span><br><span class="line"></span><br><span class="line">&gt;&gt;&gt; list(reversed(d))                # list the contents of a deque in reverse</span><br><span class="line">[&apos;i&apos;, &apos;h&apos;, &apos;g&apos;]</span><br><span class="line">&gt;&gt;&gt; &apos;h&apos; in d                         # search the deque</span><br><span class="line">True</span><br><span class="line">&gt;&gt;&gt; d.extend(&apos;jkl&apos;)                  # add multiple elements at once</span><br><span class="line">&gt;&gt;&gt; d</span><br><span class="line">deque([&apos;g&apos;, &apos;h&apos;, &apos;i&apos;, &apos;j&apos;, &apos;k&apos;, &apos;l&apos;])</span><br><span class="line">&gt;&gt;&gt; d.rotate(1)                      # right rotation</span><br><span class="line">&gt;&gt;&gt; d</span><br><span class="line">deque([&apos;l&apos;, &apos;g&apos;, &apos;h&apos;, &apos;i&apos;, &apos;j&apos;, &apos;k&apos;])</span><br><span class="line">&gt;&gt;&gt; d.rotate(-1)                     # left rotation</span><br><span class="line">&gt;&gt;&gt; d</span><br><span class="line">deque([&apos;g&apos;, &apos;h&apos;, &apos;i&apos;, &apos;j&apos;, &apos;k&apos;, &apos;l&apos;])</span><br><span class="line"></span><br><span class="line">&gt;&gt;&gt; deque(reversed(d))               # make a new deque in reverse order</span><br><span class="line">deque([&apos;l&apos;, &apos;k&apos;, &apos;j&apos;, &apos;i&apos;, &apos;h&apos;, &apos;g&apos;])</span><br><span class="line">&gt;&gt;&gt; d.clear()                        # empty the deque</span><br><span class="line">&gt;&gt;&gt; d.pop()                          # cannot pop from an empty deque</span><br><span class="line">Traceback (most recent call last):</span><br><span class="line">  File &quot;&lt;pyshell#6&gt;&quot;, line 1, in -toplevel-</span><br><span class="line">    d.pop()</span><br><span class="line">IndexError: pop from an empty deque</span><br><span class="line"></span><br><span class="line">&gt;&gt;&gt; d.extendleft(&apos;abc&apos;)              # extendleft() reverses the input order</span><br><span class="line">&gt;&gt;&gt; d</span><br><span class="line">deque([&apos;c&apos;, &apos;b&apos;, &apos;a&apos;])</span><br></pre></td></tr></table></figure></li>
-</ul>
-
-          
+          <p>总体上来说，当需要在进程间通信的时候需要使用multiprocessing.Queue; 当在同一个进程当中，而需要多线程之间通信的时候，可以使用Queue.Queue；而至于collections.deque一般就是在同一个线程当中，作为一种数据结构来使用的。下面分别讲述一下它们的用法：</p>
+<p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/02/12/Python-collections-deque-vs--Queue-Queue-vs--multiprocessing-Queue/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -894,7 +836,9 @@ Queue常用methods：</p>
     
     
     
-
+    <div>
+      
+    </div>
     
 
     
@@ -999,7 +943,7 @@ Queue常用methods：</p>
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2018-08-12 18:07:28" itemprop="dateModified" datetime="2018-08-12T18:07:28+08:00">2018-08-12</time>
+                <time title="Modified: 2018-10-06 13:29:01" itemprop="dateModified" datetime="2018-10-06T13:29:01+08:00">2018-10-06</time>
               
             
           </span>
@@ -1022,6 +966,17 @@ Queue常用methods：</p>
 
           
           
+             <span id="/2018/02/03/MongoDB-Sharding/" class="leancloud_visitors" data-flag-title="MongoDB Sharding">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">Views: </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
 
           
 
@@ -1043,58 +998,15 @@ Queue常用methods：</p>
 
       
         
-          
-            <p>详细介绍MongoDB sharding</p>
-<p>&lt;!--more--&gt;</p>
-<h2>介绍</h2>
-<h2>Sharding Key</h2>
-<ul>
-<li>Sharding key必须是在对应的collection当中所有的文档都存在的field，比如我要sharding我的user collection，我就可以找nick_name这种所有documents中都存在的field来做为sharding key，当然还要考虑其它因素，但是这个是一个必要条件。</li>
-<li>sharding key可以一个或者多个fields组成，还以user document为例，除了可以使用nick_name还可以加一个created time一起作为sharding key。当然具体使用什么field要根据系统的实际情况来综合考虑。</li>
-<li>sharding只能有一个，而且设定后不可更改</li>
-<li>针对已经有数据的collections做sharding时，原collections必须有以sharding key开头的索引；如果是空的collection，则MongoDB会自动创建对应的索引</li>
-</ul>
-<h2>Sharding的优势</h2>
-<h3>读写效率</h3>
-<p>由于我们可以将相应的写操作分布在不同的shard上，可以更加均匀分担写压力，因此写的性能一般情况下会得到提高。
-读取操作时，如果query中包含shard key对应的field，或者以这个field为prefix的compound index key</p>
-<h3>存储容量</h3>
-<p>由于是水平分割，因此几乎可以无限扩容，不需要担心某个collection过大而无法单机存储的问题</p>
-<h3>高可用</h3>
-<p>从MongoDB3.2开始，config server已经支持replicaset模式，这样的话sharding节点和config节点均可以通过replicaset来保证高可用。</p>
-<h2>关于Sharding的考虑</h2>
-<p>由于sharding的不可逆性，所以最好是先不使用sharding，在业务运行一段时间后，根据业务的情况来做决定，这主要需要考虑如下因素：</p>
-<ul>
-<li>某个collection的数据是否非常大，达到未来可能一台机器的存储容量都无法解决该collection的存储。</li>
-<li>是否有些collection存在性能问题，希望通过sharding来解决</li>
-<li>由于具有不可逆性，我们可以只针对需要做sharding的collection做sharding，而其它collection不需要sharding。不做sharding的collection会存储于primary shard之上（所以可见这个shard应该有更大的容量）</li>
-<li>针对需要分片的collection，需要确定满足以下几个条件：
-<ul>
-<li>选取的key可以使得collection的数据能均衡地分布在不同的shard上</li>
-<li>写请求的时候也能均匀分布，比如时间戳作为key时，虽然也能将key均匀分布到不同的shard上，但是同一时间段，写请求就会持续在一个shard上，这样就不是均匀写了</li>
-<li>我们针对该collection的查询主要是使用哪个field来作为查询条件，那么这个field最好是作为shard key</li>
-<li>作为sharding key的field需要有索引，或者是作为compound索引的prefix。</li>
-<li>尽量避免会导致jumbo chunk的key，比如通过age来作为key，同一个age的数据均会放到同一个chunk，这就可能导致chunk不断变大，当超过chunk size时，就会变成jumbo chunk</li>
-</ul>
-</li>
-</ul>
-<h2>Sharding策略</h2>
-<p>Sharding有两种策略：一种是ranged sharding; 另一种是hashed sharding。</p>
-<ul>
-<li>如果选择的key，其值域非常接近，尤其是单调递增或者递减(increase or decrease monotonically, 也可以翻译成单向递增递减)，就会导致所有的新增操作都会集中在最大的range的shard上（如果是递增）；或者集中在最小range的那个shard上（如果是递减）。这就导致无法均匀地进行写操作（因为所有的写操作都集中在一个shard甚至一个chunk上）。而那个最大或最小range的shard将成为系统的瓶颈。具体参考<a href="https://docs.mongodb.com/manual/core/sharding-shard-key/#shard-key-monotonic" target="_blank" rel="noopener">shard-key-monotonic</a>。在这种情况下，我们应当选择hashed sharding.</li>
-<li>hashed sharding。MongoDB通过hash算法(MD5)来计算key的hash值，然后将数据存储于对应范围的chunk上。由于算法的原因，即使非常&quot;近&quot;的key通过hash之后的值可能会有很大的差异，从而可以更加均匀的分布在不同的chunk之上。hashed sharding的缺点在于当我们的业务有很多范围查询时，（比如uid 5~20)，此时由于可能分布在很多不同的chunk上，所以就必须进行广播时操作，即要求所有的shard都进行查询，看是否有在这个范围内的数据，如果有就会交给mongos，mongos再负责将这些数据组合成一个完整的答案给客户端。这种情况下，势必会影响到查询性能。所以具体使用什么样的策略，需要综合考虑很多因素。</li>
-</ul>
-<h2>Splitting and Migration</h2>
-<h3>Splitting</h3>
-<p>splitting就是当chunk中存储的数据量超过设定的chunk size时(默认64M)，将其分裂成两个chunk，具体参考<a href="https://docs.mongodb.com/manual/core/sharding-data-partitioning/#chunk-splits" target="_blank" rel="noopener">chunk split</a>
-<img src="http://upload-images.jianshu.io/upload_images/3959253-e563c219fc51aa4f.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="Splitting"></p>
-<h3>Migration</h3>
-<p>数据迁移，是将某一个shard中的chunk数据迁移到另一个shard上。迁移有两种方式，一种是手动迁移，一种自动迁移。大部分时候，MongoDB会通过balancer进行自动迁移，以保持chunk在shard上能够均匀分布。手动迁移仅用于某些特定场景如bulk insert。</p>
-<h4>关于balancer</h4>
-<p>balancer是一个后台进程，它会自动判断含有最多chunk的shard和最少chunk的shard之间的chunk数量差达到了设定的threshold，如果达到了，就会自动进行数据迁移。
-<img src="http://upload-images.jianshu.io/upload_images/3959253-2700a7cbe0745a9b.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="Balancing"></p>
-
-          
+          <p>详细介绍MongoDB sharding</p>
+<p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/02/03/MongoDB-Sharding/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -1104,7 +1016,9 @@ Queue常用methods：</p>
     
     
     
-
+    <div>
+      
+    </div>
     
 
     
@@ -1209,7 +1123,7 @@ Queue常用methods：</p>
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2018-08-12 18:08:00" itemprop="dateModified" datetime="2018-08-12T18:08:00+08:00">2018-08-12</time>
+                <time title="Modified: 2018-10-06 13:29:01" itemprop="dateModified" datetime="2018-10-06T13:29:01+08:00">2018-10-06</time>
               
             
           </span>
@@ -1232,6 +1146,17 @@ Queue常用methods：</p>
 
           
           
+             <span id="/2018/01/10/MongoDB的事务、ACID和一致性/" class="leancloud_visitors" data-flag-title="MongoDB的事务、ACID和一致性">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">Views: </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
 
           
 
@@ -1253,75 +1178,15 @@ Queue常用methods：</p>
 
       
         
-          
-            <p>在前一篇<a href="http://localhost:4000/2018/01/08/%E7%90%86%E8%A7%A3%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E4%BA%8B%E5%8A%A1%EF%BC%8CACID%EF%BC%8CCAP%E5%92%8C%E4%B8%80%E8%87%B4%E6%80%A7/" target="_blank" rel="noopener">《理解数据库的事务，ACID，CAP和一致性》</a>我已经将数据库的一些基本概念包括事务，ACID，CAP，一致性，隔离性等都深入的介绍了一遍，而此篇主要是针对MongoDB数据库系统做一下深入的了解，主要希望弄清楚如下几个问题：</p>
-<p>&lt;!--more--&gt;</p>
-<ul>
-<li>MongoDB是如何实现事务的？有哪些局限？</li>
-<li>MongoDB的一致性是如何保证的？</li>
-</ul>
-<h2>MongoDB的事务</h2>
-<p>首先我们需要知道MongoDB是有多种存储引擎的，不同的存储引擎在实现ACID的时候，使用不同的机制。而Mongodb从3.0开始默认使用的是WiredTiger引擎，本文后续所有文字均是针对WiredTiger引擎。
-WiredTiger引擎可以针对单个文档来保证ACID特性，但是当需要操作多个文档的时候无法保证ACID，也即无法提供事务支持。但是，我们是否就无法实现事务呢？实际上，MongoDB本身虽然不支持跨文档的事务，但是我们依然可以可以在应用层来获取类似事务的支持。这其中有很多方式，MongoDB公司的Antoine Girbal曾经撰写过文章详细阐释了五种方式来支持事务，可以参考Reference中的链接。不过在此之前，让我们先了解下MongoDB在单文档上是如何实现ACID特性的。</p>
-<h4>单文档的ACID是如何实现的？</h4>
-<p>MongoDB在更新单个文档时，会对该文档加锁，而要理解MongoDB的锁机制，需要先了解以下几个概念：</p>
-<ul>
-<li>
-<p>Intent Lock（我把它翻译为<em>意图锁</em>): 意图锁表明读写方(reader-writer)意图针对更细粒度的资源进行读取或写入操作。比如：如果当某个Collection被加了intent lock，那么说明读写方意图针对该Collection中的某个文档进行读或写的操作。如下图所示：
-<img src="http://upload-images.jianshu.io/upload_images/3959253-1d185d143c10acfe.jpeg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="图1:MongoDB Lock">
-上图展示了当reader or writer需要操作文档时，相对更高的层级都需要加intent lock.</p>
-</li>
-<li>
-<p>Multiple granularity locking (我把它翻译为<em>多粒度锁机制</em>): MongoDB采用的是所谓的MGL多粒度锁机制，具体可以参考文末的wiki链接。简单来说就是结合了多种不同粒度的锁，包括S锁（Shared lock），X锁（Exclusive lock), IS锁(Intent Share lock), IX(Intent Exclusive lock)，这几种锁的互斥关系如下表所示：
-<img src="http://upload-images.jianshu.io/upload_images/3959253-537623996ad86ac2.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="lockrelation.png"></p>
-</li>
-</ul>
-<p>下面，我用一个例子来简单说明下。假设我要更改name为Jim的document
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">db.user_collection.update(&#123;&apos;name&apos;: &apos;Jim&apos;&#125;, &#123;$set: &#123;&apos;age&apos;: 26, &apos;score&apos;: 50&#125;&#125;)</span><br></pre></td></tr></table></figure></p>
-<p>此时，如图1所示，MongoDB会为name为Jim的document加上X锁，同时为包含该document的Collection，Database和instance都加上IX锁，这时，针对该文档的操作就保证了原子性。
-需要注意的是：</p>
-<ul>
-<li>如果当<code>age</code>修改成功，而<code>score</code>没有修改成功时，MongoDB会自动回滚，因此我们可以说针对单个文档，MongoDB是支持事务，保证ACID的（严格来说，要想保证Durability，需要在写操作时使用特殊的write concern，这个后边再谈）</li>
-<li>所有的锁都是平等的，它们是排在一个队列里，符合FIFO原则。但是，MongoDB做了优化，即当一个锁被采用时，所有与它兼容的锁（即上表为yes的锁）都会被采纳，从而可以并发操作。举个例子，当你针对Collection A中的Document a使用S锁时，其它reader可以同时使用S锁来读取该Document a，也可以同时读取同一个Collection的Document b.因为所有的S锁都是兼容的。那么，如果此时针对Collection A中的Document c进行写操作是否可以呢？显然需要为Document c赋予x锁，此时Collection A就需要IX锁，而由于IX和IS是兼容的，所以没有问题。简单来说，只要不是同一个Document，读写操作是可以并发的；如果是同一个Document，读可以并发，但写不可以。</li>
-<li>WiredTiger针对global, db, collection level只能使用intent lock。另外，针对冲突的情况，WiredTiger会自动重试。</li>
-</ul>
-<h4>跨文档的事务支持</h4>
-<p>前面已经说过，针对多文档，MongoDB是不支持事务的，但是我们的应用却可以自己去实现类事务的功能，这里只针对其中最常用的两步提交方式来做详细阐释。
-假设我们有两个账户A和B，现在我们要让账户A转账100元给账户B，我们需要将整个过程放在一个事务当中，来保证数据的一致性。在这个应用模拟的事务当中，需要涉及两个Collection，一个是accounts collection，另一个是transaction collection（用于存储交易的信息和状态）。
-先来看下transaction最终成功的大体流程：如图2所示
-<img src="http://upload-images.jianshu.io/upload_images/3959253-1f43175f98bf3140.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="图2 success transaction">
-伪代码如下：</p>
-<h4>initial accounts</h4>
-<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">bulk_result = db.accounts.insert(</span><br><span class="line">   [</span><br><span class="line">     &#123; _id: &quot;A&quot;, balance: 1000, pendingTransactions: [] &#125;,</span><br><span class="line">     &#123; _id: &quot;B&quot;, balance: 1000, pendingTransactions: [] &#125;</span><br><span class="line">   ]</span><br><span class="line">)</span><br><span class="line">if bulk_result.nInserted != 2:</span><br><span class="line">   print &quot;insert account failed.&quot;</span><br><span class="line">  return False</span><br></pre></td></tr></table></figure></p>
-<h4>add a transaction</h4>
-<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">write_result = db.transactions.insert(</span><br><span class="line">    &#123; _id: 1, source: &quot;A&quot;, destination: &quot;B&quot;, value: 100, state: &quot;initial&quot;, lastModified: new Date() &#125;</span><br><span class="line">)</span><br><span class="line">if write_result.nInserted != 1:</span><br><span class="line">  print &quot;transaction failed&quot;</span><br><span class="line">  return False</span><br></pre></td></tr></table></figure></p>
-<h4>update transaction to pending</h4>
-<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">t = db.transactions.findOne( &#123; state: &quot;initial&quot; &#125; )</span><br><span class="line">result = db.transactions.update(</span><br><span class="line">    &#123; _id: t._id, state: &quot;initial&quot; &#125;,</span><br><span class="line">    &#123;</span><br><span class="line">      $set: &#123; state: &quot;pending&quot; &#125;,</span><br><span class="line">      $currentDate: &#123; lastModified: true &#125;</span><br><span class="line">    &#125;</span><br><span class="line">)</span><br><span class="line">if result.nModified != 1:</span><br><span class="line">  print &quot;transaction failed&quot;</span><br><span class="line">  return False</span><br></pre></td></tr></table></figure></p>
-<h4>update accounts &amp; push transaction id</h4>
-<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">result_source = db.accounts.update(</span><br><span class="line">   &#123; _id: t.source, pendingTransactions: &#123; $ne: t._id &#125; &#125;,</span><br><span class="line">   &#123; $inc: &#123; balance: -t.value &#125;, $push: &#123; pendingTransactions: t._id &#125; &#125;</span><br><span class="line">)</span><br><span class="line">result_destination = db.accounts.update(</span><br><span class="line">   &#123; _id: t.destination, pendingTransactions: &#123; $ne: t._id &#125; &#125;,</span><br><span class="line">   &#123; $inc: &#123; balance: t.value &#125;, $push: &#123; pendingTransactions: t._id &#125; &#125;</span><br><span class="line">)</span><br><span class="line">if result_source.nModified != 1 or result_destination.nModified != 1:</span><br><span class="line">   # 进入回滚的流程</span><br><span class="line">  ...</span><br><span class="line">   return False</span><br></pre></td></tr></table></figure></p>
-<h4>update transaction to applied</h4>
-<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">result = db.transactions.update(</span><br><span class="line">   &#123; _id: t._id, state: &quot;pending&quot; &#125;,</span><br><span class="line">   &#123;</span><br><span class="line">     $set: &#123; state: &quot;applied&quot; &#125;,</span><br><span class="line">     $currentDate: &#123; lastModified: true &#125;</span><br><span class="line">   &#125;</span><br><span class="line">)</span><br><span class="line">if result.nModified != 1:</span><br><span class="line">  # 重新update accounts &amp; push transaction id</span><br><span class="line">  # 注意：如果上一步是成功的，pendingTransactions列表中会有相应的Transaction，那么就不会重复更新账户</span><br><span class="line">  ...</span><br></pre></td></tr></table></figure></p>
-<h4>pull transaction id</h4>
-<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">result_source = db.accounts.update(</span><br><span class="line">   &#123; _id: t.source, pendingTransactions: t._id &#125;,</span><br><span class="line">   &#123; $pull: &#123; pendingTransactions: t._id &#125; &#125;</span><br><span class="line">)</span><br><span class="line">result_destination = db.accounts.update(</span><br><span class="line">   &#123; _id: t.destination, pendingTransactions: t._id &#125;,</span><br><span class="line">   &#123; $pull: &#123; pendingTransactions: t._id &#125; &#125;</span><br><span class="line">)</span><br><span class="line">if result_source.nModified != 1 or result_destination.nModified != 1:</span><br><span class="line">  # 重新执行pull transaction id</span><br><span class="line">  ...</span><br></pre></td></tr></table></figure></p>
-<h4>update transaction to done</h4>
-<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">result = db.transactions.update(</span><br><span class="line">   &#123; _id: t._id, state: &quot;applied&quot; &#125;,</span><br><span class="line">   &#123;</span><br><span class="line">     $set: &#123; state: &quot;done&quot; &#125;,</span><br><span class="line">     $currentDate: &#123; lastModified: true &#125;</span><br><span class="line">   &#125;</span><br><span class="line">)</span><br><span class="line">if result.nModified != 1:</span><br><span class="line">  # 重新从pull transaction id执行</span><br><span class="line">  ...</span><br></pre></td></tr></table></figure></p>
-<p>包含回滚和失败的整体流程如图3：
-<img src="http://upload-images.jianshu.io/upload_images/3959253-f9054cb97e7a5e3d.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="图3 whole transaction procedure">
-从上图可以看出，任何一步失败都有相应的应对措施来保证事务或者执行完毕或者回滚。当然所有的实现都需要应用程序自己实现，更何况如果涉及多个应用并发的情况时，会更加复杂，如何保证多个事务不互相影响，又会进一步增加复杂度，这也就是为什么如果需要此类跨文档事务支持的时候推荐使用关系数据库。</p>
-<h2>MongoDB的一致性</h2>
-<p>当我们说外部一致性时，是针对分布式系统所说的CAP理论中的一致性，简单来说就是如何使得多台机器的副本保持一致，实际上Mongodb只能做到最终一致性，总会有“不一致时间窗口”，这是由于Mongodb在更新操作的时候，需要将同样的更新复制到副本节点当中，而这段时间无法保证reader读到的一定是最新数据，即使ReadConcern设置为<em>majority</em>，也只能保证返回目前大多数节点的所持有的数据，而不一定是最新的数据（比如，只有primary节点更新完成，其它所有secondary节点都还没有更新完成）。
-当我们说内部一致性时，是针对ACID中的一致性，这里主要针对如何避免脏读，当Mongodb无法在大多数节点成功的更新操作时，会导致回滚操作，这时如果Reader已经读取了更改后的数据，就会产生脏读现象。而避免脏读，可以通过设置Read Concern和Write Concer来实现，关于Write Concern和Read Concern，请参考Reference中链接，已经讲的很详细了，不再赘述。当我们设置Read Concern为majority时，可以保证返回的数据是大多数节点所持有的数据，这种情况是不会发生回滚的，也就避免了脏读。还有一种情况可能出现脏读，就是当writer写数据时，虽然已经写入到了内存当中，但是并没有写入到磁盘中，这时reader读取到了更新后的数据，但当Mongodb将内存中的数据写入磁盘时可能会产生错误，从而导致磁盘写入失败，这时就可能导致该数据丢失，这种情况下也会产生脏读，而为了避免这种情况，我们需要在Write Concern设置的时候使用<code>j:1</code>，这样实际是在写入journal之后才返回写入成功，保证不会出现上述的脏读现象。当然这种情况下，性能势必会受到影响。所以还是要根据业务情况来决定，非关键业务不需要很强的一致性的情况下，也不需要此种设置。</p>
-<h2>Reference</h2>
-<ul>
-<li><a href="http://www.csdn.net/article/2014-08-07/2821104-Implement-Robust-and-Scalable-Transactions-with-MongoDB" target="_blank" rel="noopener">五个解决方案让MongoDB拥有RDBMS的鲁棒性事务</a></li>
-<li><a href="https://en.wikipedia.org/wiki/Multiple_granularity_locking" target="_blank" rel="noopener">Wiki: multiple granularity locking</a></li>
-<li><a href="https://docs.mongodb.com/manual/faq/concurrency/#faq-concurrency-locking" target="_blank" rel="noopener">mongodb locking</a></li>
-<li><a href="https://docs.mongodb.com/manual/tutorial/perform-two-phase-commits/" target="_blank" rel="noopener">MongoDB 2 phase commits</a></li>
-<li><a href="http://www.ywnds.com/?p=3688" target="_blank" rel="noopener">MongoDW Write Concern机制</a></li>
-<li><a href="http://vincentwang.top/2017/08/02/MongoDB-%E5%86%99%E5%AE%89%E5%85%A8-Write-Concern/" target="_blank" rel="noopener">MongoDB 写安全(Write Concern)</a></li>
-</ul>
-
-          
+          <p>在前一篇<a href="http://localhost:4000/2018/01/08/%E7%90%86%E8%A7%A3%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E4%BA%8B%E5%8A%A1%EF%BC%8CACID%EF%BC%8CCAP%E5%92%8C%E4%B8%80%E8%87%B4%E6%80%A7/" target="_blank" rel="noopener">《理解数据库的事务，ACID，CAP和一致性》</a>我已经将数据库的一些基本概念包括事务，ACID，CAP，一致性，隔离性等都深入的介绍了一遍，而此篇主要是针对MongoDB数据库系统做一下深入的了解，主要希望弄清楚如下几个问题：</p>
+<p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/01/10/MongoDB的事务、ACID和一致性/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -1331,7 +1196,9 @@ WiredTiger引擎可以针对单个文档来保证ACID特性，但是当需要操
     
     
     
-
+    <div>
+      
+    </div>
     
 
     
@@ -1436,11 +1303,29 @@ WiredTiger引擎可以针对单个文档来保证ACID特性，但是当需要操
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2018-08-12 18:11:02" itemprop="dateModified" datetime="2018-08-12T18:11:02+08:00">2018-08-12</time>
+                <time title="Modified: 2018-10-06 13:29:01" itemprop="dateModified" datetime="2018-10-06T13:29:01+08:00">2018-10-06</time>
               
             
           </span>
 
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Database/" itemprop="url" rel="index"><span itemprop="name">Database</span></a></span>
+
+                
+                
+              
+            </span>
           
 
           
@@ -1458,6 +1343,17 @@ WiredTiger引擎可以针对单个文档来保证ACID特性，但是当需要操
           
 
           
+          
+             <span id="/2018/01/08/db_acid_cap/" class="leancloud_visitors" data-flag-title="理解数据库的事务，ACID，CAP和一致性">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">Views: </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
           
 
           
@@ -1480,65 +1376,15 @@ WiredTiger引擎可以针对单个文档来保证ACID特性，但是当需要操
 
       
         
-          
-            <p>本文详细阐述了数据库常用的一些概念如事务、ACID、CAP等</p>
-<p>&lt;!--more--&gt;</p>
-<h2>什么是事务</h2>
-<p>事务是指由一系列数据库操作组成的一个完整的逻辑过程，这个过程中的所有操作要么都成功，要么都不成功。比如：常见的例子就是银行转账的例子，一次转账操作会包含多个数据库操作，而这些数据库操作需要放到一个事务当中，保证其要么都成功，要么都不成功。</p>
-<h2>什么是ACID</h2>
-<p>ACID是事务的四个特性，指的是atomicity，原子性；consistency，一致性；isolation，隔离性；durability，持久性。</p>
-<ol>
-<li>原子性(atomicity): 指所有在事务中的操作要么都成功，要么都不成功，所有的操作都不可分割，没有中间状态。一旦某一步执行失败，就会全部回滚到初始状态。</li>
-<li>一致性(consistency): 指的是逻辑上的一致性，即所有操作是符合现实当中的期望的。具体参考下一节</li>
-<li>隔离性(isolation): 即不同事务之间的相互影响和隔离的程度。比如，不同的隔离级别，事务的并发程度也不同，最强的隔离状态是所有的事务都是串行化的（serializable）（即一个事务完成之后才能进行下一个事务），这样并发性也会降到最低，在保证了强一致性的情况下，性能也会受很大影响，所以在实际工程当中，往往会折中一下。</li>
-<li>持久性(durability): 可以简单地理解为事务执行完毕后数据不可逆并持久化存储于存储系统当中</li>
-</ol>
-<h2>理解一致性</h2>
-<p>实际上我们通常说的数据库事务的一致性和分布式系统的一致性并不是一个概念。这里可以区分成“内部一致性”和“外部一致性”。“内部一致性”搞数据库的人很少这么说，一般就直接说一致性，更准确的说是“Consistency in ACID”（“事务 ACID 属性中的一致性”）；“外部一致性”是针对分布式系统而言的，分布式领域提及的 Consistency 表示系统的正确性模型，著名的也是臭名昭著的 CAP 理论中的 C 就是这个范畴的。这主要是由于分布式系统写入和读取都可能不在同一台机器上，而这必然会有一段时间导致不同机器上所存的数据不一致的情况，这就是所谓的“不一致时间窗口”。</p>
-<h4>内部一致性</h4>
-<p>要理解内部一致性也就是我们通常所说的ACID中的一致性，就必须从反面考虑什么情况下是不一致的。不一致的情况主要有以下几种情况：
-<img src="http://upload-images.jianshu.io/upload_images/3959253-604e246793805ad0.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="丢失修改、不可重复读、脏读"></p>
-<ul>
-<li>修改丢失：丢失修改是事务A和B先后更改数据数据x（假设初始是x0)，但是在A未正式更改前，B已经读取了原先的数据x0，最后A更改后为x1，B更改的并不是A更新后的x1，而是更改的x0，更改后假设为x2，这时x2将x1覆盖了，相当于事务A针对x的更改丢失了。</li>
-<li>脏读： 事务T1读取了T2更改的x，但是T2在实际存储数据时可能出错回滚了，这时T1读取的实际是无效的数据，这种情况下就是脏读</li>
-<li>不可重复读：是说在T1读取x时，由于中间T2更改了x，所以T1前后两次读取的x值不相同，这就是所谓的不可重复读</li>
-<li>幻读：在T1读取符合某个条件的所有记录时，T2增加了一条符合该条件的记录，这就导致T1执行过程中前后读取的记录可能不一致，即T2之后读取时会多出一条记录。</li>
-</ul>
-<p>其中前三种（丢失修改、不能重复读、脏读）都是由于并发事务在修改同一份数据的时候导致的问题，此类问题可以通过对同一个资源加锁的方式来解决，而最后一种情况是由于不同事务并发时，新增数据导致的问题，对于新增的记录是无法加锁的，此种情况只能通过事务的串行化来解决。而串行化与并发是矛盾的，所以要在性能和事务的一致性强度上取得一个平衡，就涉及到不同的隔离等级，关于隔离等级，详见<em>理解隔离性</em>一节。</p>
-<h4>外部一致性</h4>
-<p>在分布式系统中我们所说的一致性，也就是外部一致性，通常会分为强一致性，弱一致性，还有最终一致性，而要理解外部一致性，需要对CAP理论（Consistency，Availability和Partition Tolerance）有所了解，关于CAP详见<em>CAP定理</em>一节。</p>
-<ul>
-<li>强一致性：指系统中的某个数据被成功更新后，后续任何对该数据的读取操作都将得到更新后的值</li>
-<li>弱一致性：弱一致性是相对于强一致性而言，它不保证总能得到最新的值；</li>
-<li>最终一致性：是弱一致性的特殊形式，即保证在没有新的更新的条件下，经过一段“不一致时间窗口”，最终所有的访问都是最后更新的值。最常见的是DNS服务，更新域名指向的机器后，多级缓存要等到expiration time的时候才会更新，但是随着时间的推移，最终数据会趋于一致。</li>
-</ul>
-<h2>理解隔离性</h2>
-<p>事务的隔离级别从低到高有
-读未提交（Read uncommitted）、读提交（read committed）、可重复读（repeatable read）和串行化（Serializable）</p>
-<ul>
-<li>Read Uncommitted：事务读数据时不会加锁，写数据时会有行级共享锁。假设事务1先于事务2，当事务1更新数据的时候，事务2可以读取事务1未提交的数据，但是不能更新事务1正在更新的数据。而如果事务1只是读数据，那么事务2既可以读数据，也可以更新数据。
-这种情况下无法规避脏读，不可重复读的问题。</li>
-<li>Read Committed：即在一个事务修改数据过程中，如果事务还没提交，其他事务不能读该数据，或者说只能读取committed的数据。事务读数据的瞬间会加行级共享锁，一旦读完该行，立即释放该行级共享锁；而写数据的瞬间会加行级排它锁，直到事务结束。这种情况下就避免了脏读，但是却不能避免不可重复读的问题</li>
-<li>Repeatable Read：当然就再升一级，为的就是避免不可重复读的问题，所以名字叫repeatable read。怎么实现的呢，我们知道read committed是，事务读操作只在读的一瞬间加锁，读完这行就释放锁了，而repeatable read级别是读的一瞬间加锁，但是一直到事务结束才释放锁。但是repeatable read不能解决幻读的问题，因为幻读是增加记录，并不是更改原先的记录。</li>
-<li>Serialization：到达这一级别的隔离，可以彻底解决一致性的所有问题。一般来说是通过加表锁来解决串行化的问题。</li>
-</ul>
-<h2>CAP定理</h2>
-<p>CAP理论主要是针对分布式存储系统的，C是指Consistency一致性，A是指Availability可用性，P是指Partition tolerance分区容忍性。CAP定理认为分布式系统中这三个特性最多只能同时满足两个特性。下面我们来分别看下这三个特性究竟是什么意思。
-<img src="http://upload-images.jianshu.io/upload_images/3959253-184c37c7dc01d4d5.gif?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="CAP"></p>
-<ul>
-<li>一致性(Consistency): 指在分布式系统中的所有数据备份，在同一时刻是否同样的值。（等同于所有节点访问同一份最新的数据副本）</li>
-<li>可用性(Availability): 在集群中一部分节点故障后，集群整体是否还能响应客户端的读写请求。（对数据更新具备高可用性）</li>
-<li>分区容忍性(Partition tolerance): 即当节点之间无法正常通信时，就产生了分区，而分区产生后，依然能够保证服务可用，那么我们就说系统是分区容忍的。显然如果节点越多，且备份越多，分区容忍度就越高（因为即便是其中一个或多个节点挂了，仍然有其它节点和备份可用）。</li>
-</ul>
-<p>那么，为什么说三个特性无法全部保证呢？首先，假如我们要保证分区容忍性，必然要做多个副本节点，而这必然会带来一致性的问题，即保证多个节点的数据是相同的，但是，要让多个节点数据相同，就必须要花时间去复制数据，这还是能够正常通信的情况下，那么在数据复制的过程中为了保持一致性，就不能对外提供服务，所以这段时间就无法满足可用性的问题。
-实际工程通常会采取一些折中措施，比如并不保证强一致性，只保证最终一致性，什么意思呢？比如，有三个数据节点互为备份，某份数据在节点A更改后，需要将更改复制到节点B和C，假设复制过程中，有客户访问该数据，那么此时不保证是一致的，即访问A节点的用户得到的是最新数据，而访问B和C节点的用户得到是老数据，但是最终，数据会复制完成，所以最终A、B、C三个节点的数据是一致的。（比如像文章点赞这种数据，延迟下也没有关系啦）</p>
-<h2>Reference</h2>
-<ul>
-<li><a href="http://www.hollischuang.com/archives/943" target="_blank" rel="noopener">深入分析事务的隔离级别</a></li>
-<li><a href="https://www.zhihu.com/question/56073588/answer/253106572" target="_blank" rel="noopener">如何理解数据库的内部一致性和外部一致性？</a></li>
-</ul>
-
-          
+          <p>本文详细阐述了数据库常用的一些概念如事务、ACID、CAP等</p>
+<p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/01/08/db_acid_cap/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -1548,7 +1394,9 @@ WiredTiger引擎可以针对单个文档来保证ACID特性，但是当需要操
     
     
     
-
+    <div>
+      
+    </div>
     
 
     
@@ -1653,7 +1501,7 @@ WiredTiger引擎可以针对单个文档来保证ACID特性，但是当需要操
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2018-10-05 22:24:37" itemprop="dateModified" datetime="2018-10-05T22:24:37+08:00">2018-10-05</time>
+                <time title="Modified: 2018-10-06 13:33:02" itemprop="dateModified" datetime="2018-10-06T13:33:02+08:00">2018-10-06</time>
               
             
           </span>
@@ -1676,6 +1524,17 @@ WiredTiger引擎可以针对单个文档来保证ACID特性，但是当需要操
 
           
           
+             <span id="/2017/10/12/Flask-Login/" class="leancloud_visitors" data-flag-title="Flask-Login详解">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">Views: </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
 
           
 
@@ -1697,82 +1556,15 @@ WiredTiger引擎可以针对单个文档来保证ACID特性，但是当需要操
 
       
         
-          
-            <p>本文主要通过源码分析Flask-Login插件，并详述其使用方法</p>
-<p>&lt;!-- more --&gt;</p>
-<p>关于Flask登录认证的详细过程请参见拙作<a href="http://geekpy.github.io/2016/12/06/flask_login_detail/" target="_blank" rel="noopener">&lt;&lt;使用Flask实现用户登陆认证的详细过程&gt;&gt;</a>一文，而本文则偏重于详细介绍Flask-Login的原理，代码的解析。</p>
-<h3>首次登陆</h3>
-<p>我们首先来看一下首次登录验证的流程图：</p>
-<p><img src="http://upload-images.jianshu.io/upload_images/3959253-b34989af4a0d0b2c.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="首次登陆"></p>
-<p>Flask-Login在登录过程中主要负责：</p>
-<ul>
-<li>将用户对象存入request context中</li>
-<li>将用户ID，Session ID等信息存入Session中
-在<a href="http://www.jianshu.com/p/06bd93e21945" target="_blank" rel="noopener">&lt;&lt;使用Flask实现用户登陆认证的详细过程&gt;&gt;</a>中我们已经介绍过如何通过Flask-Login来实现登录的过程，其中最重要的代码就是login_user，如下：
-<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="title">login_user</span><span class="params">(user, remember=remember_me)</span></span></span><br></pre></td></tr></table></figure></li>
-</ul>
-<p>那么login_user具体做了什么呢？我们来看下源码
-<figure class="highlight sqf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">def login_user(user, remember=<span class="literal">False</span>, force=<span class="literal">False</span>, fresh=<span class="literal">True</span>):</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">not</span> force <span class="built_in">and</span> <span class="built_in">not</span> user.is_active:</span><br><span class="line">        return <span class="literal">False</span></span><br><span class="line"></span><br><span class="line">    user_id = getattr(user, current_app.login_manager.id_attribute)()</span><br><span class="line">    session[<span class="string">'user_id'</span>] = user_id</span><br><span class="line">    session[<span class="string">'_fresh'</span>] = fresh</span><br><span class="line">    session[<span class="string">'_id'</span>] = current_app.login_manager.<span class="variable">_session_identifier_generator</span>()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> remember:</span><br><span class="line">        session[<span class="string">'remember'</span>] = <span class="string">'set'</span></span><br><span class="line"></span><br><span class="line">    <span class="variable">_request_ctx_stack</span>.top.user = user</span><br><span class="line">    user_logged_in.send(current_app.<span class="variable">_get_current_object</span>(), user=<span class="variable">_get_user</span>())</span><br><span class="line">    return <span class="literal">True</span></span><br></pre></td></tr></table></figure></p>
-<ul>
-<li><code>getattr(user, current_app.login_manager.id_attribute)()</code> 这里<code>login_manager.id_attribute</code>是一个字符串<code>'get_id'</code>。因此这句的意思是获取User对象的get_id method，然后执行，从而获取到用户的ID</li>
-<li>通过<code>session['user_id'] = user_id</code>来将用户的ID存储进Session当中，后面紧跟着将fresh信息，session id信息，remember信息存储进session。</li>
-</ul>
-<blockquote>
-<p>注意：Flask的session是以cookie为基础，但是是在Server端使用secret key并使用AES之类的对称加密算法进行加密的，然后将加密后的cookie发送给客户端。由于是加密后的数据，客户端无法篡改数据，也无法获知session中的信息，只能保存该session信息，在之后的请求中携带该session信息</p>
-</blockquote>
-<ul>
-<li><code>_request_ctx_stack.top.user = user</code>这里是将user对象存储进当前的request context中，_request_ctx_stack是一个LocalStack对象，top属性指向的就是当前的request context。关于LocalStack及相关技术，请参考拙作<a href="http://www.jianshu.com/p/3f38b777a621" target="_blank" rel="noopener">&lt;&lt;Werkzeug(Flask)之Local、LocalStack和LocalProxy&gt;&gt;</a></li>
-<li><code>user_logged_in.send(current_app._get_current_object(), user=_get_user())</code> 此句中<code>user_logged_in</code>是Flask-Login定义的signal，此处通过send来发射此signal，当注册监听此signal的回调函数收到此signal之后就会执行函数。这里send有两个参数，第一个参数是sender对象，此处通过<code>current_app._get_current_object()</code>来获取当前的app对象，即此signal的sender设为当前的应用；第二个参数是该signal携带的数据，此处将user对象做为signal的数据传递给相应的回调函数。关于signal的详细解释请参考拙作<a href="http://www.jianshu.com/p/756ed0267f53" target="_blank" rel="noopener">&lt;&lt;Flask Signals详解&gt;&gt;</a></li>
-</ul>
-<h3>非首次登陆</h3>
-<p>非首次登陆流程图如下：</p>
-<p><img src="http://upload-images.jianshu.io/upload_images/3959253-7ea20e139da6e2ae.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="非首次登陆"></p>
-<p>在这个流程图中，Flask-Login主要起如下作用：</p>
-<ol>
-<li>从session中获取用户ID</li>
-<li>当用户的请求访问的是受登录保护的路由时，就要通过用户ID重新load user，如果load user失败则进入鉴权失败处理流程，如果成功，则允许正常处理请求
-那么Flask-Login究竟是如何保护路由的呢？我们来看个例子：
-<figure class="highlight less"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">@app</span>.route(<span class="string">'/'</span>)</span><br><span class="line"><span class="variable">@app</span>.route(<span class="string">'/main'</span>)</span><br><span class="line"><span class="variable">@login_required</span></span><br><span class="line">def main():</span><br><span class="line">    return render_template(</span><br><span class="line">        <span class="string">'main.html'</span>, username=current_user.username)</span><br></pre></td></tr></table></figure></li>
-</ol>
-<p>我们看到只要给路由函数加一个<code>@login_required</code>装饰器就可以了，那么这个装饰器究竟是怎么做到的呢？来看下源码：
-<figure class="highlight autoit"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta"># flask_login/utils.py</span></span><br><span class="line">def login_required(<span class="function"><span class="keyword">func</span>):</span></span><br><span class="line">    <span class="symbol">@wraps</span>(<span class="function"><span class="keyword">func</span>)</span></span><br><span class="line">    def decorated_view(*args, **kwargs):</span><br><span class="line">        <span class="meta"># 如果request method为例外method，即在EXEMPT_METHODS中的method，可以不必鉴权</span></span><br><span class="line">        <span class="keyword">if</span> request.method <span class="keyword">in</span> EXEMPT_METHODS:</span><br><span class="line">            <span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">(*args, **kwargs)</span></span></span><br><span class="line"></span><br><span class="line">        <span class="meta"># 如果_login_disabled为True则不必鉴权</span></span><br><span class="line">        elif current_app.login_manager._login_disabled:</span><br><span class="line">            <span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">(*args, **kwargs)</span></span></span><br><span class="line"></span><br><span class="line">        <span class="meta"># 正常鉴权</span></span><br><span class="line">        elif <span class="literal">not</span> current_user.is_authenticated:</span><br><span class="line">            <span class="keyword">return</span> current_app.login_manager.unauthorized()</span><br><span class="line">        <span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">(*args, **kwargs)</span></span></span><br><span class="line">    <span class="keyword">return</span> decorated_view</span><br></pre></td></tr></table></figure></p>
-<ul>
-<li>默认情况下只有<em>OPTIONS</em> method在EXEMPT_METHODS set中，而GET、PUT、POST等常见的methods都需要鉴权</li>
-<li><code>_login_disabled</code>默认为False</li>
-<li>正常鉴权的关键在于<code>current_user.is_authenticated</code>是否为True，为True则正常处理请求，为False则进入unauthorized处理流程。那么这个current_user到底怎么就能鉴权了？它是怎么来的呢？来看下定义：
-<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># flask_login/utils.py</span></span><br><span class="line"><span class="attr">current_user</span> = LocalProxy(lambda: _get_user())</span><br></pre></td></tr></table></figure></li>
-</ul>
-<p>原来current_user是一个LocalProxy对象，其代理的对象需要通过<code>_get_user()</code>来获取，简单来说_get_user()会返回两种用户，一种是正常的用户对象(鉴权成功)，一种是anonymous用户对象(鉴权失败)。而正常的用户对象其<code>is_authenticated</code>属性总是为True，相对的anonymous用户对象的<code>is_authenticated</code>属性总是为False</p>
-<blockquote>
-<p>LocalProxy对象每次操作都会重新获取代理的对象从而实现动态更新，关于LocalProxy的详细说明请参考拙作<a href="http://www.jianshu.com/p/3f38b777a621" target="_blank" rel="noopener">&lt;&lt;Werkzeug(Flask)之Local、LocalStack和LocalProxy&gt;&gt;</a></p>
-</blockquote>
-<p>而要实现动态更新的关键就在于<code>_get_user</code>函数，接下来我们看下<code>_get_user</code>函数是如何获取user对象的：
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># flask_login/utils.py</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_get_user</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="keyword">if</span> has_request_context() <span class="keyword">and</span> <span class="keyword">not</span> hasattr(_request_ctx_stack.top, <span class="string">'user'</span>):</span><br><span class="line">        current_app.login_manager._load_user()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> getattr(_request_ctx_stack.top, <span class="string">'user'</span>, <span class="keyword">None</span>)</span><br></pre></td></tr></table></figure></p>
-<p>在之前的首次登陆那小节中，我们已经知道用户鉴权成功后，会将User对象保存在当前的request context当中，这时我们调用<code>_get_user</code>函数时就会直接从request context中获取user对象<code>return getattr(_request_ctx_stack.top, 'user', None)</code>
-但如果是非首次登陆，当前request context中并没有保存user对象，就需要调用<code>current_app.login_manager._load_user()</code>来去load user对象，接下来再看看如何去load：
-<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># flask_login/login_manager.py</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_load_user</span><span class="params">(<span class="keyword">self</span>)</span></span><span class="symbol">:</span></span><br><span class="line">        <span class="string">''</span><span class="string">'Loads user from session or remember_me cookie as applicable'</span><span class="string">''</span></span><br><span class="line">        user_accessed.send(current_app._get_current_object())</span><br><span class="line"></span><br><span class="line">        <span class="comment"># first check SESSION_PROTECTION</span></span><br><span class="line">        config = current_app.config</span><br><span class="line">        <span class="keyword">if</span> config.get(<span class="string">'SESSION_PROTECTION'</span>, <span class="keyword">self</span>.session_protection)<span class="symbol">:</span></span><br><span class="line">            deleted = <span class="keyword">self</span>._session_protection()</span><br><span class="line">            <span class="keyword">if</span> <span class="symbol">deleted:</span></span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">self</span>.reload_user()</span><br><span class="line"></span><br><span class="line">        <span class="comment"># If a remember cookie is set, and the session is not, move the</span></span><br><span class="line">        <span class="comment"># cookie user ID to the session.</span></span><br><span class="line">        <span class="comment">#</span></span><br><span class="line">        <span class="comment"># However, the session may have been set if the user has been</span></span><br><span class="line">        <span class="comment"># logged out on this request, 'remember' would be set to clear,</span></span><br><span class="line">        <span class="comment"># so we should check for that and not restore the session.</span></span><br><span class="line">        is_missing_user_id = <span class="string">'user_id'</span> <span class="keyword">not</span> <span class="keyword">in</span> session</span><br><span class="line">        <span class="keyword">if</span> <span class="symbol">is_missing_user_id:</span></span><br><span class="line">            cookie_name = config.get(<span class="string">'REMEMBER_COOKIE_NAME'</span>, COOKIE_NAME)</span><br><span class="line">            header_name = config.get(<span class="string">'AUTH_HEADER_NAME'</span>, AUTH_HEADER_NAME)</span><br><span class="line">            has_cookie = (cookie_name <span class="keyword">in</span> request.cookies <span class="keyword">and</span></span><br><span class="line">                          session.get(<span class="string">'remember'</span>) != <span class="string">'clear'</span>)</span><br><span class="line">            <span class="keyword">if</span> <span class="symbol">has_cookie:</span></span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">self</span>._load_from_cookie(request.cookies[cookie_name])</span><br><span class="line">            elif <span class="keyword">self</span>.<span class="symbol">request_callback:</span></span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">self</span>._load_from_request(request)</span><br><span class="line">            elif header_name <span class="keyword">in</span> request.<span class="symbol">headers:</span></span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">self</span>._load_from_header(request.headers[header_name])</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">self</span>.reload_user()</span><br></pre></td></tr></table></figure></p>
-<ul>
-<li><code>_load_user</code>大体的过程是首先检查<em>SESSION_PROTECTION</em>设置，如果<em>SESSION_PROTECTION</em> 为strong或者basic类型，那么就会执行<code>_session_protection()</code>动作，否则不执行此操作。<code>_session_protection</code>在session_id不一致的时候(比如IP变化会导致session id的变化)才真正有用，这时，如果为basic类型或者session permanent为True时，只标注session为非新鲜的(not fresh)；而如果为strong，则会删除session中的用户信息，并重新load user，即调用<code>reload_user</code>。</li>
-</ul>
-<blockquote>
-<p>session permanent为True时，用户退出浏览器不会删除session，其会保留permanent_session_lifetime s(默认是31天)，但是当其为False且<em>SESSION_PROTECTION</em> 设为strong时，用户的session就会被删除。</p>
-</blockquote>
-<ul>
-<li>接下来的代码是说当session中没有用户信息时(这里通过是否能获取到<code>user_id</code>来判断)，如果有则直接<code>reload_user</code>,如果没有，则有三种方式来load user，一种是通过remember cookie，一种通过request，一种是通过request header，依次尝试。</li>
-</ul>
-<blockquote>
-<p>remember cookie是指，当用户勾选'remember me'复选框时，Flask-Login会将用户信息放入到指定的cookie当中，同样也是加密的。这就是为什么当session中没有携带用户信息时，我们可以通过remember cookie来获取用户的信息</p>
-</blockquote>
-<p>而<code>reload_user</code>是如何获取用户的呢，来看下源代码：
-<figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># flask_login/login_manager.py</span></span><br><span class="line">def reload_user(self, <span class="attr">user=</span>None):</span><br><span class="line">        ctx = _request_ctx_stack.top</span><br><span class="line"></span><br><span class="line">        if <span class="keyword">user</span> <span class="title">is</span> None:</span><br><span class="line">            user_id = session.get('user_id')</span><br><span class="line">            if user_id is None:</span><br><span class="line">                <span class="comment"># 当无法获取到有效的用户id时，就认为是anonymous user</span></span><br><span class="line">                ctx.<span class="keyword">user</span> <span class="title">= self</span>.anonymous_user()</span><br><span class="line">            else:</span><br><span class="line">                <span class="comment"># user callback就是我们通过@login_manager.user_loader装饰的函数，用于获取user object</span></span><br><span class="line">                if self.user_callback is None:</span><br><span class="line">                    raise Exception(</span><br><span class="line">                        <span class="string">"No user_loader has been installed for this "</span></span><br><span class="line">                        <span class="string">"LoginManager. Add one with the "</span></span><br><span class="line">                        <span class="string">"'LoginManager.user_loader' decorator."</span>)</span><br><span class="line">                <span class="keyword">user</span> <span class="title">= self</span>.user_callback(user_id)</span><br><span class="line">                if <span class="keyword">user</span> <span class="title">is</span> None:</span><br><span class="line">                    ctx.<span class="keyword">user</span> <span class="title">= self</span>.anonymous_user()</span><br><span class="line">                else:</span><br><span class="line">                    ctx.<span class="keyword">user</span> <span class="title">= user</span></span><br><span class="line">        else:</span><br><span class="line">            ctx.<span class="keyword">user</span> <span class="title">= user</span></span><br></pre></td></tr></table></figure></p>
-<ul>
-<li>首先获取user id，如果获取不到有效的id，就将user设为anonymous user</li>
-<li>获取到id后，再通过@login_manager.user_loader装饰的函数获取到user对象，如果没有获取到有效的user对象，就认为是anonymous user</li>
-<li>最后将user保存于request context中（无论是正常的用户还是anonymous用户）</li>
-</ul>
-<p>至此，我们已经将Flask-Login的核心代码剖析了一遍，如果你有收获，不妨点个赞鼓励一下吧！</p>
-
-          
+          <p>本文主要通过源码分析Flask-Login插件，并详述其使用方法</p>
+<p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/10/12/Flask-Login/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -1782,7 +1574,9 @@ WiredTiger引擎可以针对单个文档来保证ACID特性，但是当需要操
     
     
     
-
+    <div>
+      
+    </div>
     
 
     
@@ -1887,11 +1681,29 @@ WiredTiger引擎可以针对单个文档来保证ACID特性，但是当需要操
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2018-10-05 22:16:01" itemprop="dateModified" datetime="2018-10-05T22:16:01+08:00">2018-10-05</time>
+                <time title="Modified: 2018-10-06 13:29:01" itemprop="dateModified" datetime="2018-10-06T13:29:01+08:00">2018-10-06</time>
               
             
           </span>
 
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Flask/" itemprop="url" rel="index"><span itemprop="name">Flask</span></a></span>
+
+                
+                
+              
+            </span>
           
 
           
@@ -1909,6 +1721,17 @@ WiredTiger引擎可以针对单个文档来保证ACID特性，但是当需要操
           
 
           
+          
+             <span id="/2017/10/08/Werkzeug-Local/" class="leancloud_visitors" data-flag-title="Werkzeug(Flask)之Local、LocalStack和LocalProxy">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">Views: </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
           
 
           
@@ -1931,103 +1754,14 @@ WiredTiger引擎可以针对单个文档来保证ACID特性，但是当需要操
 
       
         
-          
-            <p>在我们使用Flask以及Werkzeug框架的过程中，经常会遇到如下三个概念：Local、LocalStack和LocalProxy。尤其在学习Flask的Request Context和App Context的过程中，这几个概念出现的更加频繁，另外很多Flask插件都会使用这三个概念对应的技术。那么这三个东西到底是什么？我们为什么需要它们？以及如何使用呢？本篇文章主要就是来解答这些问题。</p>
-<h2>Local</h2>
-<p>这部分我们重点介绍Local概念，主要分为以下几个部分：</p>
-<ul>
-<li>为什么需要Local？</li>
-<li>Local的使用</li>
-<li>Local的实现</li>
-</ul>
-<h4>为什么需要Local？</h4>
-<p>在Python的标准库中提供了<code>thread local</code>对象用于存储<em>thread-safe</em>和<em>thread-specific</em>的数据，通过这种方式存储的数据只在本线程中有效，而对于其它线程则不可见。正是基于这样的特性，我们可以把针对线程全局的数据存储进<code>thread local</code>对象，举个简单的例子
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;</span><span class="bash">&gt;from threading import <span class="built_in">local</span></span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash">&gt;thread_local_data = <span class="built_in">local</span>()</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash">&gt;thread_local_data.user_name=<span class="string">"Jim"</span></span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash">&gt;thread_local_data.user_name</span></span><br><span class="line">'Jim'</span><br></pre></td></tr></table></figure></p>
-<p>使用<code>thread local</code>对象虽然可以基于线程存储全局变量，但是在Web应用中可能会存在如下问题：</p>
-<ol>
-<li>有些应用使用的是greenlet协程，这种情况下无法保证协程之间数据的隔离，因为不同的协程可以在同一个线程当中。</li>
-<li>即使使用的是线程，WSGI应用也无法保证每个http请求使用的都是不同的线程，因为后一个http请求可能使用的是之前的http请求的线程，这样的话存储于<code>thread local</code>中的数据可能是之前残留的数据。</li>
-</ol>
-<p>为了解决上述问题，Werkzeug开发了自己的local对象，这也是为什么我们需要Werkzeug的local对象</p>
-<h4>Local的使用</h4>
-<p>先举一个简单的示例：
-<figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> werkzeug.<span class="keyword">local</span> import Local, LocalManager</span><br><span class="line"></span><br><span class="line"><span class="keyword">local</span> = Local()</span><br><span class="line">local_manager = LocalManager([<span class="keyword">local</span>])</span><br><span class="line"></span><br><span class="line">def <span class="built_in">application</span>(environ, start_response):</span><br><span class="line">    <span class="keyword">local</span>.request = request = Request(environ)</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line"><span class="comment"># make_middleware会确保当request结束时，所有存储于local中的对象的reference被清除</span></span><br><span class="line"><span class="built_in">application</span> = local_manager.make_middleware(<span class="built_in">application</span>)</span><br></pre></td></tr></table></figure></p>
-<ul>
-<li>首先Local对象需要通过LocalManager来管理，初次生成LocalManager对象需要传一个list类型的参数，list中是Local对象，当有新的Local对象时，可以通过<code>local_manager.locals.append()</code>来添加。而当LocalManager对象清理的时候会将所有存储于locals中的当前context的数据都清理掉</li>
-<li>上例中当local.request被赋值之后，其可以在当前context中作为全局数据使用</li>
-<li>所谓当前context(the same context)意味着是在同一个greenlet(如果有)中，也就肯定是在同一个线程当中</li>
-</ul>
-<p>那么Werkzeug的Local对象是如何实现这种在相同的context环境下保证数据的全局性和隔离性的呢？</p>
-<h4>Local的实现</h4>
-<p>我们先来看下源代码
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在有greenlet的情况下，get_indent实际获取的是greenlet的id，而没有greenlet的情况下获取的是thread id</span></span><br><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    <span class="keyword">from</span> greenlet <span class="keyword">import</span> getcurrent <span class="keyword">as</span> get_ident</span><br><span class="line"><span class="keyword">except</span> ImportError:</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="keyword">from</span> thread <span class="keyword">import</span> get_ident</span><br><span class="line">    <span class="keyword">except</span> ImportError:</span><br><span class="line">        <span class="keyword">from</span> _thread <span class="keyword">import</span> get_ident</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Local</span><span class="params">(object)</span>:</span></span><br><span class="line">    __slots__ = (<span class="string">'__storage__'</span>, <span class="string">'__ident_func__'</span>)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self)</span>:</span></span><br><span class="line">        object.__setattr__(self, <span class="string">'__storage__'</span>, &#123;&#125;)</span><br><span class="line">        object.__setattr__(self, <span class="string">'__ident_func__'</span>, get_ident)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__iter__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> iter(self.__storage__.items())</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 当调用Local对象时，返回对应的LocalProxy</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__call__</span><span class="params">(self, proxy)</span>:</span></span><br><span class="line">        <span class="string">"""Create a proxy for a name."""</span></span><br><span class="line">        <span class="keyword">return</span> LocalProxy(self, proxy)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># Local类中特有的method，用于清空greenlet id或线程id对应的dict数据</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__release_local__</span><span class="params">(self)</span>:</span></span><br><span class="line">        self.__storage__.pop(self.__ident_func__(), <span class="keyword">None</span>)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__getattr__</span><span class="params">(self, name)</span>:</span></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            <span class="keyword">return</span> self.__storage__[self.__ident_func__()][name]</span><br><span class="line">        <span class="keyword">except</span> KeyError:</span><br><span class="line">            <span class="keyword">raise</span> AttributeError(name)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__setattr__</span><span class="params">(self, name, value)</span>:</span></span><br><span class="line">        ident = self.__ident_func__()</span><br><span class="line">        storage = self.__storage__</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            storage[ident][name] = value</span><br><span class="line">        <span class="keyword">except</span> KeyError:</span><br><span class="line">            storage[ident] = &#123;name: value&#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__delattr__</span><span class="params">(self, name)</span>:</span></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            <span class="keyword">del</span> self.__storage__[self.__ident_func__()][name]</span><br><span class="line">        <span class="keyword">except</span> KeyError:</span><br><span class="line">            <span class="keyword">raise</span> AttributeError(name)</span><br></pre></td></tr></table></figure></p>
-<ul>
-<li>这段代码实际是对<code>__storage__</code> dict的封装，而这个dict中的key使用的就是get_indent函数获取的id（当有greenlet时使用greenlet id，没有则使用thread id）</li>
-<li><code>__storage__</code> dict中的value也是一个dict，这个dict就是该greenlet(或者线程)对应的local存储空间</li>
-<li>通过重新实现<code>__getattr__</code>, <code>__setattr__</code>等魔术方法，我们在greenlet或者线程中使用local对象时，实际会自动获取greenlet id(或者线程id)，从而获取到对应的dict存储空间，再通过name key就可以获取到真正的存储的对象</li>
-<li>当我们需要释放local数据的内存时，可以通过调用release_local()函数来释放当前context的local数据，如下
-<figure class="highlight oxygene"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; loc = Local()</span><br><span class="line">&gt;&gt;&gt; loc.foo = <span class="number">42</span></span><br><span class="line">&gt;&gt;&gt; release_local(loc)  # release_local实际调用local对象的__release_local__ <span class="function"><span class="keyword">method</span></span></span><br><span class="line"><span class="function">&gt;&gt;&gt; <span class="title">hasattr</span><span class="params">(loc, <span class="string">'foo'</span>)</span></span></span><br><span class="line"><span class="function"><span class="title">False</span></span></span><br></pre></td></tr></table></figure></li>
-</ul>
-<h2>LocalStack</h2>
-<p>LocalStack与Local对象类似，都是可以基于Greenlet协程或者线程进行全局存储的存储空间(实际LocalStack是对Local进行了二次封装），区别在于其数据结构是栈的形式。示例如下：
-<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;</span>&gt; ls = LocalStack()</span><br><span class="line"><span class="meta">&gt;&gt;</span>&gt; ls.push(<span class="number">42</span>)</span><br><span class="line"><span class="meta">&gt;&gt;</span>&gt; ls.top</span><br><span class="line"><span class="number">42</span></span><br><span class="line"><span class="meta">&gt;&gt;</span>&gt; ls.push(<span class="number">23</span>)</span><br><span class="line"><span class="meta">&gt;&gt;</span>&gt; ls.top</span><br><span class="line"><span class="number">23</span></span><br><span class="line"><span class="meta">&gt;&gt;</span>&gt; ls.pop()</span><br><span class="line"><span class="number">23</span></span><br><span class="line"><span class="meta">&gt;&gt;</span>&gt; ls.top</span><br><span class="line"><span class="number">42</span></span><br></pre></td></tr></table></figure></p>
-<ul>
-<li>从示例看出Local对象存储的时候是类似字典的方式，需要有key和value，而LocalStack是基于栈的，通过push和pop来存储和弹出数据</li>
-<li>另外，当我们想释放存储空间的时候，也可以调用release_local()</li>
-</ul>
-<p>LocalStack在Flask框架中会频繁的出现，其Request Context和App Context的实现都是基于LocalStack，具体可以参考Github上的<a href="https://github.com/pallets/flask/tree/master/flask" target="_blank" rel="noopener">Flask源码</a></p>
-<h2>LocalProxy</h2>
-<p>LocalProxy用于代理Local对象和LocalStack对象，而所谓代理就是作为中间的代理人来处理所有针对被代理对象的操作，如下图所示：</p>
-<p><img src="http://upload-images.jianshu.io/upload_images/3959253-e64c1ca00b6f14e3.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="proxy.jpg"></p>
-<p>接下来我们将重点讲下如下内容：</p>
-<ul>
-<li>LocalProxy的使用</li>
-<li>LocalProxy代码解析</li>
-<li>为什么要使用LocalProxy</li>
-</ul>
-<h4>LocalProxy的使用</h4>
-<p>初始化LocalProxy有三种方式：</p>
-<ol>
-<li>通过Local或者LocalStack对象的<code>__call__</code> method
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">from werkzeug.local import Local</span><br><span class="line">l = Local()</span><br><span class="line"></span><br><span class="line"><span class="comment"># these are proxies</span></span><br><span class="line">request = l('request')</span><br><span class="line">user = l('user')</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">from werkzeug.local import LocalStack</span><br><span class="line">_response_local = LocalStack()</span><br><span class="line"></span><br><span class="line"><span class="comment"># this is a proxy</span></span><br><span class="line">response = _response_local()</span><br></pre></td></tr></table></figure></li>
-</ol>
-<p>上述代码直接将对象像函数一样调用，这是因为Local和LocalStack都实现了<code>__call__</code> method，这样其对象就是callable的，因此当我们将对象作为函数调用时，实际调用的是<code>__call__</code> method，可以看下本文开头部分的Local的源代码，会发现<code>__call__</code> method会返回一个LocalProxy对象</p>
-<ol start="2">
-<li>通过LocalProxy类进行初始化
-<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">l</span> = Local()</span><br><span class="line"><span class="attr">request</span> = LocalProxy(l, <span class="string">'request'</span>)</span><br></pre></td></tr></table></figure></li>
-</ol>
-<p>实际上这段代码跟第一种方式是等价的，但这种方式是最'原始'的方式，我们在Local的源代码实现中看到其<code>__call__</code> method就是通过这种方式生成LocalProxy的</p>
-<ol start="3">
-<li>使用callable对象作为参数
-<figure class="highlight lisp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">request = LocalProxy(<span class="name">get_current_request</span>())</span><br></pre></td></tr></table></figure></li>
-</ol>
-<p>通过传递一个函数，我们可以自定义如何返回Local或LocalStack对象</p>
-<p>那么LocalProxy是如何实现这种代理的呢？接下来看下源码解析</p>
-<h4>LocalProxy代码解析</h4>
-<p>下面截取LocalProxy的部分代码，我们来进行解析
-<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># LocalProxy部分代码</span></span><br><span class="line"></span><br><span class="line">@implements_bool</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LocalProxy</span>(<span class="title">object</span>):</span></span><br><span class="line">    __slots_<span class="number">_</span> = (<span class="string">'__local'</span>, <span class="string">'__dict__'</span>, <span class="string">'__name__'</span>, <span class="string">'__wrapped__'</span>)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(<span class="keyword">self</span>, local, name=None)</span></span><span class="symbol">:</span></span><br><span class="line">        object.__setattr_<span class="number">_</span>(<span class="keyword">self</span>, <span class="string">'_LocalProxy__local'</span>, local)</span><br><span class="line">        object.__setattr_<span class="number">_</span>(<span class="keyword">self</span>, <span class="string">'__name__'</span>, name)</span><br><span class="line">        <span class="keyword">if</span> callable(local) <span class="keyword">and</span> <span class="keyword">not</span> hasattr(local, <span class="string">'__release_local__'</span>)<span class="symbol">:</span></span><br><span class="line">            <span class="comment"># "local" is a callable that is not an instance of Local or</span></span><br><span class="line">            <span class="comment"># LocalManager: mark it as a wrapped function.</span></span><br><span class="line">            object.__setattr_<span class="number">_</span>(<span class="keyword">self</span>, <span class="string">'__wrapped__'</span>, local)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_get_current_object</span><span class="params">(<span class="keyword">self</span>)</span></span><span class="symbol">:</span></span><br><span class="line">        <span class="string">""</span><span class="string">"Return the current object.  This is useful if you want the real</span></span><br><span class="line"><span class="string">        object behind the proxy at a time for performance reasons or because</span></span><br><span class="line"><span class="string">        you want to pass the object into a different context.</span></span><br><span class="line"><span class="string">        "</span><span class="string">""</span></span><br><span class="line">        <span class="comment"># 由于所有Local或LocalStack对象都有__release_local__ method, 所以如果没有该属性就表明self.__local为callable对象</span></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> hasattr(<span class="keyword">self</span>.__local, <span class="string">'__release_local__'</span>)<span class="symbol">:</span></span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">self</span>.__local()</span><br><span class="line">        <span class="symbol">try:</span></span><br><span class="line">            <span class="comment"># 此处self.__local为Local或LocalStack对象</span></span><br><span class="line">            <span class="keyword">return</span> getattr(<span class="keyword">self</span>.__local, <span class="keyword">self</span>.__name_<span class="number">_</span>)</span><br><span class="line">        except <span class="symbol">AttributeError:</span></span><br><span class="line">            raise RuntimeError(<span class="string">'no object bound to %s'</span> % <span class="keyword">self</span>.__name_<span class="number">_</span>)</span><br><span class="line"></span><br><span class="line">    @property</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__dict__</span><span class="params">(<span class="keyword">self</span>)</span></span><span class="symbol">:</span></span><br><span class="line">        <span class="symbol">try:</span></span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">self</span>._get_current_object().__dict_<span class="number">_</span></span><br><span class="line">        except <span class="symbol">RuntimeError:</span></span><br><span class="line">            raise AttributeError(<span class="string">'__dict__'</span>)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__getattr__</span><span class="params">(<span class="keyword">self</span>, name)</span></span><span class="symbol">:</span></span><br><span class="line">        <span class="keyword">if</span> name == <span class="string">'__members__'</span><span class="symbol">:</span></span><br><span class="line">            <span class="keyword">return</span> dir(<span class="keyword">self</span>._get_current_object())</span><br><span class="line">        <span class="keyword">return</span> getattr(<span class="keyword">self</span>._get_current_object(), name)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__setitem__</span><span class="params">(<span class="keyword">self</span>, key, value)</span></span><span class="symbol">:</span></span><br><span class="line">        <span class="keyword">self</span>._get_current_object()[key] = value</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__delitem__</span><span class="params">(<span class="keyword">self</span>, key)</span></span><span class="symbol">:</span></span><br><span class="line">        del <span class="keyword">self</span>._get_current_object()[key]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> <span class="symbol">PY2:</span></span><br><span class="line">        __getslice_<span class="number">_</span> = lambda x, i, <span class="symbol">j:</span> x._get_current_object()[<span class="symbol">i:</span>j]</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">def</span> <span class="title">__setslice__</span><span class="params">(<span class="keyword">self</span>, i, j, seq)</span></span><span class="symbol">:</span></span><br><span class="line">            <span class="keyword">self</span>._get_current_object()[<span class="symbol">i:</span>j] = seq</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">def</span> <span class="title">__delslice__</span><span class="params">(<span class="keyword">self</span>, i, j)</span></span><span class="symbol">:</span></span><br><span class="line">            del <span class="keyword">self</span>._get_current_object()[<span class="symbol">i:</span>j]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 截取部分操作符代码</span></span><br><span class="line">    __setattr_<span class="number">_</span> = lambda x, n, <span class="symbol">v:</span> setattr(x._get_current_object(), n, v)</span><br><span class="line">    __delattr_<span class="number">_</span> = lambda x, <span class="symbol">n:</span> delattr(x._get_current_object(), n)</span><br><span class="line">    __str_<span class="number">_</span> = lambda <span class="symbol">x:</span> str(x._get_current_object())</span><br><span class="line">    __lt_<span class="number">_</span> = lambda x, <span class="symbol">o:</span> x._get_current_object() &lt; o</span><br><span class="line">    __le_<span class="number">_</span> = lambda x, <span class="symbol">o:</span> x._get_current_object() &lt;= o</span><br><span class="line">    __eq_<span class="number">_</span> = lambda x, <span class="symbol">o:</span> x._get_current_object() == o</span><br></pre></td></tr></table></figure></p>
-<ul>
-<li>首先在<code>__init__</code> method中传递的<code>local</code>参数会被赋予属性<code>_LocalProxy__local</code>,该属性可以通过<code>self.local</code>进行访问，关于这一点可以看<a href="https://stackoverflow.com/questions/1301346/what-is-the-meaning-of-a-single-and-a-double-underscore-before-an-object-name" target="_blank" rel="noopener">StackOverflow的问题回答</a></li>
-<li>LocalProxy通过<code>_get_current_object</code>来获取代理的对象。需要注意的是当初始化参数为callable对象时，则直接调用以返回Local或LocalStack对象，具体看源代码的注释。</li>
-<li>重载了绝大多数操作符，以便在调用LocalProxy的相应操作时，通过<code>_get_current_object</code> method来获取真正代理的对象，然后再进行相应操作</li>
-</ul>
-<h4>为什么要使用LocalProxy</h4>
-<p>可是说了这么多，为什么一定要用proxy，而不能直接调用Local或LocalStack对象呢？这主要是在有多个可供调用的对象的时候会出现问题，如下图：</p>
-<p><img src="http://upload-images.jianshu.io/upload_images/3959253-b474030cec52260b.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="multiple objects"></p>
-<p>我们再通过下面的代码也许可以看出一二：
-<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"># use Local object directly</span><br><span class="line"><span class="keyword">from</span> werkzeug.local <span class="keyword">import</span> LocalStack</span><br><span class="line">user_stack = LocalStack()</span><br><span class="line">user_stack.<span class="keyword">push</span>(&#123;<span class="string">'name'</span>: <span class="string">'Bob'</span>&#125;)</span><br><span class="line">user_stack.<span class="keyword">push</span>(&#123;<span class="string">'name'</span>: <span class="string">'John'</span>&#125;)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> get_user():</span><br><span class="line">    # <span class="keyword">do</span> something to get User object and <span class="keyword">return</span> it</span><br><span class="line">    <span class="keyword">return</span> user_stack.<span class="keyword">pop</span>()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># 直接调用函数获取user对象</span><br><span class="line">user = get_user()</span><br><span class="line"><span class="keyword">print</span> user[<span class="string">'name'</span>]</span><br><span class="line"><span class="keyword">print</span> user[<span class="string">'name'</span>]</span><br></pre></td></tr></table></figure></p>
-<p>打印结果是：
-<figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">John</span></span><br><span class="line"><span class="attribute">John</span></span><br></pre></td></tr></table></figure></p>
-<p>再看下使用LocalProxy
-<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"># use LocalProxy</span><br><span class="line"><span class="keyword">from</span> werkzeug.local <span class="keyword">import</span> LocalStack, LocalProxy</span><br><span class="line">user_stack = LocalStack()</span><br><span class="line">user_stack.<span class="keyword">push</span>(&#123;<span class="string">'name'</span>: <span class="string">'Bob'</span>&#125;)</span><br><span class="line">user_stack.<span class="keyword">push</span>(&#123;<span class="string">'name'</span>: <span class="string">'John'</span>&#125;)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> get_user():</span><br><span class="line">    # <span class="keyword">do</span> something to get User object and <span class="keyword">return</span> it</span><br><span class="line">    <span class="keyword">return</span> user_stack.<span class="keyword">pop</span>()</span><br><span class="line"></span><br><span class="line"># 通过LocalProxy使用user对象</span><br><span class="line">user = LocalProxy(get_user)</span><br><span class="line"><span class="keyword">print</span> user[<span class="string">'name'</span>]</span><br><span class="line"><span class="keyword">print</span> user[<span class="string">'name'</span>]</span><br></pre></td></tr></table></figure></p>
-<p>打印结果是：
-<figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">John</span></span><br><span class="line"><span class="attribute">Bob</span></span><br></pre></td></tr></table></figure></p>
-<p>怎么样，看出区别了吧，直接使用LocalStack对象，user一旦赋值就无法再动态更新了，而使用Proxy，每次调用操作符(这里<code>[]操作符</code>用于获取属性)，都会重新获取user，从而实现了动态更新user的效果。见下图：</p>
-<p><img src="http://upload-images.jianshu.io/upload_images/3959253-b673a9a708167969.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="proxy auto select object"></p>
-<p>Flask以及Flask的插件很多时候都需要这种动态更新的效果，因此LocalProxy就会非常有用了。</p>
-<p>至此，我们针对Local、LocalStack和LocalProxy的概念已经做了详细阐释，如果你觉得文章对你有帮助，不妨点个赞吧！</p>
-
-          
+          <p>在我们使用Flask以及Werkzeug框架的过程中，经常会遇到如下三个概念：Local、LocalStack和LocalProxy。尤其在学习Flask的Request Context和App Context的过程中，这几个概念出现的更加频繁，另外很多Flask插件都会使用这三个概念对应的技术。那么这三个东西到底是什么？我们为什么需要它们？以及如何使用呢？本篇文章主要就是来解答这些问题。
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/10/08/Werkzeug-Local/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -2037,7 +1771,9 @@ WiredTiger引擎可以针对单个文档来保证ACID特性，但是当需要操
     
     
     
-
+    <div>
+      
+    </div>
     
 
     
@@ -2142,7 +1878,7 @@ WiredTiger引擎可以针对单个文档来保证ACID特性，但是当需要操
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2018-08-12 18:08:57" itemprop="dateModified" datetime="2018-08-12T18:08:57+08:00">2018-08-12</time>
+                <time title="Modified: 2018-10-06 13:29:01" itemprop="dateModified" datetime="2018-10-06T13:29:01+08:00">2018-10-06</time>
               
             
           </span>
@@ -2165,6 +1901,17 @@ WiredTiger引擎可以针对单个文档来保证ACID特性，但是当需要操
 
           
           
+             <span id="/2017/10/05/Flask-Signals/" class="leancloud_visitors" data-flag-title="Flask Signals 详解">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">Views: </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
 
           
 
@@ -2186,146 +1933,19 @@ WiredTiger引擎可以针对单个文档来保证ACID特性，但是当需要操
 
       
         
-          
-            <p>Flask Signals和操作系统的signals系统很类似，都是通过信号（也可以说是事件
+          <p>Flask Signals和操作系统的signals系统很类似，都是通过信号（也可以说是事件
 event）来通知已经注册的回调函数，让回调函数自动开始执行。Flask定义了自己
 的一套核心signals和对应的functions(用于发起消息，注册回调函数)，我们需要
 定义自己的回调函数，然后注册到对应的signal，这样就可以在收到该信号的时候
 自动执行我们定义的回调函数。</p>
-<p>&lt;!--more--&gt;</p>
-<h2>Flask Signals简介</h2>
-<p>Flask Signals和操作系统的signals系统很类似，都是通过信号（也可以说是事件event）来通知已经注册的回调函数，让回调函数自动开始执行。Flask定义了自己的一套核心signals和对应的functions(用于发起消息，注册回调函数)，我们需要定义自己的回调函数，然后注册到对应的signal，这样就可以在收到该信号的时候自动执行我们定义的回调函数。</p>
-<h2>什么情况下需要使用Signals?</h2>
-<p>当我们需要使用观察者模式来解耦模块之间的信息传递的时候，Signals系统就可以帮助我们轻松达到目的。观察者模式如下图(图片来自voidcn)
-<img src="http://upload-images.jianshu.io/upload_images/3959253-15e7e0cf37d01caa.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="观察者模式"></p>
-<h3>与Hook函数的区别</h3>
-<p>试想，当我们需要监听某个事件，当它发生的时候，需要执行一系列functions，来实现诸如log记录等功能时，我们就可以使用Signals系统来实现，但是这里有一个疑问就是这个功能通过hook函数似乎也可以实现，比如通过<code>before_request</code> decorator实现记录日志的功能和使用<code>request_started</code>来记录日志就非常相似， 如下代码所示：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">#!/usr/bin/env python</span><br><span class="line"># -*- coding: utf-8 -*-</span><br><span class="line"></span><br><span class="line">from flask import Flask, request, request_started</span><br><span class="line">app = Flask(__name__)</span><br><span class="line"></span><br><span class="line">@app.before_request</span><br><span class="line">def print_url_in_hook():</span><br><span class="line">    print &quot;in hook, url: %s&quot; % request.url</span><br><span class="line"></span><br><span class="line">@app.route(&quot;/&quot;)</span><br><span class="line">def hello():</span><br><span class="line">    return &quot;Hello, World!&quot;</span><br><span class="line"></span><br><span class="line">def print_url_in_signal_subscriber(sender, **extra):</span><br><span class="line">    print &quot;in signal subscriber, url: %s&quot; % request.url</span><br><span class="line"></span><br><span class="line">if __name__ == &quot;__main__&quot;:</span><br><span class="line">    request_started.connect(print_url_in_signal_subscriber, app)</span><br><span class="line">    app.run()</span><br></pre></td></tr></table></figure></p>
-<p>当收到http请求后，打印如下：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">in signal subscriber, url: http://localhost:5000/</span><br><span class="line">in hook, url: http://localhost:5000/</span><br><span class="line">127.0.0.1 - - [05/Oct/2017 16:57:20] &quot;GET / HTTP/1.1&quot; 200 -</span><br></pre></td></tr></table></figure></p>
-<p>那么到底什么情况下使用signal，什么情况下使用hook函数呢？我们来看下它们的主要区别：</p>
-<ol>
-<li>signal的callback函数是无顺序的，而hook函数的执行是按照定义的顺序执行的。（这一点虽然是官网提出的区别，但是实际测试发现signal执行实际是按照注册的顺序执行的，即先通过connect进行注册的回调函数会先被执行）</li>
-<li>signal无法直接abort这个request请求，相比较在hook函数中可以直接abort request，即直接返回response给客户端，而无需再执行后续的操作。</li>
-<li>signal可以通过参数携带数据，而hook函数通常不会携带额外的参数</li>
-</ol>
-<h3>与RabbitMQ等消息中间件的区别</h3>
-<p>Rabbitmq与signals都支持观察者模式，但是它们的区别也是很明显的：</p>
-<ol>
-<li>Rabbitmq之类的消息中间件更加重量级，提供更多功能，如分布式部署，消息存储备份等功能，而signal系统显然更加轻量级，只提供简单的消息分发功能</li>
-<li>Rabbitmq之类的消息中间件可以在不同的系统间传递消息，从而使得不同的功能模块可以使用不同的语言进行开发，而signal系统显然仅限于Flask系统中使用</li>
-</ol>
-<p>显然，signal系统使用局限性更大，但也更加轻量级，在只是简单的进行消息分发的系统中，使用signal更加简单方便</p>
-<h2>怎么使用Signals?</h2>
-<p>Flask提供的signal机制优先使用<a href="https://pythonhosted.org/blinker/" target="_blank" rel="noopener">blinker</a>提供的库，但当blinker没有安装的时候，Flask也可以回退到使用自己的库。但是鉴于官网推荐使用blinker，所以我们最好还是安装blinker。</p>
-<h3>使用blinker</h3>
-<p>安装blinker
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install blinker</span><br></pre></td></tr></table></figure></p>
-<p>测试Flask signal是否使用blinker
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">In [1]: from flask import signals</span><br><span class="line"></span><br><span class="line">In [2]: signals.signals_available</span><br><span class="line">Out[2]: True</span><br></pre></td></tr></table></figure></p>
-<p>当<code>signals.signals_available</code>返回True时，说明使用的是Blinker库</p>
-<h3>使用Flask Built-in signals</h3>
-<p>Flask内置有多个signals可以直接使用，这些signals会自动emit(发射)，我们只需要定义自己的回调函数，然后通过connect方式来subscribe我们定义的函数到对应的signal即可监听该signal</p>
-<p>下表展示了Flask内置的Signals，详细请参考<a href="http://flask.pocoo.org/docs/0.12/api/#core-signals-list" target="_blank" rel="noopener">Flask built-in signals</a>:</p>
-<table>
-<thead>
-<tr>
-<th>Signals</th>
-<th>说明</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>template_rendered</td>
-<td>当template被成功渲染之后会触发</td>
-</tr>
-<tr>
-<td>before_render_template</td>
-<td>当template被渲染之前会触发</td>
-</tr>
-<tr>
-<td>request_started</td>
-<td>当request context建立好之后，并在request被处理之前</td>
-</tr>
-<tr>
-<td>request_finished</td>
-<td>当发送response给客户端之后被触发</td>
-</tr>
-<tr>
-<td>got_request_exception</td>
-<td>当request处理过程中发生异常时，该signal会被触发，它甚至早于程序中的异常处理</td>
-</tr>
-<tr>
-<td>request_tearing_down</td>
-<td>当request tear down的时候触发，无论何种情况该signal都会被触发，即使发生异常</td>
-</tr>
-<tr>
-<td>appcontext_tearing_down</td>
-<td>当应用的context tear down的时候触发</td>
-</tr>
-<tr>
-<td>appcontext_pushed</td>
-<td>当应用的context被push时触发</td>
-</tr>
-<tr>
-<td>appcontext_popped</td>
-<td>当应用的context被pop时触发</td>
-</tr>
-<tr>
-<td>message_flashed</td>
-<td>当应用发送flash message时触发</td>
-</tr>
-</tbody>
-</table>
-<p>之前的例子我们已经看到如何使用<code>request_started</code> signal了，这里需要说明两点：</p>
-<ol>
-<li>在定义回调函数时，第一个参数必须是sender对象（即发送该signal的对象），第二个参数**extra用于接受额外的参数，也防止将来Flask在发送signal时添加新的参数。</li>
-<li>使用connect注册回调函数时，第一个参数是回调函数，这个是必须的，第二参数是sender对象，是可选的，但最佳实践是要明确发送该signal的对象</li>
-</ol>
-<p>另外，我们也可以临时性注册一个回调函数，这个尤其在进行单元测试时非常有用，因为我们不想在实际程序中添加测试相关的回调函数，因此需要一种机制在测试完成后，再取消注册该回调函数，有两种方式可以此种临时注册的机制：</p>
-<ul>
-<li>一种是通过<code>contextmanager</code>decorator和disconnect函数一起来实现，如下：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">from flask import template_rendered</span><br><span class="line">from contextlib import contextmanager</span><br><span class="line"></span><br><span class="line">@contextmanager</span><br><span class="line">def captured_templates(app):</span><br><span class="line">    recorded = []</span><br><span class="line">    def record(sender, template, context, **extra):</span><br><span class="line">        recorded.append((template, context))</span><br><span class="line">    # 当使用with关键字进入with context时，自动注册record函数到template_rendered signal</span><br><span class="line">    template_rendered.connect(record, app)</span><br><span class="line">    try:</span><br><span class="line">        yield recorded</span><br><span class="line">    finally:</span><br><span class="line">        # with context结束时会自动调用disconnect函数来解除注册</span><br><span class="line">        template_rendered.disconnect(record, app)</span><br></pre></td></tr></table></figure></li>
-</ul>
-<p>使用时代码如下：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">with captured_templates(app) as templates:</span><br><span class="line">    rv = app.test_client().get(&apos;/&apos;)</span><br><span class="line">    assert rv.status_code == 200</span><br><span class="line">    assert len(templates) == 1</span><br><span class="line">    template, context = templates[0]</span><br><span class="line">    assert template.name == &apos;index.html&apos;</span><br><span class="line">    assert len(context[&apos;items&apos;]) == 10</span><br></pre></td></tr></table></figure></p>
-<ul>
-<li>另外一种方式是使用connect_to函数
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">from flask import template_rendered</span><br><span class="line"></span><br><span class="line">def captured_templates(app, recorded, **extra):</span><br><span class="line">    def record(sender, template, context):</span><br><span class="line">        recorded.append((template, context))</span><br><span class="line">    return template_rendered.connected_to(record, app)</span><br></pre></td></tr></table></figure></li>
-</ul>
-<p>使用时代码如下：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">templates = []</span><br><span class="line">with captured_templates(app, templates, **extra):</span><br><span class="line">    ...</span><br><span class="line">    template, context = templates[0]</span><br></pre></td></tr></table></figure></p>
-<h3>自定义signals的使用</h3>
-<h4>自定义signal</h4>
-<p>当我们需要自定义signal时，我们可以直接使用blinker库</p>
-<ol>
-<li>
-<p>首先定义一个namespace
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">from blinker import Namespace</span><br><span class="line">my_signals = Namespace()</span><br></pre></td></tr></table></figure></p>
-</li>
-<li>
-<p>使用我们自定义的namespace定义自己的signal
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">upload_image_finished = my_signals.signal(&apos;upload_image_finished&apos;)</span><br></pre></td></tr></table></figure></p>
-</li>
-</ol>
-<p>至此，我们就定义了一个signal，名为<code>upload_image_finished</code></p>
-<h4>发射自定义signal</h4>
-<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">from flask import current_app</span><br><span class="line"></span><br><span class="line">def upload_image(image_path, upload_url):</span><br><span class="line">    # upload image code</span><br><span class="line">    ...</span><br><span class="line">    # after upload image</span><br><span class="line">    upload_image_finished.send(current_app._get_current_object())</span><br></pre></td></tr></table></figure></p>
-<ul>
-<li>当在类的method中使用send函数发射signal时，我们可以选择该类的对象作为sender对象，因此直接使用self作为参数，但是当我们不是在类的method当中，或者我们想让应用对象作为sender，那么我们就需使用如上代码所示的current_app._get_current_object()来获取应用对象</li>
-<li>使用sender时，第一个参数是sender对象，是必选的。其余实际我们还可以传递更多参数(记得我们的callback函数使用了**extra), 这样的话我们实际就拥有了传递更多数据的能力。</li>
-</ul>
-<h3>注册回调函数的简化写法</h3>
-<p>从文章的第一个示例可以看出我们需要通过调用connect函数来对回调函数进行注册, 其实还有一个简化的写法可以把回调函数的定义和注册过程结合在一起，如下：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">from flask import template_rendered</span><br><span class="line"></span><br><span class="line">@template_rendered.connect_via(app)</span><br><span class="line">def when_template_rendered(sender, template, context, **extra):</span><br><span class="line">    print &apos;Template %s is rendered with %s&apos; % (template.name, context)</span><br></pre></td></tr></table></figure></p>
-<p>通过connect_via装饰器来简化回调函数定义和注册的过程</p>
-<h2>Reference</h2>
-<ul>
-<li><a href="http://flask.pocoo.org/docs/0.12/signals/" target="_blank" rel="noopener">Flask Signals</a></li>
-<li><a href="https://pythonhosted.org/blinker/" target="_blank" rel="noopener">Blinker Doc</a></li>
-</ul>
-
-          
+<p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/10/05/Flask-Signals/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -2335,7 +1955,9 @@ event）来通知已经注册的回调函数，让回调函数自动开始执行
     
     
     
-
+    <div>
+      
+    </div>
     
 
     
@@ -2440,11 +2062,29 @@ event）来通知已经注册的回调函数，让回调函数自动开始执行
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2018-08-12 13:50:21" itemprop="dateModified" datetime="2018-08-12T13:50:21+08:00">2018-08-12</time>
+                <time title="Modified: 2018-10-06 13:29:01" itemprop="dateModified" datetime="2018-10-06T13:29:01+08:00">2018-10-06</time>
               
             
           </span>
 
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Flask/" itemprop="url" rel="index"><span itemprop="name">Flask</span></a></span>
+
+                
+                
+              
+            </span>
           
 
           
@@ -2462,6 +2102,17 @@ event）来通知已经注册的回调函数，让回调函数自动开始执行
           
 
           
+          
+             <span id="/2017/08/10/flask_restful_api/" class="leancloud_visitors" data-flag-title="Flask Restful API权限管理设计与实现">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">Views: </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
           
 
           
@@ -2484,37 +2135,14 @@ event）来通知已经注册的回调函数，让回调函数自动开始执行
 
       
         
-          
-            <p>在使用flask设计restful api的时候，有一个很重要的问题就是如何进行权限管理，以及如何进行角色的定义，在网上找了一下没有发现有类似的资料，虽然有些针对网站进行的权限管理设计，但是跟restful api接口的权限管理还是有很多不同的，于是乎自己动手，丰衣足食。为方便后来者，特撰此文！</p>
-<h2>权限的设计</h2>
-<p>从本质上思考，我需要为每个API接口设定相应的权限，所以针对API的权限列表跟普通网站的权限设计是不同的，普通网站的权限设计是针对某个功能，比如是否可以comment功能，通常的权限定义如下：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">class Permission:</span><br><span class="line">    &quot;&quot;&quot;</span><br><span class="line">    权限表</span><br><span class="line">    &quot;&quot;&quot;</span><br><span class="line">    COMMENT = 0x01  # 评论</span><br><span class="line">    MODERATE_COMMENT = 0x02  # 移除评论</span><br></pre></td></tr></table></figure></p>
-<p>但是针对restful api，我们更希望权限是针对我们的api接口，而restful api接口是跟我们路由的endpoint以及http method相关的，所以我们的权限设计应该是类似如下示例中的样子：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"># 这里comments是路由的endpoint，接口在判断用户是否有权限的时候</span><br><span class="line"># 可以先获取到endpoint和http method，然后就可以查看其是否有权限</span><br><span class="line">comment_permission = &#123;&quot;comments&quot;: &#123;&quot;post&quot;: True, &quot;get&quot;: True, &quot;delete&quot;: False&#125;&#125;</span><br></pre></td></tr></table></figure></p>
-<h2>角色的设计</h2>
-<p>通常，我们在做网站的角色设计时会将角色存储在数据库当中，并会通过或运算(|)赋予角色以特定权限，如下：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">class Role(db.Model):</span><br><span class="line">    &quot;&quot;&quot;</span><br><span class="line">    用户角色</span><br><span class="line">    &quot;&quot;&quot;</span><br><span class="line">    id = db.Column(db.Integer, primary_key=True)</span><br><span class="line">    # 该用户角色名称</span><br><span class="line">    name = db.Column(db.String(164))</span><br><span class="line">    # 该用户角色是否为默认</span><br><span class="line">    default = db.Column(db.Boolean, default=False, index=True)</span><br><span class="line">    # 该用户角色对应的权限</span><br><span class="line">    permissions = db.Column(db.Integer)</span><br><span class="line">    # 该用户角色和用户的关系</span><br><span class="line">    # 角色为该用户角色的所有用户</span><br><span class="line">    users = db.relationship(&apos;User&apos;, backref=&apos;role&apos;, lazy=&apos;dynamic&apos;)</span><br><span class="line"></span><br><span class="line">    @staticmethod</span><br><span class="line">    def insert_roles():</span><br><span class="line">        &quot;&quot;&quot;</span><br><span class="line">        创建用户角色</span><br><span class="line">        &quot;&quot;&quot;</span><br><span class="line">        roles = &#123;</span><br><span class="line">            # 定义了两个用户角色(User, Admin)</span><br><span class="line">            &apos;User&apos;: (Permission.COMMENT, True),</span><br><span class="line">            &apos;Admin&apos;: (Permission.COMMENT |</span><br><span class="line">                      Permission.MODERATE_COMMENT, False)</span><br><span class="line">        &#125;</span><br><span class="line">        for r in roles:</span><br><span class="line">            role = Role.query.filter_by(name=r).first()</span><br><span class="line">            if role is None:</span><br><span class="line">                # 如果用户角色没有创建: 创建用户角色</span><br><span class="line">                role = Role(name=r)</span><br><span class="line">            role.permissions = roles[r][0]</span><br><span class="line">            role.default = roles[r][1]</span><br><span class="line">            db.session.add(role)</span><br><span class="line">            db.session.commit()</span><br></pre></td></tr></table></figure></p>
-<p>这里其实我一直没有搞明白，为什么要将角色存储于数据库当中，在我看来这只会导致更多的I/O操作从而影响系统的性能，因此我在设计角色的时候根本没有考虑存储到数据库中，角色的数据结构在系统运行时，直接存在内存当中，这样在接口调用时，可以直接使用角色相关的数据结构。而且由于我们的权限设计也不太相同，所以我针对restful api设计的Role如下：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">USER = 1</span><br><span class="line">ADMIN = 2</span><br><span class="line">VISITOR = 3</span><br><span class="line"></span><br><span class="line">Role = &#123;</span><br><span class="line">    USER: &#123;</span><br><span class="line">        &quot;comment&quot;: &#123;&quot;post&quot;: True, &quot;patch&quot;: True, &quot;get&quot;: True, &quot;delete&quot;: True&#125;,</span><br><span class="line">        &quot;share&quot;: &#123;&quot;post&quot;: True&#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    ADMIN: &#123;</span><br><span class="line">        &quot;comment&quot;: &#123;&quot;post&quot;: True, &quot;patch&quot;: True, &quot;get&quot;: True, &quot;delete&quot;: True&#125;,</span><br><span class="line">        &quot;share&quot;: &#123;&quot;post&quot;: True&#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    VISITOR: &#123;</span><br><span class="line">        &quot;comment&quot;: &#123;&quot;get&quot;: True&#125;,</span><br><span class="line">        &quot;share&quot;: &#123;&quot;post&quot;: True&#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>用户可以被赋予特定的role，如下：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">userA = &#123;&quot;name&quot;: &quot;John&quot;, &quot;role&quot;: USER&#125;</span><br></pre></td></tr></table></figure></p>
-<p>那么接口如何判断用户是否有权限访问呢？
-首先用户访问接口时都会带有用户信息，restful api一般是通过token来表明身份，系统通过token来获取用户的信息，比如用户名，然后我们可以通过用户名来获取用户的角色role，假设我们访问的接口是comments endpoint的post接口，那么就可以如下判断：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">def access_control(user):</span><br><span class="line">    &quot;&quot;&quot;判断用户是否有访问权限，有就返回True，没有返回False&quot;&quot;&quot;</span><br><span class="line">    </span><br><span class="line">    # 首先要获取到API的endpoint和http method，此处代码省略</span><br><span class="line">    ...</span><br><span class="line">    </span><br><span class="line">    role = user.get(&apos;role&apos;, VISITOR)</span><br><span class="line">    try:</span><br><span class="line">        if not Role[role][endpoint][http_method]:</span><br><span class="line">            return False</span><br><span class="line">        return True</span><br><span class="line">    except KeyError:</span><br><span class="line">        return False</span><br></pre></td></tr></table></figure></p>
-<p>由于基本所有的接口都需要access control，那么我们把上边的代码稍作改变，让它成为一个decorator，同时，user信息也可以直接获取而不需要从参数传递，如下：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">from functools import wraps</span><br><span class="line"></span><br><span class="line">def get_role():</span><br><span class="line">    # 这里get_resource_by_name用于从数据库中获取该用户的信息，这个需要自己去定义</span><br><span class="line">    # 另外我们可以在登录验证的时候或者token验证的时候讲user name存储于全局变量g中，这样我们可以随时获取该用户名</span><br><span class="line">    user = UserModel.get_resource_by_name(g.user_name)</span><br><span class="line">    return user.get(&quot;role&quot;, VISITOR)</span><br><span class="line"></span><br><span class="line">def access_control(func):</span><br><span class="line">    @wraps(func)</span><br><span class="line">    def wrap_func(*args, **kwargs):</span><br><span class="line">        # 同样要先获取到API的endpoint和http method，此处代码省略</span><br><span class="line">        ...</span><br><span class="line">        </span><br><span class="line">        try:</span><br><span class="line">            if not Role[role][endpoint][http_method]:</span><br><span class="line">                return make_response(</span><br><span class="line">                    jsonify(&#123;&apos;error&apos;: &apos;no permission&apos;&#125;), 403)</span><br><span class="line">            return func(*args, **kwargs)</span><br><span class="line">        except KeyError:</span><br><span class="line">            return make_response(</span><br><span class="line">                jsonify(&#123;&apos;error&apos;: &apos;no permission&apos;&#125;), 403)</span><br><span class="line">    return wrap_func</span><br></pre></td></tr></table></figure></p>
-<p>以下是一个获取图片resource的使用示例
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">from flask_restful import Resource</span><br><span class="line"></span><br><span class="line">class ImageResource(Resource):</span><br><span class="line">    def __init__(self):</span><br><span class="line">        super(ImageResource, self).__init__()</span><br><span class="line"></span><br><span class="line">    @token_auth.login_required</span><br><span class="line">    @access_control</span><br><span class="line">    def get(self, resource_id):</span><br><span class="line">        response = resource_get(resource_id)</span><br><span class="line">        return response</span><br></pre></td></tr></table></figure></p>
-<p>这里另外一个decortor @token_auth.login_required用于token验证，大家可以先不用理会。到这里我们已经可以针对每个接口自动判断该用户是否有权限访问了，而所有权限的变化，都可以通过修改Role中的权限来进行更改，而不需要更改原来的代码，很爽吧，有木有？
-不过，笔者在项目中还遇到了另外一个问题，有时候针对一个接口所有的user都应该有权限，但是针对特定的resource，只能resource owner可以操作，举个栗子，比如我们要删除某个评论，但是只允许发布评论的人才有权限删除，也就是comment resource的owner才可以使用delete接口删除，但是我们所有的用户在Role定义的时候delete接口都是True，这个怎么办呢？
-这就需要我们在access_control检测完了之后再进一步检测该用户是否是resource owner，所以我们就需要进一步检测，这里添加一个decorator如下：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">def get_resource_owner():</span><br><span class="line">    &quot;&quot;&quot;获取resource的owner&quot;&quot;&quot;</span><br><span class="line">    # 自定义，代码省略</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">def owner_permission_required(func):</span><br><span class="line">    @wrap(func)</span><br><span class="line">    def wrap_func(*args, **kwargs):</span><br><span class="line">        if g.user_name == get_resource_owner():</span><br><span class="line">            return func(*args, **kwargs)</span><br><span class="line">        return make_response(</span><br><span class="line">            jsonify(&#123;&apos;error&apos;: &apos;no permission&apos;&#125;), 403)</span><br><span class="line">    return wrap_func</span><br></pre></td></tr></table></figure></p>
-<p>使用如下：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">from flask_restful import Resource</span><br><span class="line"></span><br><span class="line">class CommentResource(Resource):</span><br><span class="line">    def __init__(self):</span><br><span class="line">        super(CommentResource, self).__init__()</span><br><span class="line"></span><br><span class="line">    @token_auth.login_required</span><br><span class="line">    @access_control</span><br><span class="line">    @owner_permission_required</span><br><span class="line">    @marshal_with(image_fields)</span><br><span class="line">    def delete(self, resource_id):</span><br><span class="line">        response = resource_delete(resource_id)</span><br><span class="line">        return response</span><br></pre></td></tr></table></figure></p>
-<p>注意：decorator的顺序是不能改变的。</p>
-<p>至此，Restful API权限管理相关的设计就完成了，如果文章给你带来了启发，记得点赞哦！</p>
-
-          
+          <p>在使用flask设计restful api的时候，有一个很重要的问题就是如何进行权限管理，以及如何进行角色的定义，在网上找了一下没有发现有类似的资料，虽然有些针对网站进行的权限管理设计，但是跟restful api接口的权限管理还是有很多不同的，于是乎自己动手，丰衣足食。为方便后来者，特撰此文！
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/08/10/flask_restful_api/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -2524,7 +2152,9 @@ event）来通知已经注册的回调函数，让回调函数自动开始执行
     
     
     
-
+    <div>
+      
+    </div>
     
 
     
@@ -2605,6 +2235,25 @@ event）来通知已经注册的回调函数，让回调函数自动开始执行
               
 
               
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">4</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
 
               
                 
@@ -2627,7 +2276,35 @@ event）来通知已经注册的回调函数，让回调函数自动开始执行
                     
                       
                     
-                    <span class="site-state-item-count">7</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">21</span>
                     <span class="site-state-item-name">tags</span>
                   </a>
                 </div>
@@ -2859,6 +2536,75 @@ event）来通知已经注册的回调函数，让回调函数自动开始执行
 
 
   
+
+  
+  <script>
+    
+    function showTime(Counter) {
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      Counter('get', '/classes/Counter', { where: JSON.stringify({ url: { "$in": entries } }) })
+        .done(function ({ results }) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.url;
+            var time = item.time;
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function ({ responseJSON }) {
+          console.log("LeanCloud Counter Error: " + responseJSON.code + " " + responseJSON.error);
+        });
+    }
+    
+
+    $(function() {
+      $.get('https://app-router.leancloud.cn/2/route?appId=' + "OCjgmQiFa9gpVkDabM6KTb8g-gzGzoHsz")
+        .done(function ({ api_server }) {
+          var Counter = function (method, url, data) {
+            return $.ajax({
+              method: method,
+              url: `https://${api_server}/1.1${url}`,
+              headers: {
+                'X-LC-Id': "OCjgmQiFa9gpVkDabM6KTb8g-gzGzoHsz",
+                'X-LC-Key': "Ie7XE2V6spB6Q6C1W2GU9drV",
+                'Content-Type': 'application/json',
+              },
+              data: data,
+            });
+          };
+          
+          if ($('.post-title-link').length >= 1) {
+            showTime(Counter);
+          }
+          
+        })
+    });
+  </script>
+
+
 
   
 

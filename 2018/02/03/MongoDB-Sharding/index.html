@@ -108,20 +108,20 @@
 
 
 
-  <meta name="description" content="详细介绍MongoDB sharding &amp;lt;!--more--&amp;gt; 介绍 Sharding Key  Sharding key必须是在对应的collection当中所有的文档都存在的field，比如我要sharding我的user collection，我就可以找nick_name这种所有documents中都存在的field来做为sharding key，当然还要考虑其它因素，但是这个">
+  <meta name="description" content="详细介绍MongoDB sharding">
 <meta name="keywords" content="computer, programming, data science, deep learning">
 <meta property="og:type" content="article">
 <meta property="og:title" content="MongoDB Sharding">
 <meta property="og:url" content="http://yoursite.com/2018/02/03/MongoDB-Sharding/index.html">
 <meta property="og:site_name" content="Geekpy&#39;s Blog">
-<meta property="og:description" content="详细介绍MongoDB sharding &amp;lt;!--more--&amp;gt; 介绍 Sharding Key  Sharding key必须是在对应的collection当中所有的文档都存在的field，比如我要sharding我的user collection，我就可以找nick_name这种所有documents中都存在的field来做为sharding key，当然还要考虑其它因素，但是这个">
+<meta property="og:description" content="详细介绍MongoDB sharding">
 <meta property="og:locale" content="default">
 <meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3959253-e563c219fc51aa4f.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
 <meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3959253-2700a7cbe0745a9b.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
-<meta property="og:updated_time" content="2018-08-12T10:07:28.933Z">
+<meta property="og:updated_time" content="2018-10-06T05:29:01.905Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="MongoDB Sharding">
-<meta name="twitter:description" content="详细介绍MongoDB sharding &amp;lt;!--more--&amp;gt; 介绍 Sharding Key  Sharding key必须是在对应的collection当中所有的文档都存在的field，比如我要sharding我的user collection，我就可以找nick_name这种所有documents中都存在的field来做为sharding key，当然还要考虑其它因素，但是这个">
+<meta name="twitter:description" content="详细介绍MongoDB sharding">
 <meta name="twitter:image" content="http://upload-images.jianshu.io/upload_images/3959253-e563c219fc51aa4f.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
 
 
@@ -373,7 +373,7 @@
         
         
           <p>详细介绍MongoDB sharding</p>
-<p>&lt;!--more--&gt;</p>
+<p><a id="more"></a></p>
 <h2>介绍</h2>
 <h2>Sharding Key</h2>
 <ul>
@@ -552,6 +552,25 @@
               
 
               
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">4</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
 
               
                 
@@ -574,7 +593,35 @@
                     
                       
                     
-                    <span class="site-state-item-count">7</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">21</span>
                     <span class="site-state-item-name">tags</span>
                   </a>
                 </div>
@@ -826,6 +873,75 @@
 
 
   
+
+  
+  <script>
+    
+    function showTime(Counter) {
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      Counter('get', '/classes/Counter', { where: JSON.stringify({ url: { "$in": entries } }) })
+        .done(function ({ results }) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.url;
+            var time = item.time;
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function ({ responseJSON }) {
+          console.log("LeanCloud Counter Error: " + responseJSON.code + " " + responseJSON.error);
+        });
+    }
+    
+
+    $(function() {
+      $.get('https://app-router.leancloud.cn/2/route?appId=' + "OCjgmQiFa9gpVkDabM6KTb8g-gzGzoHsz")
+        .done(function ({ api_server }) {
+          var Counter = function (method, url, data) {
+            return $.ajax({
+              method: method,
+              url: `https://${api_server}/1.1${url}`,
+              headers: {
+                'X-LC-Id': "OCjgmQiFa9gpVkDabM6KTb8g-gzGzoHsz",
+                'X-LC-Key': "Ie7XE2V6spB6Q6C1W2GU9drV",
+                'Content-Type': 'application/json',
+              },
+              data: data,
+            });
+          };
+          
+          if ($('.post-title-link').length >= 1) {
+            showTime(Counter);
+          }
+          
+        })
+    });
+  </script>
+
+
 
   
 

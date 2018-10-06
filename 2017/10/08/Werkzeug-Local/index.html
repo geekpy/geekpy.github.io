@@ -108,21 +108,21 @@
 
 
 
-  <meta name="description" content="在我们使用Flask以及Werkzeug框架的过程中，经常会遇到如下三个概念：Local、LocalStack和LocalProxy。尤其在学习Flask的Request Context和App Context的过程中，这几个概念出现的更加频繁，另外很多Flask插件都会使用这三个概念对应的技术。那么这三个东西到底是什么？我们为什么需要它们？以及如何使用呢？本篇文章主要就是来解答这些问题。 Loc">
+  <meta name="description" content="在我们使用Flask以及Werkzeug框架的过程中，经常会遇到如下三个概念：Local、LocalStack和LocalProxy。尤其在学习Flask的Request Context和App Context的过程中，这几个概念出现的更加频繁，另外很多Flask插件都会使用这三个概念对应的技术。那么这三个东西到底是什么？我们为什么需要它们？以及如何使用呢？本篇文章主要就是来解答这些问题。">
 <meta name="keywords" content="flask,local,localstack,localproxy,werkzeug">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Werkzeug(Flask)之Local、LocalStack和LocalProxy">
 <meta property="og:url" content="http://yoursite.com/2017/10/08/Werkzeug-Local/index.html">
 <meta property="og:site_name" content="Geekpy&#39;s Blog">
-<meta property="og:description" content="在我们使用Flask以及Werkzeug框架的过程中，经常会遇到如下三个概念：Local、LocalStack和LocalProxy。尤其在学习Flask的Request Context和App Context的过程中，这几个概念出现的更加频繁，另外很多Flask插件都会使用这三个概念对应的技术。那么这三个东西到底是什么？我们为什么需要它们？以及如何使用呢？本篇文章主要就是来解答这些问题。 Loc">
+<meta property="og:description" content="在我们使用Flask以及Werkzeug框架的过程中，经常会遇到如下三个概念：Local、LocalStack和LocalProxy。尤其在学习Flask的Request Context和App Context的过程中，这几个概念出现的更加频繁，另外很多Flask插件都会使用这三个概念对应的技术。那么这三个东西到底是什么？我们为什么需要它们？以及如何使用呢？本篇文章主要就是来解答这些问题。">
 <meta property="og:locale" content="default">
 <meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3959253-e64c1ca00b6f14e3.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
 <meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3959253-b474030cec52260b.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
 <meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3959253-b673a9a708167969.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
-<meta property="og:updated_time" content="2018-10-05T14:16:01.368Z">
+<meta property="og:updated_time" content="2018-10-06T05:29:01.905Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Werkzeug(Flask)之Local、LocalStack和LocalProxy">
-<meta name="twitter:description" content="在我们使用Flask以及Werkzeug框架的过程中，经常会遇到如下三个概念：Local、LocalStack和LocalProxy。尤其在学习Flask的Request Context和App Context的过程中，这几个概念出现的更加频繁，另外很多Flask插件都会使用这三个概念对应的技术。那么这三个东西到底是什么？我们为什么需要它们？以及如何使用呢？本篇文章主要就是来解答这些问题。 Loc">
+<meta name="twitter:description" content="在我们使用Flask以及Werkzeug框架的过程中，经常会遇到如下三个概念：Local、LocalStack和LocalProxy。尤其在学习Flask的Request Context和App Context的过程中，这几个概念出现的更加频繁，另外很多Flask插件都会使用这三个概念对应的技术。那么这三个东西到底是什么？我们为什么需要它们？以及如何使用呢？本篇文章主要就是来解答这些问题。">
 <meta name="twitter:image" content="http://upload-images.jianshu.io/upload_images/3959253-e64c1ca00b6f14e3.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
 
 
@@ -373,7 +373,8 @@
       <div class="post-body">
         
         
-          <p>在我们使用Flask以及Werkzeug框架的过程中，经常会遇到如下三个概念：Local、LocalStack和LocalProxy。尤其在学习Flask的Request Context和App Context的过程中，这几个概念出现的更加频繁，另外很多Flask插件都会使用这三个概念对应的技术。那么这三个东西到底是什么？我们为什么需要它们？以及如何使用呢？本篇文章主要就是来解答这些问题。</p>
+          <p>在我们使用Flask以及Werkzeug框架的过程中，经常会遇到如下三个概念：Local、LocalStack和LocalProxy。尤其在学习Flask的Request Context和App Context的过程中，这几个概念出现的更加频繁，另外很多Flask插件都会使用这三个概念对应的技术。那么这三个东西到底是什么？我们为什么需要它们？以及如何使用呢？本篇文章主要就是来解答这些问题。
+<a id="more"></a></p>
 <h2>Local</h2>
 <p>这部分我们重点介绍Local概念，主要分为以下几个部分：</p>
 <ul>
@@ -598,6 +599,25 @@
               
 
               
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">4</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
 
               
                 
@@ -620,7 +640,35 @@
                     
                       
                     
-                    <span class="site-state-item-count">7</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">21</span>
                     <span class="site-state-item-name">tags</span>
                   </a>
                 </div>
@@ -872,6 +920,75 @@
 
 
   
+
+  
+  <script>
+    
+    function showTime(Counter) {
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      Counter('get', '/classes/Counter', { where: JSON.stringify({ url: { "$in": entries } }) })
+        .done(function ({ results }) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.url;
+            var time = item.time;
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function ({ responseJSON }) {
+          console.log("LeanCloud Counter Error: " + responseJSON.code + " " + responseJSON.error);
+        });
+    }
+    
+
+    $(function() {
+      $.get('https://app-router.leancloud.cn/2/route?appId=' + "OCjgmQiFa9gpVkDabM6KTb8g-gzGzoHsz")
+        .done(function ({ api_server }) {
+          var Counter = function (method, url, data) {
+            return $.ajax({
+              method: method,
+              url: `https://${api_server}/1.1${url}`,
+              headers: {
+                'X-LC-Id': "OCjgmQiFa9gpVkDabM6KTb8g-gzGzoHsz",
+                'X-LC-Key': "Ie7XE2V6spB6Q6C1W2GU9drV",
+                'Content-Type': 'application/json',
+              },
+              data: data,
+            });
+          };
+          
+          if ($('.post-title-link').length >= 1) {
+            showTime(Counter);
+          }
+          
+        })
+    });
+  </script>
+
+
 
   
 

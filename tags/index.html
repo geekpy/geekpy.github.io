@@ -367,10 +367,66 @@
                     
                   
                 
-                7 tags in total
+                  
+                    
+                  
+                
+                  
+                    
+                  
+                
+                  
+                    
+                  
+                
+                  
+                    
+                  
+                
+                  
+                    
+                  
+                
+                  
+                    
+                  
+                
+                  
+                    
+                  
+                
+                  
+                    
+                  
+                
+                  
+                    
+                  
+                
+                  
+                    
+                  
+                
+                  
+                    
+                  
+                
+                  
+                    
+                  
+                
+                  
+                    
+                  
+                
+                  
+                    
+                  
+                
+                21 tags in total
             </div>
             <div class="tag-cloud-tags">
-              <a href="/tags/flask/" style="font-size: 30px; color: #111">flask</a> <a href="/tags/local/" style="font-size: 12px; color: #ccc">local</a> <a href="/tags/localproxy/" style="font-size: 12px; color: #ccc">localproxy</a> <a href="/tags/localstack/" style="font-size: 12px; color: #ccc">localstack</a> <a href="/tags/pandas/" style="font-size: 12px; color: #ccc">pandas</a> <a href="/tags/redis/" style="font-size: 12px; color: #ccc">redis</a> <a href="/tags/werkzeug/" style="font-size: 12px; color: #ccc">werkzeug</a>
+              <a href="/tags/acid/" style="font-size: 12px; color: #ccc">acid</a> <a href="/tags/api/" style="font-size: 12px; color: #ccc">api</a> <a href="/tags/asyncio/" style="font-size: 12px; color: #ccc">asyncio</a> <a href="/tags/celery/" style="font-size: 12px; color: #ccc">celery</a> <a href="/tags/database/" style="font-size: 18px; color: #8e8e8e">database</a> <a href="/tags/flask/" style="font-size: 24px; color: #4f4f4f">flask</a> <a href="/tags/ipython/" style="font-size: 12px; color: #ccc">ipython</a> <a href="/tags/local/" style="font-size: 12px; color: #ccc">local</a> <a href="/tags/localproxy/" style="font-size: 12px; color: #ccc">localproxy</a> <a href="/tags/localstack/" style="font-size: 12px; color: #ccc">localstack</a> <a href="/tags/pandas/" style="font-size: 12px; color: #ccc">pandas</a> <a href="/tags/python/" style="font-size: 30px; color: #111">python</a> <a href="/tags/queue/" style="font-size: 12px; color: #ccc">queue</a> <a href="/tags/redis/" style="font-size: 12px; color: #ccc">redis</a> <a href="/tags/restful/" style="font-size: 12px; color: #ccc">restful</a> <a href="/tags/spark/" style="font-size: 12px; color: #ccc">spark</a> <a href="/tags/time/" style="font-size: 18px; color: #8e8e8e">time</a> <a href="/tags/timezone/" style="font-size: 12px; color: #ccc">timezone</a> <a href="/tags/traceback/" style="font-size: 12px; color: #ccc">traceback</a> <a href="/tags/werkzeug/" style="font-size: 12px; color: #ccc">werkzeug</a> <a href="/tags/登陆/" style="font-size: 12px; color: #ccc">登陆</a>
             </div>
           </div>
         
@@ -434,6 +490,25 @@
               
 
               
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">4</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
 
               
                 
@@ -456,7 +531,35 @@
                     
                       
                     
-                    <span class="site-state-item-count">7</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">21</span>
                     <span class="site-state-item-name">tags</span>
                   </a>
                 </div>
@@ -692,6 +795,75 @@
 
 
   
+
+  
+  <script>
+    
+    function showTime(Counter) {
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      Counter('get', '/classes/Counter', { where: JSON.stringify({ url: { "$in": entries } }) })
+        .done(function ({ results }) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.url;
+            var time = item.time;
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function ({ responseJSON }) {
+          console.log("LeanCloud Counter Error: " + responseJSON.code + " " + responseJSON.error);
+        });
+    }
+    
+
+    $(function() {
+      $.get('https://app-router.leancloud.cn/2/route?appId=' + "OCjgmQiFa9gpVkDabM6KTb8g-gzGzoHsz")
+        .done(function ({ api_server }) {
+          var Counter = function (method, url, data) {
+            return $.ajax({
+              method: method,
+              url: `https://${api_server}/1.1${url}`,
+              headers: {
+                'X-LC-Id': "OCjgmQiFa9gpVkDabM6KTb8g-gzGzoHsz",
+                'X-LC-Key': "Ie7XE2V6spB6Q6C1W2GU9drV",
+                'Content-Type': 'application/json',
+              },
+              data: data,
+            });
+          };
+          
+          if ($('.post-title-link').length >= 1) {
+            showTime(Counter);
+          }
+          
+        })
+    });
+  </script>
+
+
 
   
 

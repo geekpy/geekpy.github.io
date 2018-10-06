@@ -109,14 +109,14 @@
 
 
   <meta name="description" content="此下篇主要讲解跟时区相关的概念和程序中经常使用的场景，希望通过此文大家可以搞定所有时区相关的编程问题（如果还有不明白的地方，请联系我，我将进一步补充）。">
-<meta name="keywords" content="computer, programming, data science, deep learning">
+<meta name="keywords" content="python,time,timezone">
 <meta property="og:type" content="article">
 <meta property="og:title" content="史上最详解Python日期和时间处理（下）">
 <meta property="og:url" content="http://yoursite.com/2018/08/25/python_time2/index.html">
 <meta property="og:site_name" content="Geekpy&#39;s Blog">
 <meta property="og:description" content="此下篇主要讲解跟时区相关的概念和程序中经常使用的场景，希望通过此文大家可以搞定所有时区相关的编程问题（如果还有不明白的地方，请联系我，我将进一步补充）。">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2018-10-05T14:28:36.106Z">
+<meta property="og:updated_time" content="2018-10-06T03:45:32.692Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="史上最详解Python日期和时间处理（下）">
 <meta name="twitter:description" content="此下篇主要讲解跟时区相关的概念和程序中经常使用的场景，希望通过此文大家可以搞定所有时区相关的编程问题（如果还有不明白的地方，请联系我，我将进一步补充）。">
@@ -604,6 +604,25 @@
               
 
               
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">4</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
 
               
                 
@@ -626,7 +645,35 @@
                     
                       
                     
-                    <span class="site-state-item-count">7</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">21</span>
                     <span class="site-state-item-name">tags</span>
                   </a>
                 </div>
@@ -878,6 +925,75 @@
 
 
   
+
+  
+  <script>
+    
+    function showTime(Counter) {
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      Counter('get', '/classes/Counter', { where: JSON.stringify({ url: { "$in": entries } }) })
+        .done(function ({ results }) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.url;
+            var time = item.time;
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function ({ responseJSON }) {
+          console.log("LeanCloud Counter Error: " + responseJSON.code + " " + responseJSON.error);
+        });
+    }
+    
+
+    $(function() {
+      $.get('https://app-router.leancloud.cn/2/route?appId=' + "OCjgmQiFa9gpVkDabM6KTb8g-gzGzoHsz")
+        .done(function ({ api_server }) {
+          var Counter = function (method, url, data) {
+            return $.ajax({
+              method: method,
+              url: `https://${api_server}/1.1${url}`,
+              headers: {
+                'X-LC-Id': "OCjgmQiFa9gpVkDabM6KTb8g-gzGzoHsz",
+                'X-LC-Key': "Ie7XE2V6spB6Q6C1W2GU9drV",
+                'Content-Type': 'application/json',
+              },
+              data: data,
+            });
+          };
+          
+          if ($('.post-title-link').length >= 1) {
+            showTime(Counter);
+          }
+          
+        })
+    });
+  </script>
+
+
 
   
 

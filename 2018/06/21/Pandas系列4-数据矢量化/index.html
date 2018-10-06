@@ -108,18 +108,18 @@
 
 
 
-  <meta name="description" content="我们在处理数据问题时，经常会遇到的问题是要将原有数据进行转化，比如在原有 数据的基础上+1操作，或者将原有数据的字符串全部转化为小写字符，更复杂的是 要将原有数据的一部分提取出来使用。这些问题都是数据转化问题，即原有的数据 不能直接使用，而要进一步转化后才能使用。 &amp;lt;!--more--&amp;gt; 问题 我们在处理数据问题时，经常会遇到的问题是要将原有数据进行转化，比如在原有数据的基础上+1操作">
+  <meta name="description" content="我们在处理数据问题时，经常会遇到的问题是要将原有数据进行转化，比如在原有 数据的基础上+1操作，或者将原有数据的字符串全部转化为小写字符，更复杂的是 要将原有数据的一部分提取出来使用。这些问题都是数据转化问题，即原有的数据 不能直接使用，而要进一步转化后才能使用。">
 <meta name="keywords" content="computer, programming, data science, deep learning">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Pandas系列4-数据矢量化">
 <meta property="og:url" content="http://yoursite.com/2018/06/21/Pandas系列4-数据矢量化/index.html">
 <meta property="og:site_name" content="Geekpy&#39;s Blog">
-<meta property="og:description" content="我们在处理数据问题时，经常会遇到的问题是要将原有数据进行转化，比如在原有 数据的基础上+1操作，或者将原有数据的字符串全部转化为小写字符，更复杂的是 要将原有数据的一部分提取出来使用。这些问题都是数据转化问题，即原有的数据 不能直接使用，而要进一步转化后才能使用。 &amp;lt;!--more--&amp;gt; 问题 我们在处理数据问题时，经常会遇到的问题是要将原有数据进行转化，比如在原有数据的基础上+1操作">
+<meta property="og:description" content="我们在处理数据问题时，经常会遇到的问题是要将原有数据进行转化，比如在原有 数据的基础上+1操作，或者将原有数据的字符串全部转化为小写字符，更复杂的是 要将原有数据的一部分提取出来使用。这些问题都是数据转化问题，即原有的数据 不能直接使用，而要进一步转化后才能使用。">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2018-08-12T10:05:50.000Z">
+<meta property="og:updated_time" content="2018-10-06T05:29:01.895Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Pandas系列4-数据矢量化">
-<meta name="twitter:description" content="我们在处理数据问题时，经常会遇到的问题是要将原有数据进行转化，比如在原有 数据的基础上+1操作，或者将原有数据的字符串全部转化为小写字符，更复杂的是 要将原有数据的一部分提取出来使用。这些问题都是数据转化问题，即原有的数据 不能直接使用，而要进一步转化后才能使用。 &amp;lt;!--more--&amp;gt; 问题 我们在处理数据问题时，经常会遇到的问题是要将原有数据进行转化，比如在原有数据的基础上+1操作">
+<meta name="twitter:description" content="我们在处理数据问题时，经常会遇到的问题是要将原有数据进行转化，比如在原有 数据的基础上+1操作，或者将原有数据的字符串全部转化为小写字符，更复杂的是 要将原有数据的一部分提取出来使用。这些问题都是数据转化问题，即原有的数据 不能直接使用，而要进一步转化后才能使用。">
 
 
 
@@ -373,35 +373,35 @@
 数据的基础上+1操作，或者将原有数据的字符串全部转化为小写字符，更复杂的是
 要将原有数据的一部分提取出来使用。这些问题都是数据转化问题，即原有的数据
 不能直接使用，而要进一步转化后才能使用。</p>
-<p>&lt;!--more--&gt;</p>
+<p><a id="more"></a></p>
 <h2>问题</h2>
 <p>我们在处理数据问题时，经常会遇到的问题是要将原有数据进行转化，比如在原有数据的基础上+1操作，或者将原有数据的字符串全部转化为小写字符，更复杂的是要将原有数据的一部分提取出来使用。这些问题都是数据转化问题，即原有的数据不能直接使用，而要进一步转化后才能使用。</p>
 <h2>示例</h2>
 <p>这里举一个笔者在实际项目中遇到的例子来说明。</p>
 <p>笔者项目中需要收集的app version信息，原始信息如下：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">In [167]: df</span><br><span class="line">Out[167]:</span><br><span class="line">        app_version  uid</span><br><span class="line">0  7.23.1-180522122    1</span><br><span class="line">1  7.20.1-180502135    2</span><br><span class="line">2  7.23.1-180522122    3</span><br><span class="line">3  7.23.1-180522122    4</span><br><span class="line">4  7.16.7-180411077    5</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">In</span> <span class="selector-attr">[167]</span>: <span class="selector-tag">df</span></span><br><span class="line"><span class="selector-tag">Out</span><span class="selector-attr">[167]</span>:</span><br><span class="line">        <span class="selector-tag">app_version</span>  <span class="selector-tag">uid</span></span><br><span class="line">0  7<span class="selector-class">.23</span><span class="selector-class">.1-180522122</span>    1</span><br><span class="line">1  7<span class="selector-class">.20</span><span class="selector-class">.1-180502135</span>    2</span><br><span class="line">2  7<span class="selector-class">.23</span><span class="selector-class">.1-180522122</span>    3</span><br><span class="line">3  7<span class="selector-class">.23</span><span class="selector-class">.1-180522122</span>    4</span><br><span class="line">4  7<span class="selector-class">.16</span><span class="selector-class">.7-180411077</span>    5</span><br></pre></td></tr></table></figure></p>
 <p>但是实际上，我们只需要&quot;-&quot;之前的版本号，而且后续比较的时候要用'-'之前的数字进行比较，因此这样就涉及到了将原版本数据进行转化，即只提取'-'之前的数字，而舍弃后边的数字。</p>
 <h4>迭代</h4>
 <p>一个显而易见的做法是通过遍历的方式来逐行修改，如下图所示：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">In [178]: %%timeit</span><br><span class="line">     ...: for index, row in df.iterrows():</span><br><span class="line">     ...:     df.iloc[index, 0] = row[&apos;app_version&apos;].split(&apos;-&apos;)[0]</span><br><span class="line">     ...:</span><br><span class="line">2.34 ms ± 47.4 µs per loop (mean ± std. dev. of 7 runs, 100 loops each)</span><br><span class="line"></span><br><span class="line">In [179]: df</span><br><span class="line">Out[179]:</span><br><span class="line">  app_version  uid</span><br><span class="line">0      7.23.1    1</span><br><span class="line">1      7.20.1    2</span><br><span class="line">2      7.23.1    3</span><br><span class="line">3      7.23.1    4</span><br><span class="line">4      7.16.7    5</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight oxygene"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">In</span> [<span class="number">178</span>]: %%timeit</span><br><span class="line">     ...: <span class="keyword">for</span> <span class="keyword">index</span>, row <span class="keyword">in</span> df.iterrows():</span><br><span class="line">     ...:     df.iloc[<span class="keyword">index</span>, <span class="number">0</span>] = row[<span class="string">'app_version'</span>].split(<span class="string">'-'</span>)[<span class="number">0</span>]</span><br><span class="line">     ...:</span><br><span class="line"><span class="number">2.34</span> ms ± <span class="number">47.4</span> µs per <span class="keyword">loop</span> (mean ± std. dev. <span class="keyword">of</span> <span class="number">7</span> runs, <span class="number">100</span> loops <span class="keyword">each</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">In</span> [<span class="number">179</span>]: df</span><br><span class="line"><span class="keyword">Out</span>[<span class="number">179</span>]:</span><br><span class="line">  app_version  uid</span><br><span class="line"><span class="number">0</span>      <span class="number">7.23</span>.<span class="number">1</span>    <span class="number">1</span></span><br><span class="line"><span class="number">1</span>      <span class="number">7.20</span>.<span class="number">1</span>    <span class="number">2</span></span><br><span class="line"><span class="number">2</span>      <span class="number">7.23</span>.<span class="number">1</span>    <span class="number">3</span></span><br><span class="line"><span class="number">3</span>      <span class="number">7.23</span>.<span class="number">1</span>    <span class="number">4</span></span><br><span class="line"><span class="number">4</span>      <span class="number">7.16</span>.<span class="number">7</span>    <span class="number">5</span></span><br></pre></td></tr></table></figure></p>
 <p>再进一步，我们可以使用apply方法，如下：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">In [181]: df</span><br><span class="line">Out[181]:</span><br><span class="line">        app_version  uid</span><br><span class="line">0  7.23.1-180522122    1</span><br><span class="line">1  7.20.1-180502135    2</span><br><span class="line">2  7.23.1-180522122    3</span><br><span class="line">3  7.23.1-180522122    4</span><br><span class="line">4  7.16.7-180411077    5</span><br><span class="line"></span><br><span class="line">In [182]: %%timeit</span><br><span class="line">     ...: df[&apos;app_version&apos;] = df[&apos;app_version&apos;].apply(lambda x: x.split(&apos;-&apos;)[0])</span><br><span class="line">     ...:</span><br><span class="line">247 µs ± 11.4 µs per loop (mean ± std. dev. of 7 runs, 1000 loops each)</span><br><span class="line"></span><br><span class="line">In [183]: df</span><br><span class="line">Out[183]:</span><br><span class="line">  app_version  uid</span><br><span class="line">0      7.23.1    1</span><br><span class="line">1      7.20.1    2</span><br><span class="line">2      7.23.1    3</span><br><span class="line">3      7.23.1    4</span><br><span class="line">4      7.16.7    5</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight x86asm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">In</span> [<span class="number">181</span>]: df</span><br><span class="line"><span class="keyword">Out</span>[<span class="number">181</span>]:</span><br><span class="line">        app_version  uid</span><br><span class="line"><span class="number">0</span>  <span class="number">7.23</span><span class="meta">.1</span>-<span class="number">180522122</span>    <span class="number">1</span></span><br><span class="line"><span class="number">1</span>  <span class="number">7.20</span><span class="meta">.1</span>-<span class="number">180502135</span>    <span class="number">2</span></span><br><span class="line"><span class="number">2</span>  <span class="number">7.23</span><span class="meta">.1</span>-<span class="number">180522122</span>    <span class="number">3</span></span><br><span class="line"><span class="number">3</span>  <span class="number">7.23</span><span class="meta">.1</span>-<span class="number">180522122</span>    <span class="number">4</span></span><br><span class="line"><span class="number">4</span>  <span class="number">7.16</span><span class="meta">.7</span>-<span class="number">180411077</span>    <span class="number">5</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">In</span> [<span class="number">182</span>]: %%timeit</span><br><span class="line"><span class="symbol">     ...:</span> df[<span class="string">'app_version'</span>] = df[<span class="string">'app_version'</span>].apply(lambda x: x.split(<span class="string">'-'</span>)[<span class="number">0</span>])</span><br><span class="line"><span class="symbol">     ...:</span></span><br><span class="line"><span class="number">247</span> µs ± <span class="number">11.4</span> µs per <span class="keyword">loop</span> (mean ± <span class="keyword">std</span>. dev. of <span class="number">7</span> runs, <span class="number">1000</span> loops <span class="number">each</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">In</span> [<span class="number">183</span>]: df</span><br><span class="line"><span class="keyword">Out</span>[<span class="number">183</span>]:</span><br><span class="line">  app_version  uid</span><br><span class="line"><span class="number">0</span>      <span class="number">7.23</span><span class="meta">.1</span>    <span class="number">1</span></span><br><span class="line"><span class="number">1</span>      <span class="number">7.20</span><span class="meta">.1</span>    <span class="number">2</span></span><br><span class="line"><span class="number">2</span>      <span class="number">7.23</span><span class="meta">.1</span>    <span class="number">3</span></span><br><span class="line"><span class="number">3</span>      <span class="number">7.23</span><span class="meta">.1</span>    <span class="number">4</span></span><br><span class="line"><span class="number">4</span>      <span class="number">7.16</span><span class="meta">.7</span>    <span class="number">5</span></span><br></pre></td></tr></table></figure></p>
 <p>我们可以发现使用<code>apply</code>不仅使得代码更加简洁，而且速度也有了较明显的提升。但是以上方法本质上都是通过迭代的方式一条一条的修改，那么我们能否进一步提升性能呢？</p>
 <h4>矢量化</h4>
-<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">In [197]: df</span><br><span class="line">Out[197]:</span><br><span class="line">        app_version  uid</span><br><span class="line">0  7.23.1-180522122    1</span><br><span class="line">1  7.20.1-180502135    2</span><br><span class="line">2  7.23.1-180522122    3</span><br><span class="line">3  7.23.1-180522122    4</span><br><span class="line">4  7.16.7-180411077    5</span><br><span class="line"></span><br><span class="line">In [198]: %%timeit</span><br><span class="line">     ...: df[&apos;app_version&apos;] = df[&apos;app_version&apos;].str.split(&apos;-&apos;).str.get(0)</span><br><span class="line">     ...:</span><br><span class="line">424 µs ± 11.3 µs per loop (mean ± std. dev. of 7 runs, 1000 loops each)</span><br></pre></td></tr></table></figure></p>
+<p><figure class="highlight x86asm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">In</span> [<span class="number">197</span>]: df</span><br><span class="line"><span class="keyword">Out</span>[<span class="number">197</span>]:</span><br><span class="line">        app_version  uid</span><br><span class="line"><span class="number">0</span>  <span class="number">7.23</span><span class="meta">.1</span>-<span class="number">180522122</span>    <span class="number">1</span></span><br><span class="line"><span class="number">1</span>  <span class="number">7.20</span><span class="meta">.1</span>-<span class="number">180502135</span>    <span class="number">2</span></span><br><span class="line"><span class="number">2</span>  <span class="number">7.23</span><span class="meta">.1</span>-<span class="number">180522122</span>    <span class="number">3</span></span><br><span class="line"><span class="number">3</span>  <span class="number">7.23</span><span class="meta">.1</span>-<span class="number">180522122</span>    <span class="number">4</span></span><br><span class="line"><span class="number">4</span>  <span class="number">7.16</span><span class="meta">.7</span>-<span class="number">180411077</span>    <span class="number">5</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">In</span> [<span class="number">198</span>]: %%timeit</span><br><span class="line"><span class="symbol">     ...:</span> df[<span class="string">'app_version'</span>] = df[<span class="string">'app_version'</span>].str.split(<span class="string">'-'</span>).str.get(<span class="number">0</span>)</span><br><span class="line"><span class="symbol">     ...:</span></span><br><span class="line"><span class="number">424</span> µs ± <span class="number">11.3</span> µs per <span class="keyword">loop</span> (mean ± <span class="keyword">std</span>. dev. of <span class="number">7</span> runs, <span class="number">1000</span> loops <span class="number">each</span>)</span><br></pre></td></tr></table></figure></p>
 <p>这里发现矢量化貌似不能提高性能啊，这是为什么？</p>
 <blockquote>
 <p>这里我猜测是由于我们的矢量化代码是分为两步操作，且在数据量较小的情况下就会显得慢</p>
 </blockquote>
 <p>为了验证这个假设，我做了如下实验：
 先将原数据concat为2560条记录，然后再计算时间
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">2557  7.23.1-180522122    3</span><br><span class="line">2558  7.23.1-180522122    4</span><br><span class="line">2559  7.16.7-180411077    5</span><br><span class="line"></span><br><span class="line">[2560 rows x 2 columns]</span><br><span class="line"></span><br><span class="line">In [232]: df3 = df</span><br><span class="line"></span><br><span class="line">In [233]: %%timeit</span><br><span class="line">     ...: df[&apos;app_version&apos;] = df[&apos;app_version&apos;].apply(lambda x: x.split(&apos;-&apos;)[0])</span><br><span class="line">     ...:</span><br><span class="line">1.36 ms ± 35.4 µs per loop (mean ± std. dev. of 7 runs, 1000 loops each)</span><br><span class="line"></span><br><span class="line"># 矢量化方式</span><br><span class="line">In [250]: %%timeit</span><br><span class="line">     ...: df[&apos;app_version&apos;] = df[&apos;app_version&apos;].str.split(&quot;-&quot;).str.get(0)</span><br><span class="line">     ...:</span><br><span class="line">2.61 ms ± 113 µs per loop (mean ± std. dev. of 7 runs, 100 loops each)</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight prolog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">2557</span>  <span class="number">7.23</span><span class="number">.1</span><span class="number">-180522122</span>    <span class="number">3</span></span><br><span class="line"><span class="number">2558</span>  <span class="number">7.23</span><span class="number">.1</span><span class="number">-180522122</span>    <span class="number">4</span></span><br><span class="line"><span class="number">2559</span>  <span class="number">7.16</span><span class="number">.7</span><span class="number">-180411077</span>    <span class="number">5</span></span><br><span class="line"></span><br><span class="line">[<span class="number">2560</span> rows x <span class="number">2</span> columns]</span><br><span class="line"></span><br><span class="line"><span class="symbol">In</span> [<span class="number">232</span>]: df3 = df</span><br><span class="line"></span><br><span class="line"><span class="symbol">In</span> [<span class="number">233</span>]: <span class="comment">%%timeit</span></span><br><span class="line">     ...: df[<span class="string">'app_version'</span>] = df[<span class="string">'app_version'</span>].apply(lambda x: x.split(<span class="string">'-'</span>)[<span class="number">0</span>])</span><br><span class="line">     ...:</span><br><span class="line"><span class="number">1.36</span> ms ± <span class="number">35.4</span> µs per loop (mean ± std. dev. of <span class="number">7</span> runs, <span class="number">1000</span> loops each)</span><br><span class="line"></span><br><span class="line"># 矢量化方式</span><br><span class="line"><span class="symbol">In</span> [<span class="number">250</span>]: <span class="comment">%%timeit</span></span><br><span class="line">     ...: df[<span class="string">'app_version'</span>] = df[<span class="string">'app_version'</span>].str.split(<span class="string">"-"</span>).str.get(<span class="number">0</span>)</span><br><span class="line">     ...:</span><br><span class="line"><span class="number">2.61</span> ms ± <span class="number">113</span> µs per loop (mean ± std. dev. of <span class="number">7</span> runs, <span class="number">100</span> loops each)</span><br></pre></td></tr></table></figure></p>
 <p>发现单纯的数据量增大并没有影响结果，那么用其它转化来测试下，这里获取字符串长度的转化进行实验
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">In [253]: %%timeit</span><br><span class="line">     ...: df[&apos;length&apos;] = df[&apos;app_version&apos;].str.len()</span><br><span class="line">     ...:</span><br><span class="line">901 µs ± 17.5 µs per loop (mean ± std. dev. of 7 runs, 1000 loops each)</span><br><span class="line"></span><br><span class="line">In [254]: %%timeit</span><br><span class="line">     ...: df3[&apos;length&apos;] = df3[&apos;app_version&apos;].apply(lambda x: len(x))</span><br><span class="line">     ...:</span><br><span class="line">     ...:</span><br><span class="line">1.16 ms ± 14.7 µs per loop (mean ± std. dev. of 7 runs, 1000 loops each)</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight oxygene"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">In</span> [<span class="number">253</span>]: %%timeit</span><br><span class="line">     ...: df[<span class="string">'length'</span>] = df[<span class="string">'app_version'</span>].str.len()</span><br><span class="line">     ...:</span><br><span class="line"><span class="number">901</span> µs ± <span class="number">17.5</span> µs per <span class="keyword">loop</span> (mean ± std. dev. <span class="keyword">of</span> <span class="number">7</span> runs, <span class="number">1000</span> loops <span class="keyword">each</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">In</span> [<span class="number">254</span>]: %%timeit</span><br><span class="line">     ...: df3[<span class="string">'length'</span>] = df3[<span class="string">'app_version'</span>].apply(lambda x: len(x))</span><br><span class="line">     ...:</span><br><span class="line">     ...:</span><br><span class="line"><span class="number">1.16</span> ms ± <span class="number">14.7</span> µs per <span class="keyword">loop</span> (mean ± std. dev. <span class="keyword">of</span> <span class="number">7</span> runs, <span class="number">1000</span> loops <span class="keyword">each</span>)</span><br></pre></td></tr></table></figure></p>
 <p>我们看到在这里就体现出了矢量化的优势，因为这里大家都是一步。</p>
 <p>结论：当矢量化步数只有一步时，其性能还是要比apply方式好的，但当需要多步的时候，不一定好于apply方式。</p>
 <p>那么，我们能否将其转化为一步呢？后发现有extract这样的函数，使用如下：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">In [312]: df</span><br><span class="line">Out[312]:</span><br><span class="line">        app_version  uid</span><br><span class="line">0  7.23.1-180522122    1</span><br><span class="line">1  7.20.1-180502135    2</span><br><span class="line">2  7.23.1-180522122    3</span><br><span class="line">3  7.23.1-180522122    4</span><br><span class="line">4  7.16.7-180411077    5</span><br><span class="line"></span><br><span class="line">In [313]: %%timeit</span><br><span class="line">     ...: df[&apos;app_version&apos;] = df[&apos;app_version&apos;].str.extract(r&quot;([0-9\.]+)-[0-9]+&quot;, expand=Fal</span><br><span class="line">     ...: se)</span><br><span class="line">     ...:</span><br><span class="line">247 µs ± 8.95 µs per loop (mean ± std. dev. of 7 runs, 1000 loops each)</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">In [<span class="number">312</span>]: df</span><br><span class="line">Out[<span class="number">312</span>]:</span><br><span class="line">        app_version  uid</span><br><span class="line"><span class="number">0</span>  <span class="number">7.23</span>.<span class="number">1</span>-<span class="number">180522122</span>    <span class="number">1</span></span><br><span class="line"><span class="number">1</span>  <span class="number">7.20</span>.<span class="number">1</span>-<span class="number">180502135</span>    <span class="number">2</span></span><br><span class="line"><span class="number">2</span>  <span class="number">7.23</span>.<span class="number">1</span>-<span class="number">180522122</span>    <span class="number">3</span></span><br><span class="line"><span class="number">3</span>  <span class="number">7.23</span>.<span class="number">1</span>-<span class="number">180522122</span>    <span class="number">4</span></span><br><span class="line"><span class="number">4</span>  <span class="number">7.16</span>.<span class="number">7</span>-<span class="number">180411077</span>    <span class="number">5</span></span><br><span class="line"></span><br><span class="line">In [<span class="number">313</span>]: %%timeit</span><br><span class="line">     ...: df[<span class="string">'app_version'</span>] = df[<span class="string">'app_version'</span>].str.extract(<span class="string">r"([0-9\.]+)-[0-9]+"</span>, expand=Fal</span><br><span class="line">     ...: se)</span><br><span class="line">     ...:</span><br><span class="line"><span class="number">247</span> µs ± <span class="number">8.95</span> µs per loop (mean ± std. dev. of <span class="number">7</span> runs, <span class="number">1000</span> loops each)</span><br></pre></td></tr></table></figure></p>
 <p>通过<code>extract</code>终于实现了一步的矢量化。而且性能上也是最优的。</p>
 <blockquote>
 <p>这里需要注意的是，如果使用timeit, 由于多次操作，会导致后续df中'app_version'的值变为NaN。当我们只操作一次的时候则不存在此问题。</p>
@@ -544,6 +544,25 @@
               
 
               
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">4</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
 
               
                 
@@ -566,7 +585,35 @@
                     
                       
                     
-                    <span class="site-state-item-count">7</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">21</span>
                     <span class="site-state-item-name">tags</span>
                   </a>
                 </div>
@@ -818,6 +865,75 @@
 
 
   
+
+  
+  <script>
+    
+    function showTime(Counter) {
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      Counter('get', '/classes/Counter', { where: JSON.stringify({ url: { "$in": entries } }) })
+        .done(function ({ results }) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.url;
+            var time = item.time;
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function ({ responseJSON }) {
+          console.log("LeanCloud Counter Error: " + responseJSON.code + " " + responseJSON.error);
+        });
+    }
+    
+
+    $(function() {
+      $.get('https://app-router.leancloud.cn/2/route?appId=' + "OCjgmQiFa9gpVkDabM6KTb8g-gzGzoHsz")
+        .done(function ({ api_server }) {
+          var Counter = function (method, url, data) {
+            return $.ajax({
+              method: method,
+              url: `https://${api_server}/1.1${url}`,
+              headers: {
+                'X-LC-Id': "OCjgmQiFa9gpVkDabM6KTb8g-gzGzoHsz",
+                'X-LC-Key': "Ie7XE2V6spB6Q6C1W2GU9drV",
+                'Content-Type': 'application/json',
+              },
+              data: data,
+            });
+          };
+          
+          if ($('.post-title-link').length >= 1) {
+            showTime(Counter);
+          }
+          
+        })
+    });
+  </script>
+
+
 
   
 

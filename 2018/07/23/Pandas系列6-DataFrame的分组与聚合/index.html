@@ -108,20 +108,20 @@
 
 
 
-  <meta name="description" content="在对数据进行处理的时候，分组与聚合是非常常用的操作。在Pandas中此类操作主要是通过groupby函数来完成的。 &amp;lt;!--more--&amp;gt; 先看一个实际的例子： 123456789101112131415161718192021222324252627282930# 生成一个原始的DataFrameIn [70]: raw_data = &amp;#123;&amp;apos;regiment&amp;apo">
+  <meta name="description" content="在对数据进行处理的时候，分组与聚合是非常常用的操作。在Pandas中此类操作主要是通过groupby函数来完成的。">
 <meta name="keywords" content="computer, programming, data science, deep learning">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Pandas系列6-DataFrame的分组与聚合">
 <meta property="og:url" content="http://yoursite.com/2018/07/23/Pandas系列6-DataFrame的分组与聚合/index.html">
 <meta property="og:site_name" content="Geekpy&#39;s Blog">
-<meta property="og:description" content="在对数据进行处理的时候，分组与聚合是非常常用的操作。在Pandas中此类操作主要是通过groupby函数来完成的。 &amp;lt;!--more--&amp;gt; 先看一个实际的例子： 123456789101112131415161718192021222324252627282930# 生成一个原始的DataFrameIn [70]: raw_data = &amp;#123;&amp;apos;regiment&amp;apo">
+<meta property="og:description" content="在对数据进行处理的时候，分组与聚合是非常常用的操作。在Pandas中此类操作主要是通过groupby函数来完成的。">
 <meta property="og:locale" content="default">
 <meta property="og:image" content="https://upload-images.jianshu.io/upload_images/3959253-c268458a8035803b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
 <meta property="og:image" content="https://upload-images.jianshu.io/upload_images/3959253-0b1bee24d432dc9c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
-<meta property="og:updated_time" content="2018-08-12T10:06:16.879Z">
+<meta property="og:updated_time" content="2018-10-06T05:29:01.903Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Pandas系列6-DataFrame的分组与聚合">
-<meta name="twitter:description" content="在对数据进行处理的时候，分组与聚合是非常常用的操作。在Pandas中此类操作主要是通过groupby函数来完成的。 &amp;lt;!--more--&amp;gt; 先看一个实际的例子： 123456789101112131415161718192021222324252627282930# 生成一个原始的DataFrameIn [70]: raw_data = &amp;#123;&amp;apos;regiment&amp;apo">
+<meta name="twitter:description" content="在对数据进行处理的时候，分组与聚合是非常常用的操作。在Pandas中此类操作主要是通过groupby函数来完成的。">
 <meta name="twitter:image" content="https://upload-images.jianshu.io/upload_images/3959253-c268458a8035803b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
 
 
@@ -373,21 +373,21 @@
         
         
           <p>在对数据进行处理的时候，分组与聚合是非常常用的操作。在Pandas中此类操作主要是通过groupby函数来完成的。</p>
-<p>&lt;!--more--&gt;</p>
+<p><a id="more"></a></p>
 <p>先看一个实际的例子：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"># 生成一个原始的DataFrame</span><br><span class="line">In [70]: raw_data = &#123;&apos;regiment&apos;: [&apos;Nighthawks&apos;, &apos;Nighthawks&apos;, &apos;Nighthawks&apos;, &apos;Nighthawk</span><br><span class="line">    ...: s&apos;, &apos;Dragoons&apos;, &apos;Dragoons&apos;, &apos;Dragoons&apos;, &apos;Dragoons&apos;, &apos;Scouts&apos;, &apos;Scouts&apos;, &apos;Scou</span><br><span class="line">    ...: ts&apos;, &apos;Scouts&apos;],</span><br><span class="line">    ...:         &apos;company&apos;: [&apos;1st&apos;, &apos;1st&apos;, &apos;2nd&apos;, &apos;2nd&apos;, &apos;1st&apos;, &apos;1st&apos;, &apos;2nd&apos;, &apos;2nd&apos;,&apos;1</span><br><span class="line">    ...: st&apos;, &apos;1st&apos;, &apos;2nd&apos;, &apos;2nd&apos;],</span><br><span class="line">    ...:         &apos;name&apos;: [&apos;Miller&apos;, &apos;Jacobson&apos;, &apos;Ali&apos;, &apos;Milner&apos;, &apos;Cooze&apos;, &apos;Jacon&apos;, &apos;Ry</span><br><span class="line">    ...: aner&apos;, &apos;Sone&apos;, &apos;Sloan&apos;, &apos;Piger&apos;, &apos;Riani&apos;, &apos;Ali&apos;],</span><br><span class="line">    ...:         &apos;preTestScore&apos;: [4, 24, 31, 2, 3, 4, 24, 31, 2, 3, 2, 3],</span><br><span class="line">    ...:         &apos;postTestScore&apos;: [25, 94, 57, 62, 70, 25, 94, 57, 62, 70, 62, 70]&#125;</span><br><span class="line">    ...:</span><br><span class="line"></span><br><span class="line">In [71]: df = pd.DataFrame(raw_data, columns = [&apos;regiment&apos;, &apos;company&apos;, &apos;name&apos;, &apos;preTes</span><br><span class="line">    ...: tScore&apos;, &apos;postTestScore&apos;])</span><br><span class="line"></span><br><span class="line">In [72]: df</span><br><span class="line">Out[72]:</span><br><span class="line">      regiment company      name  preTestScore  postTestScore</span><br><span class="line">0   Nighthawks     1st    Miller             4             25</span><br><span class="line">1   Nighthawks     1st  Jacobson            24             94</span><br><span class="line">2   Nighthawks     2nd       Ali            31             57</span><br><span class="line">3   Nighthawks     2nd    Milner             2             62</span><br><span class="line">4     Dragoons     1st     Cooze             3             70</span><br><span class="line">5     Dragoons     1st     Jacon             4             25</span><br><span class="line">6     Dragoons     2nd    Ryaner            24             94</span><br><span class="line">7     Dragoons     2nd      Sone            31             57</span><br><span class="line">8       Scouts     1st     Sloan             2             62</span><br><span class="line">9       Scouts     1st     Piger             3             70</span><br><span class="line">10      Scouts     2nd     Riani             2             62</span><br><span class="line">11      Scouts     2nd       Ali             3             70</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"># 生成一个原始的DataFrame</span><br><span class="line">In [<span class="number">70</span>]: raw_data = &#123;<span class="string">'regiment'</span>: [<span class="string">'Nighthawks'</span>, <span class="string">'Nighthawks'</span>, <span class="string">'Nighthawks'</span>, <span class="string">'Nighthawk</span></span><br><span class="line"><span class="string">    ...: s'</span>, <span class="string">'Dragoons'</span>, <span class="string">'Dragoons'</span>, <span class="string">'Dragoons'</span>, <span class="string">'Dragoons'</span>, <span class="string">'Scouts'</span>, <span class="string">'Scouts'</span>, <span class="string">'Scou</span></span><br><span class="line"><span class="string">    ...: ts'</span>, <span class="string">'Scouts'</span>],</span><br><span class="line">    ...:         <span class="string">'company'</span>: [<span class="string">'1st'</span>, <span class="string">'1st'</span>, <span class="string">'2nd'</span>, <span class="string">'2nd'</span>, <span class="string">'1st'</span>, <span class="string">'1st'</span>, <span class="string">'2nd'</span>, <span class="string">'2nd'</span>,<span class="string">'1</span></span><br><span class="line"><span class="string">    ...: st'</span>, <span class="string">'1st'</span>, <span class="string">'2nd'</span>, <span class="string">'2nd'</span>],</span><br><span class="line">    ...:         <span class="string">'name'</span>: [<span class="string">'Miller'</span>, <span class="string">'Jacobson'</span>, <span class="string">'Ali'</span>, <span class="string">'Milner'</span>, <span class="string">'Cooze'</span>, <span class="string">'Jacon'</span>, <span class="string">'Ry</span></span><br><span class="line"><span class="string">    ...: aner'</span>, <span class="string">'Sone'</span>, <span class="string">'Sloan'</span>, <span class="string">'Piger'</span>, <span class="string">'Riani'</span>, <span class="string">'Ali'</span>],</span><br><span class="line">    ...:         <span class="string">'preTestScore'</span>: [<span class="number">4</span>, <span class="number">24</span>, <span class="number">31</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">24</span>, <span class="number">31</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">2</span>, <span class="number">3</span>],</span><br><span class="line">    ...:         <span class="string">'postTestScore'</span>: [<span class="number">25</span>, <span class="number">94</span>, <span class="number">57</span>, <span class="number">62</span>, <span class="number">70</span>, <span class="number">25</span>, <span class="number">94</span>, <span class="number">57</span>, <span class="number">62</span>, <span class="number">70</span>, <span class="number">62</span>, <span class="number">70</span>]&#125;</span><br><span class="line">    ...:</span><br><span class="line"></span><br><span class="line">In [<span class="number">71</span>]: df = pd.DataFrame(raw_data, columns = [<span class="string">'regiment'</span>, <span class="string">'company'</span>, <span class="string">'name'</span>, <span class="string">'preTes</span></span><br><span class="line"><span class="string">    ...: tScore'</span>, <span class="string">'postTestScore'</span>])</span><br><span class="line"></span><br><span class="line">In [<span class="number">72</span>]: df</span><br><span class="line">Out[<span class="number">72</span>]:</span><br><span class="line">      regiment company      name  preTestScore  postTestScore</span><br><span class="line"><span class="number">0</span>   Nighthawks     <span class="number">1s</span>t    Miller             <span class="number">4</span>             <span class="number">25</span></span><br><span class="line"><span class="number">1</span>   Nighthawks     <span class="number">1s</span>t  Jacobson            <span class="number">24</span>             <span class="number">94</span></span><br><span class="line"><span class="number">2</span>   Nighthawks     <span class="number">2</span>nd       Ali            <span class="number">31</span>             <span class="number">57</span></span><br><span class="line"><span class="number">3</span>   Nighthawks     <span class="number">2</span>nd    Milner             <span class="number">2</span>             <span class="number">62</span></span><br><span class="line"><span class="number">4</span>     Dragoons     <span class="number">1s</span>t     Cooze             <span class="number">3</span>             <span class="number">70</span></span><br><span class="line"><span class="number">5</span>     Dragoons     <span class="number">1s</span>t     Jacon             <span class="number">4</span>             <span class="number">25</span></span><br><span class="line"><span class="number">6</span>     Dragoons     <span class="number">2</span>nd    Ryaner            <span class="number">24</span>             <span class="number">94</span></span><br><span class="line"><span class="number">7</span>     Dragoons     <span class="number">2</span>nd      Sone            <span class="number">31</span>             <span class="number">57</span></span><br><span class="line"><span class="number">8</span>       Scouts     <span class="number">1s</span>t     Sloan             <span class="number">2</span>             <span class="number">62</span></span><br><span class="line"><span class="number">9</span>       Scouts     <span class="number">1s</span>t     Piger             <span class="number">3</span>             <span class="number">70</span></span><br><span class="line"><span class="number">10</span>      Scouts     <span class="number">2</span>nd     Riani             <span class="number">2</span>             <span class="number">62</span></span><br><span class="line"><span class="number">11</span>      Scouts     <span class="number">2</span>nd       Ali             <span class="number">3</span>             <span class="number">70</span></span><br></pre></td></tr></table></figure></p>
 <p>通过groupby函数生成一个groupby对象，如下：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"># 当针对特定列（此例是&apos;preTestScore&apos;）进行分组时，需要通过df[&apos;colume_name&apos;](此例是df[&apos;regiment&apos;])来指定键名</span><br><span class="line">In [73]: groupby_regiment = df[&apos;preTestScore&apos;].groupby(df[&apos;regiment&apos;])</span><br><span class="line"></span><br><span class="line"># 生成的groupby对象没有做任何计算，只是将数据按键进行分组</span><br><span class="line">In [74]: groupby_regiment</span><br><span class="line">Out[74]: &lt;pandas.core.groupby.SeriesGroupBy object at 0x11112cef0&gt;</span><br><span class="line"></span><br><span class="line"># 分组的聚合统计</span><br><span class="line">In [75]: groupby_regiment.describe()</span><br><span class="line">Out[75]:</span><br><span class="line">            count   mean        std  min   25%   50%    75%   max</span><br><span class="line">regiment</span><br><span class="line">Dragoons      4.0  15.50  14.153916  3.0  3.75  14.0  25.75  31.0</span><br><span class="line">Nighthawks    4.0  15.25  14.453950  2.0  3.50  14.0  25.75  31.0</span><br><span class="line">Scouts        4.0   2.50   0.577350  2.0  2.00   2.5   3.00   3.0</span><br><span class="line"></span><br><span class="line"># 也可以针对特定统计单独计算</span><br><span class="line">In [76]: groupby_regiment.mean()</span><br><span class="line">Out[76]:</span><br><span class="line">regiment</span><br><span class="line">Dragoons      15.50</span><br><span class="line">Nighthawks    15.25</span><br><span class="line">Scouts         2.50</span><br><span class="line">Name: preTestScore, dtype: float64</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight prolog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"># 当针对特定列（此例是<span class="string">'preTestScore'</span>）进行分组时，需要通过df[<span class="string">'colume_name'</span>](此例是df[<span class="string">'regiment'</span>])来指定键名</span><br><span class="line"><span class="symbol">In</span> [<span class="number">73</span>]: groupby_regiment = df[<span class="string">'preTestScore'</span>].groupby(df[<span class="string">'regiment'</span>])</span><br><span class="line"></span><br><span class="line"># 生成的groupby对象没有做任何计算，只是将数据按键进行分组</span><br><span class="line"><span class="symbol">In</span> [<span class="number">74</span>]: groupby_regiment</span><br><span class="line"><span class="symbol">Out</span>[<span class="number">74</span>]: &lt;pandas.core.groupby.<span class="symbol">SeriesGroupBy</span> object at <span class="number">0x11112cef0</span>&gt;</span><br><span class="line"></span><br><span class="line"># 分组的聚合统计</span><br><span class="line"><span class="symbol">In</span> [<span class="number">75</span>]: groupby_regiment.describe()</span><br><span class="line"><span class="symbol">Out</span>[<span class="number">75</span>]:</span><br><span class="line">            count   mean        std  min   <span class="number">25</span><span class="comment">%   50%    75%   max</span></span><br><span class="line">regiment</span><br><span class="line"><span class="symbol">Dragoons</span>      <span class="number">4.0</span>  <span class="number">15.50</span>  <span class="number">14.153916</span>  <span class="number">3.0</span>  <span class="number">3.75</span>  <span class="number">14.0</span>  <span class="number">25.75</span>  <span class="number">31.0</span></span><br><span class="line"><span class="symbol">Nighthawks</span>    <span class="number">4.0</span>  <span class="number">15.25</span>  <span class="number">14.453950</span>  <span class="number">2.0</span>  <span class="number">3.50</span>  <span class="number">14.0</span>  <span class="number">25.75</span>  <span class="number">31.0</span></span><br><span class="line"><span class="symbol">Scouts</span>        <span class="number">4.0</span>   <span class="number">2.50</span>   <span class="number">0.577350</span>  <span class="number">2.0</span>  <span class="number">2.00</span>   <span class="number">2.5</span>   <span class="number">3.00</span>   <span class="number">3.0</span></span><br><span class="line"></span><br><span class="line"># 也可以针对特定统计单独计算</span><br><span class="line"><span class="symbol">In</span> [<span class="number">76</span>]: groupby_regiment.mean()</span><br><span class="line"><span class="symbol">Out</span>[<span class="number">76</span>]:</span><br><span class="line">regiment</span><br><span class="line"><span class="symbol">Dragoons</span>      <span class="number">15.50</span></span><br><span class="line"><span class="symbol">Nighthawks</span>    <span class="number">15.25</span></span><br><span class="line"><span class="symbol">Scouts</span>         <span class="number">2.50</span></span><br><span class="line"><span class="symbol">Name</span>: preTestScore, dtype: float64</span><br></pre></td></tr></table></figure></p>
 <p>整个分组统计的过程，可以通过下图更清晰地展示：
 <img src="https://upload-images.jianshu.io/upload_images/3959253-c268458a8035803b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="1.1-group and aggregate process"></p>
 <h4>聚合函数</h4>
 <p>聚合的时候，既可以使用Pandas内置的函数进行聚合计算，也可以使用自定义的函数进行聚合计算，我们先来看下内置的函数：
 <img src="https://upload-images.jianshu.io/upload_images/3959253-0b1bee24d432dc9c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="1.2-built-in aggregate functions">
 另外，我们也可以自定义聚合函数：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">In [81]: def my_agg(pre_test_score_group):</span><br><span class="line">    ...:     return np.sum(np.power(pre_test_score_group, 2))</span><br><span class="line">    ...:</span><br><span class="line"></span><br><span class="line">In [82]: df[&apos;preTestScore&apos;].groupby(df[&apos;regiment&apos;]).apply(my_agg)</span><br><span class="line">Out[82]:</span><br><span class="line">regiment</span><br><span class="line">Dragoons      1562</span><br><span class="line">Nighthawks    1557</span><br><span class="line">Scouts          26</span><br><span class="line">Name: preTestScore, dtype: int64</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">In</span> <span class="selector-attr">[81]</span>: <span class="selector-tag">def</span> <span class="selector-tag">my_agg</span>(<span class="selector-tag">pre_test_score_group</span>):</span><br><span class="line">    ...:     <span class="selector-tag">return</span> <span class="selector-tag">np</span><span class="selector-class">.sum</span>(<span class="selector-tag">np</span><span class="selector-class">.power</span>(<span class="selector-tag">pre_test_score_group</span>, 2))</span><br><span class="line">    ...:</span><br><span class="line"></span><br><span class="line"><span class="selector-tag">In</span> <span class="selector-attr">[82]</span>: <span class="selector-tag">df</span><span class="selector-attr">['preTestScore']</span><span class="selector-class">.groupby</span>(<span class="selector-tag">df</span><span class="selector-attr">['regiment']</span>)<span class="selector-class">.apply</span>(<span class="selector-tag">my_agg</span>)</span><br><span class="line"><span class="selector-tag">Out</span><span class="selector-attr">[82]</span>:</span><br><span class="line"><span class="selector-tag">regiment</span></span><br><span class="line"><span class="selector-tag">Dragoons</span>      1562</span><br><span class="line"><span class="selector-tag">Nighthawks</span>    1557</span><br><span class="line"><span class="selector-tag">Scouts</span>          26</span><br><span class="line"><span class="selector-tag">Name</span>: <span class="selector-tag">preTestScore</span>, <span class="selector-tag">dtype</span>: <span class="selector-tag">int64</span></span><br></pre></td></tr></table></figure></p>
 <p>通过上面的例子我们可以看到，通过apply函数也可以完成类似for循环的迭代，在pandas中尽可能使用apply函数来代替for循环迭代，以提高性能。</p>
 <h4>根据多个键进行分组和聚合</h4>
-<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"># 如果有多个键，将多个键放到一个list当中，作为groupby的参数</span><br><span class="line">In [77]: df[&apos;preTestScore&apos;].groupby([df[&apos;regiment&apos;], df[&apos;company&apos;]]).mean()</span><br><span class="line">Out[77]:</span><br><span class="line">regiment    company</span><br><span class="line">Dragoons    1st         3.5</span><br><span class="line">            2nd        27.5</span><br><span class="line">Nighthawks  1st        14.0</span><br><span class="line">            2nd        16.5</span><br><span class="line">Scouts      1st         2.5</span><br><span class="line">            2nd         2.5</span><br><span class="line">Name: preTestScore, dtype: float64</span><br><span class="line"></span><br><span class="line"># unstack之后变成表格模式，更加清晰</span><br><span class="line">In [78]: df[&apos;preTestScore&apos;].groupby([df[&apos;regiment&apos;], df[&apos;company&apos;]]).mean().unstack()</span><br><span class="line">Out[78]:</span><br><span class="line">company      1st   2nd</span><br><span class="line">regiment</span><br><span class="line">Dragoons     3.5  27.5</span><br><span class="line">Nighthawks  14.0  16.5</span><br><span class="line">Scouts       2.5   2.5</span><br></pre></td></tr></table></figure></p>
+<p><figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"># 如果有多个键，将多个键放到一个<span class="selector-tag">list</span>当中，作为<span class="selector-tag">groupby</span>的参数</span><br><span class="line"><span class="selector-tag">In</span> <span class="selector-attr">[77]</span>: <span class="selector-tag">df</span><span class="selector-attr">['preTestScore']</span><span class="selector-class">.groupby</span>(<span class="selector-attr">[df['regiment']</span>, <span class="selector-tag">df</span><span class="selector-attr">['company']</span>])<span class="selector-class">.mean</span>()</span><br><span class="line"><span class="selector-tag">Out</span><span class="selector-attr">[77]</span>:</span><br><span class="line"><span class="selector-tag">regiment</span>    <span class="selector-tag">company</span></span><br><span class="line"><span class="selector-tag">Dragoons</span>    1<span class="selector-tag">st</span>         3<span class="selector-class">.5</span></span><br><span class="line">            2<span class="selector-tag">nd</span>        27<span class="selector-class">.5</span></span><br><span class="line"><span class="selector-tag">Nighthawks</span>  1<span class="selector-tag">st</span>        14<span class="selector-class">.0</span></span><br><span class="line">            2<span class="selector-tag">nd</span>        16<span class="selector-class">.5</span></span><br><span class="line"><span class="selector-tag">Scouts</span>      1<span class="selector-tag">st</span>         2<span class="selector-class">.5</span></span><br><span class="line">            2<span class="selector-tag">nd</span>         2<span class="selector-class">.5</span></span><br><span class="line"><span class="selector-tag">Name</span>: <span class="selector-tag">preTestScore</span>, <span class="selector-tag">dtype</span>: <span class="selector-tag">float64</span></span><br><span class="line"></span><br><span class="line"># <span class="selector-tag">unstack</span>之后变成表格模式，更加清晰</span><br><span class="line"><span class="selector-tag">In</span> <span class="selector-attr">[78]</span>: <span class="selector-tag">df</span><span class="selector-attr">['preTestScore']</span><span class="selector-class">.groupby</span>(<span class="selector-attr">[df['regiment']</span>, <span class="selector-tag">df</span><span class="selector-attr">['company']</span>])<span class="selector-class">.mean</span>()<span class="selector-class">.unstack</span>()</span><br><span class="line"><span class="selector-tag">Out</span><span class="selector-attr">[78]</span>:</span><br><span class="line"><span class="selector-tag">company</span>      1<span class="selector-tag">st</span>   2<span class="selector-tag">nd</span></span><br><span class="line"><span class="selector-tag">regiment</span></span><br><span class="line"><span class="selector-tag">Dragoons</span>     3<span class="selector-class">.5</span>  27<span class="selector-class">.5</span></span><br><span class="line"><span class="selector-tag">Nighthawks</span>  14<span class="selector-class">.0</span>  16<span class="selector-class">.5</span></span><br><span class="line"><span class="selector-tag">Scouts</span>       2<span class="selector-class">.5</span>   2<span class="selector-class">.5</span></span><br></pre></td></tr></table></figure></p>
 <h2>References</h2>
 <ul>
 <li><a href="https://chrisalbon.com/python/data_wrangling/pandas_apply_operations_to_groups/" target="_blank" rel="noopener">Apply Operations To Groups In Pandas</a></li>
@@ -524,6 +524,25 @@
               
 
               
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">4</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
 
               
                 
@@ -546,7 +565,35 @@
                     
                       
                     
-                    <span class="site-state-item-count">7</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">21</span>
                     <span class="site-state-item-name">tags</span>
                   </a>
                 </div>
@@ -798,6 +845,75 @@
 
 
   
+
+  
+  <script>
+    
+    function showTime(Counter) {
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      Counter('get', '/classes/Counter', { where: JSON.stringify({ url: { "$in": entries } }) })
+        .done(function ({ results }) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.url;
+            var time = item.time;
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function ({ responseJSON }) {
+          console.log("LeanCloud Counter Error: " + responseJSON.code + " " + responseJSON.error);
+        });
+    }
+    
+
+    $(function() {
+      $.get('https://app-router.leancloud.cn/2/route?appId=' + "OCjgmQiFa9gpVkDabM6KTb8g-gzGzoHsz")
+        .done(function ({ api_server }) {
+          var Counter = function (method, url, data) {
+            return $.ajax({
+              method: method,
+              url: `https://${api_server}/1.1${url}`,
+              headers: {
+                'X-LC-Id': "OCjgmQiFa9gpVkDabM6KTb8g-gzGzoHsz",
+                'X-LC-Key': "Ie7XE2V6spB6Q6C1W2GU9drV",
+                'Content-Type': 'application/json',
+              },
+              data: data,
+            });
+          };
+          
+          if ($('.post-title-link').length >= 1) {
+            showTime(Counter);
+          }
+          
+        })
+    });
+  </script>
+
+
 
   
 

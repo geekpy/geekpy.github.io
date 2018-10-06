@@ -108,19 +108,19 @@
 
 
 
-  <meta name="description" content="Redis相较于其它的数据库虽然简单，但是要熟记所有命令的用法也并非易事。一个简单的技巧是通过要操作的数据类型来将这些命令进行结构化。 &amp;lt;!--more--&amp;gt; 数据类型和对应命令 所有存储于redis中的数据都对应于一个键值对(key-value pair), key可以是任意二进制序列，通常我们使用字符串来标记一个特定的key。在redis中我们通常称这个key为name或者就叫ke">
-<meta name="keywords" content="redis">
+  <meta name="description" content="Redis相较于其它的数据库虽然简单，但是要熟记所有命令的用法也并非易事。一个简单的技巧是通过要操作的数据类型来将这些命令进行结构化。">
+<meta name="keywords" content="redis,database">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Redis数据类型和常用命令">
 <meta property="og:url" content="http://yoursite.com/2018/07/27/Redis数据类型和常用命令/index.html">
 <meta property="og:site_name" content="Geekpy&#39;s Blog">
-<meta property="og:description" content="Redis相较于其它的数据库虽然简单，但是要熟记所有命令的用法也并非易事。一个简单的技巧是通过要操作的数据类型来将这些命令进行结构化。 &amp;lt;!--more--&amp;gt; 数据类型和对应命令 所有存储于redis中的数据都对应于一个键值对(key-value pair), key可以是任意二进制序列，通常我们使用字符串来标记一个特定的key。在redis中我们通常称这个key为name或者就叫ke">
+<meta property="og:description" content="Redis相较于其它的数据库虽然简单，但是要熟记所有命令的用法也并非易事。一个简单的技巧是通过要操作的数据类型来将这些命令进行结构化。">
 <meta property="og:locale" content="default">
 <meta property="og:image" content="https://upload-images.jianshu.io/upload_images/3959253-6c756bf39ad702c0.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
-<meta property="og:updated_time" content="2018-10-05T14:16:23.961Z">
+<meta property="og:updated_time" content="2018-10-06T05:29:01.903Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Redis数据类型和常用命令">
-<meta name="twitter:description" content="Redis相较于其它的数据库虽然简单，但是要熟记所有命令的用法也并非易事。一个简单的技巧是通过要操作的数据类型来将这些命令进行结构化。 &amp;lt;!--more--&amp;gt; 数据类型和对应命令 所有存储于redis中的数据都对应于一个键值对(key-value pair), key可以是任意二进制序列，通常我们使用字符串来标记一个特定的key。在redis中我们通常称这个key为name或者就叫ke">
+<meta name="twitter:description" content="Redis相较于其它的数据库虽然简单，但是要熟记所有命令的用法也并非易事。一个简单的技巧是通过要操作的数据类型来将这些命令进行结构化。">
 <meta name="twitter:image" content="https://upload-images.jianshu.io/upload_images/3959253-6c756bf39ad702c0.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
 
 
@@ -372,7 +372,7 @@
         
         
           <p>Redis相较于其它的数据库虽然简单，但是要熟记所有命令的用法也并非易事。一个简单的技巧是通过要操作的数据类型来将这些命令进行结构化。</p>
-<p>&lt;!--more--&gt;</p>
+<p><a id="more"></a></p>
 <h2>数据类型和对应命令</h2>
 <p>所有存储于redis中的数据都对应于一个键值对(key-value pair), key可以是任意二进制序列，通常我们使用字符串来标记一个特定的key。在redis中我们通常称这个key为name或者就叫key, 而对于value，redis支持如下几种类型：</p>
 <ul>
@@ -554,6 +554,25 @@
               
 
               
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">4</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
 
               
                 
@@ -576,7 +595,35 @@
                     
                       
                     
-                    <span class="site-state-item-count">7</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">21</span>
                     <span class="site-state-item-name">tags</span>
                   </a>
                 </div>
@@ -828,6 +875,75 @@
 
 
   
+
+  
+  <script>
+    
+    function showTime(Counter) {
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      Counter('get', '/classes/Counter', { where: JSON.stringify({ url: { "$in": entries } }) })
+        .done(function ({ results }) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.url;
+            var time = item.time;
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function ({ responseJSON }) {
+          console.log("LeanCloud Counter Error: " + responseJSON.code + " " + responseJSON.error);
+        });
+    }
+    
+
+    $(function() {
+      $.get('https://app-router.leancloud.cn/2/route?appId=' + "OCjgmQiFa9gpVkDabM6KTb8g-gzGzoHsz")
+        .done(function ({ api_server }) {
+          var Counter = function (method, url, data) {
+            return $.ajax({
+              method: method,
+              url: `https://${api_server}/1.1${url}`,
+              headers: {
+                'X-LC-Id': "OCjgmQiFa9gpVkDabM6KTb8g-gzGzoHsz",
+                'X-LC-Key': "Ie7XE2V6spB6Q6C1W2GU9drV",
+                'Content-Type': 'application/json',
+              },
+              data: data,
+            });
+          };
+          
+          if ($('.post-title-link').length >= 1) {
+            showTime(Counter);
+          }
+          
+        })
+    });
+  </script>
+
+
 
   
 

@@ -108,13 +108,13 @@
 
 
 
-  <meta name="description" content="IPython提供了改进的交互式Python Shell，我们可以利用IPython来执行Python语句，并能够立刻看到结果，这一点跟Python自带的shell工具没有什么不同，但是IPython额外提供了很多实用的功能是Python自带的shell所没有的，下面就来看看这些实用的功能吧。 &amp;lt;!--more--&amp;gt; ####Tab自动补全 使用过Linux命令行的同学都知道tab自动">
-<meta name="keywords" content="computer, programming, data science, deep learning">
+  <meta name="description" content="IPython提供了改进的交互式Python Shell，我们可以利用IPython来执行Python语句，并能够立刻看到结果，这一点跟Python自带的shell工具没有什么不同，但是IPython额外提供了很多实用的功能是Python自带的shell所没有的，下面就来看看这些实用的功能吧。">
+<meta name="keywords" content="python,ipython">
 <meta property="og:type" content="article">
 <meta property="og:title" content="为什么要使用IPython">
 <meta property="og:url" content="http://yoursite.com/2016/12/21/why_ipython/index.html">
 <meta property="og:site_name" content="Geekpy&#39;s Blog">
-<meta property="og:description" content="IPython提供了改进的交互式Python Shell，我们可以利用IPython来执行Python语句，并能够立刻看到结果，这一点跟Python自带的shell工具没有什么不同，但是IPython额外提供了很多实用的功能是Python自带的shell所没有的，下面就来看看这些实用的功能吧。 &amp;lt;!--more--&amp;gt; ####Tab自动补全 使用过Linux命令行的同学都知道tab自动">
+<meta property="og:description" content="IPython提供了改进的交互式Python Shell，我们可以利用IPython来执行Python语句，并能够立刻看到结果，这一点跟Python自带的shell工具没有什么不同，但是IPython额外提供了很多实用的功能是Python自带的shell所没有的，下面就来看看这些实用的功能吧。">
 <meta property="og:locale" content="default">
 <meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3959253-1db6cf5999a46cef.JPG?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
 <meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3959253-fb281fe67f8656c1.JPG?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
@@ -125,10 +125,10 @@
 <meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3959253-e49d8fc237e4369a.JPG?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
 <meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3959253-ae3c2c63b7ee044c.JPG?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
 <meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3959253-5694a399cc400d7d.JPG?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
-<meta property="og:updated_time" content="2018-08-12T10:12:49.574Z">
+<meta property="og:updated_time" content="2018-10-06T05:29:01.904Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="为什么要使用IPython">
-<meta name="twitter:description" content="IPython提供了改进的交互式Python Shell，我们可以利用IPython来执行Python语句，并能够立刻看到结果，这一点跟Python自带的shell工具没有什么不同，但是IPython额外提供了很多实用的功能是Python自带的shell所没有的，下面就来看看这些实用的功能吧。 &amp;lt;!--more--&amp;gt; ####Tab自动补全 使用过Linux命令行的同学都知道tab自动">
+<meta name="twitter:description" content="IPython提供了改进的交互式Python Shell，我们可以利用IPython来执行Python语句，并能够立刻看到结果，这一点跟Python自带的shell工具没有什么不同，但是IPython额外提供了很多实用的功能是Python自带的shell所没有的，下面就来看看这些实用的功能吧。">
 <meta name="twitter:image" content="http://upload-images.jianshu.io/upload_images/3959253-1db6cf5999a46cef.JPG?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
 
 
@@ -380,8 +380,8 @@
         
         
           <p>IPython提供了改进的交互式Python Shell，我们可以利用IPython来执行Python语句，并能够立刻看到结果，这一点跟Python自带的shell工具没有什么不同，但是IPython额外提供了很多实用的功能是Python自带的shell所没有的，下面就来看看这些实用的功能吧。</p>
-<p>&lt;!--more--&gt;</p>
-<p>####Tab自动补全
+<p><a id="more"></a>
+####Tab自动补全
 使用过Linux命令行的同学都知道tab自动补全有多实用吧，IPython可以针对之前输入过的变量，对象的方法等进行自动补全。我们只需要输入一部分，就可以看到命名空间中所有相匹配的变量，函数等</p>
 <p><img src="http://upload-images.jianshu.io/upload_images/3959253-1db6cf5999a46cef.JPG?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="1.JPG"></p>
 <p>这个示例显示了，当输入mylist. 之后按tab键就自动出现的可以使用的method。
@@ -403,13 +403,13 @@ numpy.linalg.svd(x)
 <p>下面仅就常用的魔术命令做下介绍：</p>
 <h5>%run 命令</h5>
 <p>该命令可以直接执行python脚本，并输出结果，比如我们有一个python文件如下：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># test.py</span><br><span class="line">def main():</span><br><span class="line">    print &quot;this is a test.&quot;</span><br><span class="line"></span><br><span class="line">if __name__ == &apos;__main__&apos;:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># test.py</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">main</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="keyword">print</span> <span class="string">"this is a test."</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure></p>
 <p>在IPython中执行如下图：</p>
 <p><img src="http://upload-images.jianshu.io/upload_images/3959253-4f5b8302d6da7e74.JPG?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="run.JPG"></p>
 <h5>%paste 和 %cpaste命令</h5>
 <p>我们经常会将python文件中的代码粘贴到IPython中执行，以便查看效果，尤其是针对现实图形的代码。这时如果直接拷贝粘贴，IPython可能无法正确的执行，这是因为IPython一旦遇到空行就认为粘贴结束，然后就开始执行了。
 例如，我们有如下代码：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">def add(x, y):</span><br><span class="line">    result = x + y</span><br><span class="line">    print result</span><br><span class="line"></span><br><span class="line">add(1, 2)</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">def <span class="builtin-name">add</span>(x, y):</span><br><span class="line">    result = x + y</span><br><span class="line">    <span class="builtin-name">print</span> result</span><br><span class="line"></span><br><span class="line"><span class="builtin-name">add</span>(1, 2)</span><br></pre></td></tr></table></figure></p>
 <p>如果直接拷贝粘贴到IPython当中，就会报错，如下：</p>
 <p><img src="http://upload-images.jianshu.io/upload_images/3959253-85d9feee0f25cc75.JPG?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="paste.JPG"></p>
 <p>这时我们就需要使用%paste或者%cpaste来粘贴了，先拷贝代码，然后在IPython中输入%paste，结果如下：</p>
@@ -418,7 +418,7 @@ numpy.linalg.svd(x)
 <h5>%pdb</h5>
 <p>用以打开/关闭自动pdb唤出功能，当我们打开这个功能的时候(通过%pdb on 或者%pdb 1)，程序一旦遇到exception就会自动调用pdb，进入pdb交互界面(如果要关闭该功能可以通过%pdb off 或者%pdb 0)
 例如我们有一个test2.py文件如下：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">def raise_exception():</span><br><span class="line">    var_before_exception = 1</span><br><span class="line">    raise Exception(&quot;test&quot;)</span><br><span class="line">    var_after_exception = 2</span><br><span class="line">    print var_before_exception</span><br><span class="line">    print var_after_exception</span><br><span class="line"></span><br><span class="line">raise_exception()</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">raise_exception</span><span class="params">()</span>:</span></span><br><span class="line">    var_before_exception = <span class="number">1</span></span><br><span class="line">    <span class="keyword">raise</span> Exception(<span class="string">"test"</span>)</span><br><span class="line">    var_after_exception = <span class="number">2</span></span><br><span class="line">    <span class="keyword">print</span> var_before_exception</span><br><span class="line">    <span class="keyword">print</span> var_after_exception</span><br><span class="line"></span><br><span class="line">raise_exception()</span><br></pre></td></tr></table></figure></p>
 <p>当我们打开pdb开关后，执行如下图所示：</p>
 <p><img src="http://upload-images.jianshu.io/upload_images/3959253-e49d8fc237e4369a.JPG?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="pdb.JPG"></p>
 <p>可以发现pdb在raise exception的地方被唤出了。</p>
@@ -666,6 +666,25 @@ Out代表输出，同样也有行号。IPython提供了一下几种快捷方式�
               
 
               
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">4</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
 
               
                 
@@ -688,7 +707,35 @@ Out代表输出，同样也有行号。IPython提供了一下几种快捷方式�
                     
                       
                     
-                    <span class="site-state-item-count">7</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">21</span>
                     <span class="site-state-item-name">tags</span>
                   </a>
                 </div>
@@ -940,6 +987,75 @@ Out代表输出，同样也有行号。IPython提供了一下几种快捷方式�
 
 
   
+
+  
+  <script>
+    
+    function showTime(Counter) {
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      Counter('get', '/classes/Counter', { where: JSON.stringify({ url: { "$in": entries } }) })
+        .done(function ({ results }) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.url;
+            var time = item.time;
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function ({ responseJSON }) {
+          console.log("LeanCloud Counter Error: " + responseJSON.code + " " + responseJSON.error);
+        });
+    }
+    
+
+    $(function() {
+      $.get('https://app-router.leancloud.cn/2/route?appId=' + "OCjgmQiFa9gpVkDabM6KTb8g-gzGzoHsz")
+        .done(function ({ api_server }) {
+          var Counter = function (method, url, data) {
+            return $.ajax({
+              method: method,
+              url: `https://${api_server}/1.1${url}`,
+              headers: {
+                'X-LC-Id': "OCjgmQiFa9gpVkDabM6KTb8g-gzGzoHsz",
+                'X-LC-Key': "Ie7XE2V6spB6Q6C1W2GU9drV",
+                'Content-Type': 'application/json',
+              },
+              data: data,
+            });
+          };
+          
+          if ($('.post-title-link').length >= 1) {
+            showTime(Counter);
+          }
+          
+        })
+    });
+  </script>
+
+
 
   
 

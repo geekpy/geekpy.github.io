@@ -108,19 +108,19 @@
 
 
 
-  <meta name="description" content="总体上来说，当需要在进程间通信的时候需要使用multiprocessing.Queue; 当在同一个进程当中，而需要多线程之间通信的时候，可以使用Queue.Queue；而至于collections.deque一般就是在同一个线程当中，作为一种数据结构来使用的。下面分别讲述一下它们的用法： &amp;lt;!--more--&amp;gt; multiprocessing.Queue multiprocessin">
-<meta name="keywords" content="computer, programming, data science, deep learning">
+  <meta name="description" content="总体上来说，当需要在进程间通信的时候需要使用multiprocessing.Queue; 当在同一个进程当中，而需要多线程之间通信的时候，可以使用Queue.Queue；而至于collections.deque一般就是在同一个线程当中，作为一种数据结构来使用的。下面分别讲述一下它们的用法：">
+<meta name="keywords" content="python,queue">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Python collections.deque vs. Queue.Queue vs. multiprocessing.Queue">
 <meta property="og:url" content="http://yoursite.com/2018/02/12/Python-collections-deque-vs--Queue-Queue-vs--multiprocessing-Queue/index.html">
 <meta property="og:site_name" content="Geekpy&#39;s Blog">
-<meta property="og:description" content="总体上来说，当需要在进程间通信的时候需要使用multiprocessing.Queue; 当在同一个进程当中，而需要多线程之间通信的时候，可以使用Queue.Queue；而至于collections.deque一般就是在同一个线程当中，作为一种数据结构来使用的。下面分别讲述一下它们的用法： &amp;lt;!--more--&amp;gt; multiprocessing.Queue multiprocessin">
+<meta property="og:description" content="总体上来说，当需要在进程间通信的时候需要使用multiprocessing.Queue; 当在同一个进程当中，而需要多线程之间通信的时候，可以使用Queue.Queue；而至于collections.deque一般就是在同一个线程当中，作为一种数据结构来使用的。下面分别讲述一下它们的用法：">
 <meta property="og:locale" content="default">
 <meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3959253-0e780f8002f768ac.jpeg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
-<meta property="og:updated_time" content="2018-08-12T10:08:41.412Z">
+<meta property="og:updated_time" content="2018-10-06T05:29:01.906Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Python collections.deque vs. Queue.Queue vs. multiprocessing.Queue">
-<meta name="twitter:description" content="总体上来说，当需要在进程间通信的时候需要使用multiprocessing.Queue; 当在同一个进程当中，而需要多线程之间通信的时候，可以使用Queue.Queue；而至于collections.deque一般就是在同一个线程当中，作为一种数据结构来使用的。下面分别讲述一下它们的用法： &amp;lt;!--more--&amp;gt; multiprocessing.Queue multiprocessin">
+<meta name="twitter:description" content="总体上来说，当需要在进程间通信的时候需要使用multiprocessing.Queue; 当在同一个进程当中，而需要多线程之间通信的时候，可以使用Queue.Queue；而至于collections.deque一般就是在同一个线程当中，作为一种数据结构来使用的。下面分别讲述一下它们的用法：">
 <meta name="twitter:image" content="http://upload-images.jianshu.io/upload_images/3959253-0e780f8002f768ac.jpeg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
 
 
@@ -372,7 +372,7 @@
         
         
           <p>总体上来说，当需要在进程间通信的时候需要使用multiprocessing.Queue; 当在同一个进程当中，而需要多线程之间通信的时候，可以使用Queue.Queue；而至于collections.deque一般就是在同一个线程当中，作为一种数据结构来使用的。下面分别讲述一下它们的用法：</p>
-<p>&lt;!--more--&gt;</p>
+<p><a id="more"></a></p>
 <h3>multiprocessing.Queue</h3>
 <p>multiprocessing提供了两种进程间通信机制，一种是我们要说的Queue，另外一种是Pipe。而实际上Queue也是通过Pipe来实现的。具体可以参考<a href="https://docs.python.org/2/library/multiprocessing.html#exchanging-objects-between-processes" target="_blank" rel="noopener">进程间通信</a>
 Queue常用methods：</p>
@@ -386,7 +386,7 @@ Queue常用methods：</p>
 <li>Queue.get_nowait(): Equivalent to get(False)</li>
 </ul>
 <p>示例：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">from multiprocessing import Process, Queue</span><br><span class="line"></span><br><span class="line">def f(q):</span><br><span class="line">    q.put([42, None, &apos;hello&apos;])</span><br><span class="line"></span><br><span class="line">if __name__ == &apos;__main__&apos;:</span><br><span class="line">    q = Queue()</span><br><span class="line">    p = Process(target=f, args=(q,))</span><br><span class="line">    p.start()</span><br><span class="line">    print q.get()    # prints &quot;[42, None, &apos;hello&apos;]&quot;</span><br><span class="line">    p.join()</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">from multiprocessing <span class="keyword">import</span> <span class="built_in">Process</span>, Queue</span><br><span class="line"></span><br><span class="line">def f(q):</span><br><span class="line">    q.<span class="built_in">put</span>([<span class="number">42</span>, None, <span class="string">'hello'</span>])</span><br><span class="line"></span><br><span class="line"><span class="built_in">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    q = Queue()</span><br><span class="line">    p = <span class="built_in">Process</span>(target=f, args=(q,))</span><br><span class="line">    p.start()</span><br><span class="line">    <span class="built_in">print</span> q.<span class="built_in">get</span>()    <span class="meta"># prints <span class="meta-string">"[42, None, 'hello']"</span></span></span><br><span class="line">    p.join()</span><br></pre></td></tr></table></figure></p>
 <p><strong>需要注意的是Queue不提供join()和task_done()，因此在producer process中无法确保所有的task均已经被处理, 如果需要join and task_done就需要使用multiprocessing.JoinableQueue，详情参看<a href="https://docs.python.org/2/library/multiprocessing.html?highlight=multiprocessing#multiprocessing.JoinableQueue" target="_blank" rel="noopener">JoinableQueue</a></strong></p>
 <h3>Queue.Queue</h3>
 <p>Queue.Queue通常用于同一个进程中的不同线程间的通信，其提供的方法与multiprocessing.Queue类似，但是多出了两个methods如下：</p>
@@ -406,7 +406,7 @@ Queue常用methods：</p>
 <li>pop
 具体参考<a href="https://docs.python.org/2/library/collections.html?highlight=deque#deque-objects" target="_blank" rel="noopener">官网</a>
 示例：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; from collections import deque</span><br><span class="line">&gt;&gt;&gt; d = deque(&apos;ghi&apos;)                 # make a new deque with three items</span><br><span class="line">&gt;&gt;&gt; for elem in d:                   # iterate over the deque&apos;s elements</span><br><span class="line">...     print elem.upper()</span><br><span class="line">G</span><br><span class="line">H</span><br><span class="line">I</span><br><span class="line"></span><br><span class="line">&gt;&gt;&gt; d.append(&apos;j&apos;)                    # add a new entry to the right side</span><br><span class="line">&gt;&gt;&gt; d.appendleft(&apos;f&apos;)                # add a new entry to the left side</span><br><span class="line">&gt;&gt;&gt; d                                # show the representation of the deque</span><br><span class="line">deque([&apos;f&apos;, &apos;g&apos;, &apos;h&apos;, &apos;i&apos;, &apos;j&apos;])</span><br><span class="line"></span><br><span class="line">&gt;&gt;&gt; d.pop()                          # return and remove the rightmost item</span><br><span class="line">&apos;j&apos;</span><br><span class="line">&gt;&gt;&gt; d.popleft()                      # return and remove the leftmost item</span><br><span class="line">&apos;f&apos;</span><br><span class="line">&gt;&gt;&gt; list(d)                          # list the contents of the deque</span><br><span class="line">[&apos;g&apos;, &apos;h&apos;, &apos;i&apos;]</span><br><span class="line">&gt;&gt;&gt; d[0]                             # peek at leftmost item</span><br><span class="line">&apos;g&apos;</span><br><span class="line">&gt;&gt;&gt; d[-1]                            # peek at rightmost item</span><br><span class="line">&apos;i&apos;</span><br><span class="line"></span><br><span class="line">&gt;&gt;&gt; list(reversed(d))                # list the contents of a deque in reverse</span><br><span class="line">[&apos;i&apos;, &apos;h&apos;, &apos;g&apos;]</span><br><span class="line">&gt;&gt;&gt; &apos;h&apos; in d                         # search the deque</span><br><span class="line">True</span><br><span class="line">&gt;&gt;&gt; d.extend(&apos;jkl&apos;)                  # add multiple elements at once</span><br><span class="line">&gt;&gt;&gt; d</span><br><span class="line">deque([&apos;g&apos;, &apos;h&apos;, &apos;i&apos;, &apos;j&apos;, &apos;k&apos;, &apos;l&apos;])</span><br><span class="line">&gt;&gt;&gt; d.rotate(1)                      # right rotation</span><br><span class="line">&gt;&gt;&gt; d</span><br><span class="line">deque([&apos;l&apos;, &apos;g&apos;, &apos;h&apos;, &apos;i&apos;, &apos;j&apos;, &apos;k&apos;])</span><br><span class="line">&gt;&gt;&gt; d.rotate(-1)                     # left rotation</span><br><span class="line">&gt;&gt;&gt; d</span><br><span class="line">deque([&apos;g&apos;, &apos;h&apos;, &apos;i&apos;, &apos;j&apos;, &apos;k&apos;, &apos;l&apos;])</span><br><span class="line"></span><br><span class="line">&gt;&gt;&gt; deque(reversed(d))               # make a new deque in reverse order</span><br><span class="line">deque([&apos;l&apos;, &apos;k&apos;, &apos;j&apos;, &apos;i&apos;, &apos;h&apos;, &apos;g&apos;])</span><br><span class="line">&gt;&gt;&gt; d.clear()                        # empty the deque</span><br><span class="line">&gt;&gt;&gt; d.pop()                          # cannot pop from an empty deque</span><br><span class="line">Traceback (most recent call last):</span><br><span class="line">  File &quot;&lt;pyshell#6&gt;&quot;, line 1, in -toplevel-</span><br><span class="line">    d.pop()</span><br><span class="line">IndexError: pop from an empty deque</span><br><span class="line"></span><br><span class="line">&gt;&gt;&gt; d.extendleft(&apos;abc&apos;)              # extendleft() reverses the input order</span><br><span class="line">&gt;&gt;&gt; d</span><br><span class="line">deque([&apos;c&apos;, &apos;b&apos;, &apos;a&apos;])</span><br></pre></td></tr></table></figure></li>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;</span>&gt; from collections import deque</span><br><span class="line"><span class="meta">&gt;&gt;</span>&gt; d = deque(<span class="string">'ghi'</span>)                 <span class="comment"># make a new deque with three items</span></span><br><span class="line"><span class="meta">&gt;&gt;</span>&gt; for elem in <span class="symbol">d:</span>                   <span class="comment"># iterate over the deque's elements</span></span><br><span class="line">...     print elem.upper()</span><br><span class="line">G</span><br><span class="line">H</span><br><span class="line">I</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;</span>&gt; d.append(<span class="string">'j'</span>)                    <span class="comment"># add a new entry to the right side</span></span><br><span class="line"><span class="meta">&gt;&gt;</span>&gt; d.appendleft(<span class="string">'f'</span>)                <span class="comment"># add a new entry to the left side</span></span><br><span class="line"><span class="meta">&gt;&gt;</span>&gt; d                                <span class="comment"># show the representation of the deque</span></span><br><span class="line">deque([<span class="string">'f'</span>, <span class="string">'g'</span>, <span class="string">'h'</span>, <span class="string">'i'</span>, <span class="string">'j'</span>])</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;</span>&gt; d.pop()                          <span class="comment"># return and remove the rightmost item</span></span><br><span class="line"><span class="string">'j'</span></span><br><span class="line"><span class="meta">&gt;&gt;</span>&gt; d.popleft()                      <span class="comment"># return and remove the leftmost item</span></span><br><span class="line"><span class="string">'f'</span></span><br><span class="line"><span class="meta">&gt;&gt;</span>&gt; list(d)                          <span class="comment"># list the contents of the deque</span></span><br><span class="line">[<span class="string">'g'</span>, <span class="string">'h'</span>, <span class="string">'i'</span>]</span><br><span class="line"><span class="meta">&gt;&gt;</span>&gt; d[<span class="number">0</span>]                             <span class="comment"># peek at leftmost item</span></span><br><span class="line"><span class="string">'g'</span></span><br><span class="line"><span class="meta">&gt;&gt;</span>&gt; d[-<span class="number">1</span>]                            <span class="comment"># peek at rightmost item</span></span><br><span class="line"><span class="string">'i'</span></span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;</span>&gt; list(reversed(d))                <span class="comment"># list the contents of a deque in reverse</span></span><br><span class="line">[<span class="string">'i'</span>, <span class="string">'h'</span>, <span class="string">'g'</span>]</span><br><span class="line"><span class="meta">&gt;&gt;</span>&gt; <span class="string">'h'</span> in d                         <span class="comment"># search the deque</span></span><br><span class="line">True</span><br><span class="line"><span class="meta">&gt;&gt;</span>&gt; d.extend(<span class="string">'jkl'</span>)                  <span class="comment"># add multiple elements at once</span></span><br><span class="line"><span class="meta">&gt;&gt;</span>&gt; d</span><br><span class="line">deque([<span class="string">'g'</span>, <span class="string">'h'</span>, <span class="string">'i'</span>, <span class="string">'j'</span>, <span class="string">'k'</span>, <span class="string">'l'</span>])</span><br><span class="line"><span class="meta">&gt;&gt;</span>&gt; d.rotate(<span class="number">1</span>)                      <span class="comment"># right rotation</span></span><br><span class="line"><span class="meta">&gt;&gt;</span>&gt; d</span><br><span class="line">deque([<span class="string">'l'</span>, <span class="string">'g'</span>, <span class="string">'h'</span>, <span class="string">'i'</span>, <span class="string">'j'</span>, <span class="string">'k'</span>])</span><br><span class="line"><span class="meta">&gt;&gt;</span>&gt; d.rotate(-<span class="number">1</span>)                     <span class="comment"># left rotation</span></span><br><span class="line"><span class="meta">&gt;&gt;</span>&gt; d</span><br><span class="line">deque([<span class="string">'g'</span>, <span class="string">'h'</span>, <span class="string">'i'</span>, <span class="string">'j'</span>, <span class="string">'k'</span>, <span class="string">'l'</span>])</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;</span>&gt; deque(reversed(d))               <span class="comment"># make a new deque in reverse order</span></span><br><span class="line">deque([<span class="string">'l'</span>, <span class="string">'k'</span>, <span class="string">'j'</span>, <span class="string">'i'</span>, <span class="string">'h'</span>, <span class="string">'g'</span>])</span><br><span class="line"><span class="meta">&gt;&gt;</span>&gt; d.clear()                        <span class="comment"># empty the deque</span></span><br><span class="line"><span class="meta">&gt;&gt;</span>&gt; d.pop()                          <span class="comment"># cannot pop from an empty deque</span></span><br><span class="line">Traceback (most recent call last)<span class="symbol">:</span></span><br><span class="line">  File <span class="string">"&lt;pyshell#6&gt;"</span>, line <span class="number">1</span>, <span class="keyword">in</span> -toplevel-</span><br><span class="line">    d.pop()</span><br><span class="line"><span class="symbol">IndexError:</span> pop from an empty deque</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;</span>&gt; d.extendleft(<span class="string">'abc'</span>)              <span class="comment"># extendleft() reverses the input order</span></span><br><span class="line"><span class="meta">&gt;&gt;</span>&gt; d</span><br><span class="line">deque([<span class="string">'c'</span>, <span class="string">'b'</span>, <span class="string">'a'</span>])</span><br></pre></td></tr></table></figure></li>
 </ul>
 
         
@@ -539,6 +539,25 @@ Queue常用methods：</p>
               
 
               
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">4</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
 
               
                 
@@ -561,7 +580,35 @@ Queue常用methods：</p>
                     
                       
                     
-                    <span class="site-state-item-count">7</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">21</span>
                     <span class="site-state-item-name">tags</span>
                   </a>
                 </div>
@@ -813,6 +860,75 @@ Queue常用methods：</p>
 
 
   
+
+  
+  <script>
+    
+    function showTime(Counter) {
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      Counter('get', '/classes/Counter', { where: JSON.stringify({ url: { "$in": entries } }) })
+        .done(function ({ results }) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.url;
+            var time = item.time;
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function ({ responseJSON }) {
+          console.log("LeanCloud Counter Error: " + responseJSON.code + " " + responseJSON.error);
+        });
+    }
+    
+
+    $(function() {
+      $.get('https://app-router.leancloud.cn/2/route?appId=' + "OCjgmQiFa9gpVkDabM6KTb8g-gzGzoHsz")
+        .done(function ({ api_server }) {
+          var Counter = function (method, url, data) {
+            return $.ajax({
+              method: method,
+              url: `https://${api_server}/1.1${url}`,
+              headers: {
+                'X-LC-Id': "OCjgmQiFa9gpVkDabM6KTb8g-gzGzoHsz",
+                'X-LC-Key': "Ie7XE2V6spB6Q6C1W2GU9drV",
+                'Content-Type': 'application/json',
+              },
+              data: data,
+            });
+          };
+          
+          if ($('.post-title-link').length >= 1) {
+            showTime(Counter);
+          }
+          
+        })
+    });
+  </script>
+
+
 
   
 

@@ -108,18 +108,18 @@
 
 
 
-  <meta name="description" content="在使用flask设计restful api的时候，有一个很重要的问题就是如何进行权限管理，以及如何进行角色的定义，在网上找了一下没有发现有类似的资料，虽然有些针对网站进行的权限管理设计，但是跟restful api接口的权限管理还是有很多不同的，于是乎自己动手，丰衣足食。为方便后来者，特撰此文！ 权限的设计 从本质上思考，我需要为每个API接口设定相应的权限，所以针对API的权限列表跟普通网站的权">
-<meta name="keywords" content="computer, programming, data science, deep learning">
+  <meta name="description" content="在使用flask设计restful api的时候，有一个很重要的问题就是如何进行权限管理，以及如何进行角色的定义，在网上找了一下没有发现有类似的资料，虽然有些针对网站进行的权限管理设计，但是跟restful api接口的权限管理还是有很多不同的，于是乎自己动手，丰衣足食。为方便后来者，特撰此文！">
+<meta name="keywords" content="flask,restful,api">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Flask Restful API权限管理设计与实现">
 <meta property="og:url" content="http://yoursite.com/2017/08/10/flask_restful_api/index.html">
 <meta property="og:site_name" content="Geekpy&#39;s Blog">
-<meta property="og:description" content="在使用flask设计restful api的时候，有一个很重要的问题就是如何进行权限管理，以及如何进行角色的定义，在网上找了一下没有发现有类似的资料，虽然有些针对网站进行的权限管理设计，但是跟restful api接口的权限管理还是有很多不同的，于是乎自己动手，丰衣足食。为方便后来者，特撰此文！ 权限的设计 从本质上思考，我需要为每个API接口设定相应的权限，所以针对API的权限列表跟普通网站的权">
+<meta property="og:description" content="在使用flask设计restful api的时候，有一个很重要的问题就是如何进行权限管理，以及如何进行角色的定义，在网上找了一下没有发现有类似的资料，虽然有些针对网站进行的权限管理设计，但是跟restful api接口的权限管理还是有很多不同的，于是乎自己动手，丰衣足食。为方便后来者，特撰此文！">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2018-08-12T05:50:21.523Z">
+<meta property="og:updated_time" content="2018-10-06T05:29:01.904Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Flask Restful API权限管理设计与实现">
-<meta name="twitter:description" content="在使用flask设计restful api的时候，有一个很重要的问题就是如何进行权限管理，以及如何进行角色的定义，在网上找了一下没有发现有类似的资料，虽然有些针对网站进行的权限管理设计，但是跟restful api接口的权限管理还是有很多不同的，于是乎自己动手，丰衣足食。为方便后来者，特撰此文！ 权限的设计 从本质上思考，我需要为每个API接口设定相应的权限，所以针对API的权限列表跟普通网站的权">
+<meta name="twitter:description" content="在使用flask设计restful api的时候，有一个很重要的问题就是如何进行权限管理，以及如何进行角色的定义，在网上找了一下没有发现有类似的资料，虽然有些针对网站进行的权限管理设计，但是跟restful api接口的权限管理还是有很多不同的，于是乎自己动手，丰衣足食。为方便后来者，特撰此文！">
 
 
 
@@ -369,32 +369,33 @@
       <div class="post-body">
         
         
-          <p>在使用flask设计restful api的时候，有一个很重要的问题就是如何进行权限管理，以及如何进行角色的定义，在网上找了一下没有发现有类似的资料，虽然有些针对网站进行的权限管理设计，但是跟restful api接口的权限管理还是有很多不同的，于是乎自己动手，丰衣足食。为方便后来者，特撰此文！</p>
+          <p>在使用flask设计restful api的时候，有一个很重要的问题就是如何进行权限管理，以及如何进行角色的定义，在网上找了一下没有发现有类似的资料，虽然有些针对网站进行的权限管理设计，但是跟restful api接口的权限管理还是有很多不同的，于是乎自己动手，丰衣足食。为方便后来者，特撰此文！
+<a id="more"></a></p>
 <h2>权限的设计</h2>
 <p>从本质上思考，我需要为每个API接口设定相应的权限，所以针对API的权限列表跟普通网站的权限设计是不同的，普通网站的权限设计是针对某个功能，比如是否可以comment功能，通常的权限定义如下：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">class Permission:</span><br><span class="line">    &quot;&quot;&quot;</span><br><span class="line">    权限表</span><br><span class="line">    &quot;&quot;&quot;</span><br><span class="line">    COMMENT = 0x01  # 评论</span><br><span class="line">    MODERATE_COMMENT = 0x02  # 移除评论</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Permission</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    权限表</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    COMMENT = <span class="number">0x01</span>  <span class="comment"># 评论</span></span><br><span class="line">    MODERATE_COMMENT = <span class="number">0x02</span>  <span class="comment"># 移除评论</span></span><br></pre></td></tr></table></figure></p>
 <p>但是针对restful api，我们更希望权限是针对我们的api接口，而restful api接口是跟我们路由的endpoint以及http method相关的，所以我们的权限设计应该是类似如下示例中的样子：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"># 这里comments是路由的endpoint，接口在判断用户是否有权限的时候</span><br><span class="line"># 可以先获取到endpoint和http method，然后就可以查看其是否有权限</span><br><span class="line">comment_permission = &#123;&quot;comments&quot;: &#123;&quot;post&quot;: True, &quot;get&quot;: True, &quot;delete&quot;: False&#125;&#125;</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 这里comments是路由的endpoint，接口在判断用户是否有权限的时候</span></span><br><span class="line"><span class="comment"># 可以先获取到endpoint和http method，然后就可以查看其是否有权限</span></span><br><span class="line"><span class="attr">comment_permission</span> = &#123;<span class="string">"comments"</span>: &#123;<span class="string">"post"</span>: <span class="literal">True</span>, <span class="string">"get"</span>: <span class="literal">True</span>, <span class="string">"delete"</span>: <span class="literal">False</span>&#125;&#125;</span><br></pre></td></tr></table></figure></p>
 <h2>角色的设计</h2>
 <p>通常，我们在做网站的角色设计时会将角色存储在数据库当中，并会通过或运算(|)赋予角色以特定权限，如下：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">class Role(db.Model):</span><br><span class="line">    &quot;&quot;&quot;</span><br><span class="line">    用户角色</span><br><span class="line">    &quot;&quot;&quot;</span><br><span class="line">    id = db.Column(db.Integer, primary_key=True)</span><br><span class="line">    # 该用户角色名称</span><br><span class="line">    name = db.Column(db.String(164))</span><br><span class="line">    # 该用户角色是否为默认</span><br><span class="line">    default = db.Column(db.Boolean, default=False, index=True)</span><br><span class="line">    # 该用户角色对应的权限</span><br><span class="line">    permissions = db.Column(db.Integer)</span><br><span class="line">    # 该用户角色和用户的关系</span><br><span class="line">    # 角色为该用户角色的所有用户</span><br><span class="line">    users = db.relationship(&apos;User&apos;, backref=&apos;role&apos;, lazy=&apos;dynamic&apos;)</span><br><span class="line"></span><br><span class="line">    @staticmethod</span><br><span class="line">    def insert_roles():</span><br><span class="line">        &quot;&quot;&quot;</span><br><span class="line">        创建用户角色</span><br><span class="line">        &quot;&quot;&quot;</span><br><span class="line">        roles = &#123;</span><br><span class="line">            # 定义了两个用户角色(User, Admin)</span><br><span class="line">            &apos;User&apos;: (Permission.COMMENT, True),</span><br><span class="line">            &apos;Admin&apos;: (Permission.COMMENT |</span><br><span class="line">                      Permission.MODERATE_COMMENT, False)</span><br><span class="line">        &#125;</span><br><span class="line">        for r in roles:</span><br><span class="line">            role = Role.query.filter_by(name=r).first()</span><br><span class="line">            if role is None:</span><br><span class="line">                # 如果用户角色没有创建: 创建用户角色</span><br><span class="line">                role = Role(name=r)</span><br><span class="line">            role.permissions = roles[r][0]</span><br><span class="line">            role.default = roles[r][1]</span><br><span class="line">            db.session.add(role)</span><br><span class="line">            db.session.commit()</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Role</span><span class="params">(db.Model)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    用户角色</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    id = db.Column(db.Integer, primary_key=<span class="keyword">True</span>)</span><br><span class="line">    <span class="comment"># 该用户角色名称</span></span><br><span class="line">    name = db.Column(db.String(<span class="number">164</span>))</span><br><span class="line">    <span class="comment"># 该用户角色是否为默认</span></span><br><span class="line">    default = db.Column(db.Boolean, default=<span class="keyword">False</span>, index=<span class="keyword">True</span>)</span><br><span class="line">    <span class="comment"># 该用户角色对应的权限</span></span><br><span class="line">    permissions = db.Column(db.Integer)</span><br><span class="line">    <span class="comment"># 该用户角色和用户的关系</span></span><br><span class="line">    <span class="comment"># 角色为该用户角色的所有用户</span></span><br><span class="line">    users = db.relationship(<span class="string">'User'</span>, backref=<span class="string">'role'</span>, lazy=<span class="string">'dynamic'</span>)</span><br><span class="line"></span><br><span class="line"><span class="meta">    @staticmethod</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">insert_roles</span><span class="params">()</span>:</span></span><br><span class="line">        <span class="string">"""</span></span><br><span class="line"><span class="string">        创建用户角色</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        roles = &#123;</span><br><span class="line">            <span class="comment"># 定义了两个用户角色(User, Admin)</span></span><br><span class="line">            <span class="string">'User'</span>: (Permission.COMMENT, <span class="keyword">True</span>),</span><br><span class="line">            <span class="string">'Admin'</span>: (Permission.COMMENT |</span><br><span class="line">                      Permission.MODERATE_COMMENT, <span class="keyword">False</span>)</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span> r <span class="keyword">in</span> roles:</span><br><span class="line">            role = Role.query.filter_by(name=r).first()</span><br><span class="line">            <span class="keyword">if</span> role <span class="keyword">is</span> <span class="keyword">None</span>:</span><br><span class="line">                <span class="comment"># 如果用户角色没有创建: 创建用户角色</span></span><br><span class="line">                role = Role(name=r)</span><br><span class="line">            role.permissions = roles[r][<span class="number">0</span>]</span><br><span class="line">            role.default = roles[r][<span class="number">1</span>]</span><br><span class="line">            db.session.add(role)</span><br><span class="line">            db.session.commit()</span><br></pre></td></tr></table></figure></p>
 <p>这里其实我一直没有搞明白，为什么要将角色存储于数据库当中，在我看来这只会导致更多的I/O操作从而影响系统的性能，因此我在设计角色的时候根本没有考虑存储到数据库中，角色的数据结构在系统运行时，直接存在内存当中，这样在接口调用时，可以直接使用角色相关的数据结构。而且由于我们的权限设计也不太相同，所以我针对restful api设计的Role如下：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">USER = 1</span><br><span class="line">ADMIN = 2</span><br><span class="line">VISITOR = 3</span><br><span class="line"></span><br><span class="line">Role = &#123;</span><br><span class="line">    USER: &#123;</span><br><span class="line">        &quot;comment&quot;: &#123;&quot;post&quot;: True, &quot;patch&quot;: True, &quot;get&quot;: True, &quot;delete&quot;: True&#125;,</span><br><span class="line">        &quot;share&quot;: &#123;&quot;post&quot;: True&#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    ADMIN: &#123;</span><br><span class="line">        &quot;comment&quot;: &#123;&quot;post&quot;: True, &quot;patch&quot;: True, &quot;get&quot;: True, &quot;delete&quot;: True&#125;,</span><br><span class="line">        &quot;share&quot;: &#123;&quot;post&quot;: True&#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    VISITOR: &#123;</span><br><span class="line">        &quot;comment&quot;: &#123;&quot;get&quot;: True&#125;,</span><br><span class="line">        &quot;share&quot;: &#123;&quot;post&quot;: True&#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">USER</span> <span class="title">= 1</span></span><br><span class="line">ADMIN = <span class="number">2</span></span><br><span class="line">VISITOR = <span class="number">3</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">Role</span> <span class="title">= &#123;</span></span><br><span class="line"><span class="title">    USER</span>: &#123;</span><br><span class="line">        <span class="string">"comment"</span>: &#123;<span class="string">"post"</span>: <span class="literal">True</span>, <span class="string">"patch"</span>: <span class="literal">True</span>, <span class="string">"get"</span>: <span class="literal">True</span>, <span class="string">"delete"</span>: <span class="literal">True</span>&#125;,</span><br><span class="line">        <span class="string">"share"</span>: &#123;<span class="string">"post"</span>: <span class="literal">True</span>&#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    ADMIN: &#123;</span><br><span class="line">        <span class="string">"comment"</span>: &#123;<span class="string">"post"</span>: <span class="literal">True</span>, <span class="string">"patch"</span>: <span class="literal">True</span>, <span class="string">"get"</span>: <span class="literal">True</span>, <span class="string">"delete"</span>: <span class="literal">True</span>&#125;,</span><br><span class="line">        <span class="string">"share"</span>: &#123;<span class="string">"post"</span>: <span class="literal">True</span>&#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    VISITOR: &#123;</span><br><span class="line">        <span class="string">"comment"</span>: &#123;<span class="string">"get"</span>: <span class="literal">True</span>&#125;,</span><br><span class="line">        <span class="string">"share"</span>: &#123;<span class="string">"post"</span>: <span class="literal">True</span>&#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p>用户可以被赋予特定的role，如下：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">userA = &#123;&quot;name&quot;: &quot;John&quot;, &quot;role&quot;: USER&#125;</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">userA</span> = &#123;<span class="string">"name"</span>: <span class="string">"John"</span>, <span class="string">"role"</span>: USER&#125;</span><br></pre></td></tr></table></figure></p>
 <p>那么接口如何判断用户是否有权限访问呢？
 首先用户访问接口时都会带有用户信息，restful api一般是通过token来表明身份，系统通过token来获取用户的信息，比如用户名，然后我们可以通过用户名来获取用户的角色role，假设我们访问的接口是comments endpoint的post接口，那么就可以如下判断：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">def access_control(user):</span><br><span class="line">    &quot;&quot;&quot;判断用户是否有访问权限，有就返回True，没有返回False&quot;&quot;&quot;</span><br><span class="line">    </span><br><span class="line">    # 首先要获取到API的endpoint和http method，此处代码省略</span><br><span class="line">    ...</span><br><span class="line">    </span><br><span class="line">    role = user.get(&apos;role&apos;, VISITOR)</span><br><span class="line">    try:</span><br><span class="line">        if not Role[role][endpoint][http_method]:</span><br><span class="line">            return False</span><br><span class="line">        return True</span><br><span class="line">    except KeyError:</span><br><span class="line">        return False</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">access_control</span><span class="params">(user)</span>:</span></span><br><span class="line">    <span class="string">"""判断用户是否有访问权限，有就返回True，没有返回False"""</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 首先要获取到API的endpoint和http method，此处代码省略</span></span><br><span class="line">    ...</span><br><span class="line">    </span><br><span class="line">    role = user.get(<span class="string">'role'</span>, VISITOR)</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> Role[role][endpoint][http_method]:</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">False</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">True</span></span><br><span class="line">    <span class="keyword">except</span> KeyError:</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">False</span></span><br></pre></td></tr></table></figure></p>
 <p>由于基本所有的接口都需要access control，那么我们把上边的代码稍作改变，让它成为一个decorator，同时，user信息也可以直接获取而不需要从参数传递，如下：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">from functools import wraps</span><br><span class="line"></span><br><span class="line">def get_role():</span><br><span class="line">    # 这里get_resource_by_name用于从数据库中获取该用户的信息，这个需要自己去定义</span><br><span class="line">    # 另外我们可以在登录验证的时候或者token验证的时候讲user name存储于全局变量g中，这样我们可以随时获取该用户名</span><br><span class="line">    user = UserModel.get_resource_by_name(g.user_name)</span><br><span class="line">    return user.get(&quot;role&quot;, VISITOR)</span><br><span class="line"></span><br><span class="line">def access_control(func):</span><br><span class="line">    @wraps(func)</span><br><span class="line">    def wrap_func(*args, **kwargs):</span><br><span class="line">        # 同样要先获取到API的endpoint和http method，此处代码省略</span><br><span class="line">        ...</span><br><span class="line">        </span><br><span class="line">        try:</span><br><span class="line">            if not Role[role][endpoint][http_method]:</span><br><span class="line">                return make_response(</span><br><span class="line">                    jsonify(&#123;&apos;error&apos;: &apos;no permission&apos;&#125;), 403)</span><br><span class="line">            return func(*args, **kwargs)</span><br><span class="line">        except KeyError:</span><br><span class="line">            return make_response(</span><br><span class="line">                jsonify(&#123;&apos;error&apos;: &apos;no permission&apos;&#125;), 403)</span><br><span class="line">    return wrap_func</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> functools <span class="keyword">import</span> wraps</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_role</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="comment"># 这里get_resource_by_name用于从数据库中获取该用户的信息，这个需要自己去定义</span></span><br><span class="line">    <span class="comment"># 另外我们可以在登录验证的时候或者token验证的时候讲user name存储于全局变量g中，这样我们可以随时获取该用户名</span></span><br><span class="line">    user = UserModel.get_resource_by_name(g.user_name)</span><br><span class="line">    <span class="keyword">return</span> user.get(<span class="string">"role"</span>, VISITOR)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">access_control</span><span class="params">(func)</span>:</span></span><br><span class="line"><span class="meta">    @wraps(func)</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">wrap_func</span><span class="params">(*args, **kwargs)</span>:</span></span><br><span class="line">        <span class="comment"># 同样要先获取到API的endpoint和http method，此处代码省略</span></span><br><span class="line">        ...</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            <span class="keyword">if</span> <span class="keyword">not</span> Role[role][endpoint][http_method]:</span><br><span class="line">                <span class="keyword">return</span> make_response(</span><br><span class="line">                    jsonify(&#123;<span class="string">'error'</span>: <span class="string">'no permission'</span>&#125;), <span class="number">403</span>)</span><br><span class="line">            <span class="keyword">return</span> func(*args, **kwargs)</span><br><span class="line">        <span class="keyword">except</span> KeyError:</span><br><span class="line">            <span class="keyword">return</span> make_response(</span><br><span class="line">                jsonify(&#123;<span class="string">'error'</span>: <span class="string">'no permission'</span>&#125;), <span class="number">403</span>)</span><br><span class="line">    <span class="keyword">return</span> wrap_func</span><br></pre></td></tr></table></figure></p>
 <p>以下是一个获取图片resource的使用示例
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">from flask_restful import Resource</span><br><span class="line"></span><br><span class="line">class ImageResource(Resource):</span><br><span class="line">    def __init__(self):</span><br><span class="line">        super(ImageResource, self).__init__()</span><br><span class="line"></span><br><span class="line">    @token_auth.login_required</span><br><span class="line">    @access_control</span><br><span class="line">    def get(self, resource_id):</span><br><span class="line">        response = resource_get(resource_id)</span><br><span class="line">        return response</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">from flask_restful import Resource</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ImageResource</span>(<span class="title">Resource</span>):</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(<span class="keyword">self</span>)</span></span><span class="symbol">:</span></span><br><span class="line">        <span class="keyword">super</span>(ImageResource, <span class="keyword">self</span>).__init_<span class="number">_</span>()</span><br><span class="line"></span><br><span class="line">    @token_auth.login_required</span><br><span class="line">    @access_control</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">get</span><span class="params">(<span class="keyword">self</span>, resource_id)</span></span><span class="symbol">:</span></span><br><span class="line">        response = resource_get(resource_id)</span><br><span class="line">        <span class="keyword">return</span> response</span><br></pre></td></tr></table></figure></p>
 <p>这里另外一个decortor @token_auth.login_required用于token验证，大家可以先不用理会。到这里我们已经可以针对每个接口自动判断该用户是否有权限访问了，而所有权限的变化，都可以通过修改Role中的权限来进行更改，而不需要更改原来的代码，很爽吧，有木有？
 不过，笔者在项目中还遇到了另外一个问题，有时候针对一个接口所有的user都应该有权限，但是针对特定的resource，只能resource owner可以操作，举个栗子，比如我们要删除某个评论，但是只允许发布评论的人才有权限删除，也就是comment resource的owner才可以使用delete接口删除，但是我们所有的用户在Role定义的时候delete接口都是True，这个怎么办呢？
 这就需要我们在access_control检测完了之后再进一步检测该用户是否是resource owner，所以我们就需要进一步检测，这里添加一个decorator如下：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">def get_resource_owner():</span><br><span class="line">    &quot;&quot;&quot;获取resource的owner&quot;&quot;&quot;</span><br><span class="line">    # 自定义，代码省略</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">def owner_permission_required(func):</span><br><span class="line">    @wrap(func)</span><br><span class="line">    def wrap_func(*args, **kwargs):</span><br><span class="line">        if g.user_name == get_resource_owner():</span><br><span class="line">            return func(*args, **kwargs)</span><br><span class="line">        return make_response(</span><br><span class="line">            jsonify(&#123;&apos;error&apos;: &apos;no permission&apos;&#125;), 403)</span><br><span class="line">    return wrap_func</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_resource_owner</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="string">"""获取resource的owner"""</span></span><br><span class="line">    <span class="comment"># 自定义，代码省略</span></span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">owner_permission_required</span><span class="params">(func)</span>:</span></span><br><span class="line"><span class="meta">    @wrap(func)</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">wrap_func</span><span class="params">(*args, **kwargs)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> g.user_name == get_resource_owner():</span><br><span class="line">            <span class="keyword">return</span> func(*args, **kwargs)</span><br><span class="line">        <span class="keyword">return</span> make_response(</span><br><span class="line">            jsonify(&#123;<span class="string">'error'</span>: <span class="string">'no permission'</span>&#125;), <span class="number">403</span>)</span><br><span class="line">    <span class="keyword">return</span> wrap_func</span><br></pre></td></tr></table></figure></p>
 <p>使用如下：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">from flask_restful import Resource</span><br><span class="line"></span><br><span class="line">class CommentResource(Resource):</span><br><span class="line">    def __init__(self):</span><br><span class="line">        super(CommentResource, self).__init__()</span><br><span class="line"></span><br><span class="line">    @token_auth.login_required</span><br><span class="line">    @access_control</span><br><span class="line">    @owner_permission_required</span><br><span class="line">    @marshal_with(image_fields)</span><br><span class="line">    def delete(self, resource_id):</span><br><span class="line">        response = resource_delete(resource_id)</span><br><span class="line">        return response</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">from flask_restful import Resource</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CommentResource</span>(<span class="title">Resource</span>):</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(<span class="keyword">self</span>)</span></span><span class="symbol">:</span></span><br><span class="line">        <span class="keyword">super</span>(CommentResource, <span class="keyword">self</span>).__init_<span class="number">_</span>()</span><br><span class="line"></span><br><span class="line">    @token_auth.login_required</span><br><span class="line">    @access_control</span><br><span class="line">    @owner_permission_required</span><br><span class="line">    @marshal_with(image_fields)</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">delete</span><span class="params">(<span class="keyword">self</span>, resource_id)</span></span><span class="symbol">:</span></span><br><span class="line">        response = resource_delete(resource_id)</span><br><span class="line">        <span class="keyword">return</span> response</span><br></pre></td></tr></table></figure></p>
 <p>注意：decorator的顺序是不能改变的。</p>
 <p>至此，Restful API权限管理相关的设计就完成了，如果文章给你带来了启发，记得点赞哦！</p>
 
@@ -528,6 +529,25 @@
               
 
               
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">4</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
 
               
                 
@@ -550,7 +570,35 @@
                     
                       
                     
-                    <span class="site-state-item-count">7</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">21</span>
                     <span class="site-state-item-name">tags</span>
                   </a>
                 </div>
@@ -802,6 +850,75 @@
 
 
   
+
+  
+  <script>
+    
+    function showTime(Counter) {
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      Counter('get', '/classes/Counter', { where: JSON.stringify({ url: { "$in": entries } }) })
+        .done(function ({ results }) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.url;
+            var time = item.time;
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function ({ responseJSON }) {
+          console.log("LeanCloud Counter Error: " + responseJSON.code + " " + responseJSON.error);
+        });
+    }
+    
+
+    $(function() {
+      $.get('https://app-router.leancloud.cn/2/route?appId=' + "OCjgmQiFa9gpVkDabM6KTb8g-gzGzoHsz")
+        .done(function ({ api_server }) {
+          var Counter = function (method, url, data) {
+            return $.ajax({
+              method: method,
+              url: `https://${api_server}/1.1${url}`,
+              headers: {
+                'X-LC-Id': "OCjgmQiFa9gpVkDabM6KTb8g-gzGzoHsz",
+                'X-LC-Key': "Ie7XE2V6spB6Q6C1W2GU9drV",
+                'Content-Type': 'application/json',
+              },
+              data: data,
+            });
+          };
+          
+          if ($('.post-title-link').length >= 1) {
+            showTime(Counter);
+          }
+          
+        })
+    });
+  </script>
+
+
 
   
 
