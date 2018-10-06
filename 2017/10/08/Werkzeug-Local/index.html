@@ -1,4 +1,379 @@
-<!DOCTYPE html><html><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>Werkzeug(Flask)之Local、LocalStack和LocalProxy | Geekpy's Blog</title><link rel="stylesheet" type="text/css" href="/css/normalize.css"><link rel="stylesheet" type="text/css" href="/css/highlight.css"><link rel="stylesheet" type="text/css" href="/css/very-simple.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/font-awesome/4.5.0/css/font-awesome.min.css"><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="alternate" type="application/atom+xml" href="/atom.xml"></head><body><!-- include the sidebar--><!-- include ./includes/sidebar.jade--><!-- Blog title and subtitle--><header><div class="container header"><a id="logo" href="/." class="title">Geekpy's Blog</a><span class="subtitle"></span><label id="toggle-menu" for="menu" onclick><i class="fa fa-bars"></i></label></div></header><!-- use checkbox hack for toggle nav-bar on small screens--><input id="menu" type="checkbox"><!-- Navigation Links--><nav id="nav"><div class="container"><a href="/" class="sidebar-nav-item active">Home</a><a href="/archives" class="sidebar-nav-item">Archives</a><a href="/about" class="sidebar-nav-item">About</a></div></nav><div id="header-margin-bar"></div><div class="wrapper"><div class="container post-header"><h1>Werkzeug(Flask)之Local、LocalStack和LocalProxy</h1></div></div><article><div class="container post"><p>在我们使用Flask以及Werkzeug框架的过程中，经常会遇到如下三个概念：Local、LocalStack和LocalProxy。尤其在学习Flask的Request Context和App Context的过程中，这几个概念出现的更加频繁，另外很多Flask插件都会使用这三个概念对应的技术。那么这三个东西到底是什么？我们为什么需要它们？以及如何使用呢？本篇文章主要就是来解答这些问题。</p>
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '6.4.2',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="在我们使用Flask以及Werkzeug框架的过程中，经常会遇到如下三个概念：Local、LocalStack和LocalProxy。尤其在学习Flask的Request Context和App Context的过程中，这几个概念出现的更加频繁，另外很多Flask插件都会使用这三个概念对应的技术。那么这三个东西到底是什么？我们为什么需要它们？以及如何使用呢？本篇文章主要就是来解答这些问题。 Loc">
+<meta name="keywords" content="flask,local,localstack,localproxy,werkzeug">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Werkzeug(Flask)之Local、LocalStack和LocalProxy">
+<meta property="og:url" content="http://yoursite.com/2017/10/08/Werkzeug-Local/index.html">
+<meta property="og:site_name" content="Geekpy&#39;s Blog">
+<meta property="og:description" content="在我们使用Flask以及Werkzeug框架的过程中，经常会遇到如下三个概念：Local、LocalStack和LocalProxy。尤其在学习Flask的Request Context和App Context的过程中，这几个概念出现的更加频繁，另外很多Flask插件都会使用这三个概念对应的技术。那么这三个东西到底是什么？我们为什么需要它们？以及如何使用呢？本篇文章主要就是来解答这些问题。 Loc">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3959253-e64c1ca00b6f14e3.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3959253-b474030cec52260b.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3959253-b673a9a708167969.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:updated_time" content="2018-10-05T14:16:01.368Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Werkzeug(Flask)之Local、LocalStack和LocalProxy">
+<meta name="twitter:description" content="在我们使用Flask以及Werkzeug框架的过程中，经常会遇到如下三个概念：Local、LocalStack和LocalProxy。尤其在学习Flask的Request Context和App Context的过程中，这几个概念出现的更加频繁，另外很多Flask插件都会使用这三个概念对应的技术。那么这三个东西到底是什么？我们为什么需要它们？以及如何使用呢？本篇文章主要就是来解答这些问题。 Loc">
+<meta name="twitter:image" content="http://upload-images.jianshu.io/upload_images/3959253-e64c1ca00b6f14e3.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Geekpy's Blog" type="application/atom+xml" />
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/10/08/Werkzeug-Local/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Werkzeug(Flask)之Local、LocalStack和LocalProxy | Geekpy's Blog</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Geekpy's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br />About</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />Tags</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />Categories</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />Archives</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+    
+    
+    <div class="post-block page">
+      <header class="post-header">
+
+<h1 class="post-title" itemprop="name headline">Werkzeug(Flask)之Local、LocalStack和LocalProxy</h1>
+
+<div class="post-meta">
+  
+  
+
+
+  
+  
+  <ul class="breadcrumb">
+    
+      
+      
+        
+          <li><a href="/2017/">2017</a></li>
+          
+            
+          
+        
+      
+    
+      
+      
+        
+          <li><a href="/2017/10/">10</a></li>
+          
+            
+          
+        
+      
+    
+      
+      
+        
+          <li><a href="/2017/10/08/">08</a></li>
+          
+            
+          
+        
+      
+    
+      
+      
+        
+          <li>WERKZEUG-LOCAL</li>
+        
+      
+    
+      
+      
+        
+          <li><a href="/2017/10/08//"></a></li>
+          
+            
+          
+        
+      
+    
+  </ul>
+
+
+</div>
+
+</header>
+
+      
+      
+      
+      <div class="post-body">
+        
+        
+          <p>在我们使用Flask以及Werkzeug框架的过程中，经常会遇到如下三个概念：Local、LocalStack和LocalProxy。尤其在学习Flask的Request Context和App Context的过程中，这几个概念出现的更加频繁，另外很多Flask插件都会使用这三个概念对应的技术。那么这三个东西到底是什么？我们为什么需要它们？以及如何使用呢？本篇文章主要就是来解答这些问题。</p>
 <h2>Local</h2>
 <p>这部分我们重点介绍Local概念，主要分为以下几个部分：</p>
 <ul>
@@ -8,7 +383,7 @@
 </ul>
 <h4>为什么需要Local？</h4>
 <p>在Python的标准库中提供了<code>thread local</code>对象用于存储<em>thread-safe</em>和<em>thread-specific</em>的数据，通过这种方式存储的数据只在本线程中有效，而对于其它线程则不可见。正是基于这样的特性，我们可以把针对线程全局的数据存储进<code>thread local</code>对象，举个简单的例子
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;from threading import local</span><br><span class="line">&gt;&gt;thread_local_data = local()</span><br><span class="line">&gt;&gt;thread_local_data.user_name=&quot;Jim&quot;</span><br><span class="line">&gt;&gt;thread_local_data.user_name</span><br><span class="line">&apos;Jim&apos;</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;</span><span class="bash">&gt;from threading import <span class="built_in">local</span></span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash">&gt;thread_local_data = <span class="built_in">local</span>()</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash">&gt;thread_local_data.user_name=<span class="string">"Jim"</span></span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash">&gt;thread_local_data.user_name</span></span><br><span class="line">'Jim'</span><br></pre></td></tr></table></figure></p>
 <p>使用<code>thread local</code>对象虽然可以基于线程存储全局变量，但是在Web应用中可能会存在如下问题：</p>
 <ol>
 <li>有些应用使用的是greenlet协程，这种情况下无法保证协程之间数据的隔离，因为不同的协程可以在同一个线程当中。</li>
@@ -17,7 +392,7 @@
 <p>为了解决上述问题，Werkzeug开发了自己的local对象，这也是为什么我们需要Werkzeug的local对象</p>
 <h4>Local的使用</h4>
 <p>先举一个简单的示例：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">from werkzeug.local import Local, LocalManager</span><br><span class="line"></span><br><span class="line">local = Local()</span><br><span class="line">local_manager = LocalManager([local])</span><br><span class="line"></span><br><span class="line">def application(environ, start_response):</span><br><span class="line">    local.request = request = Request(environ)</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line"># make_middleware会确保当request结束时，所有存储于local中的对象的reference被清除</span><br><span class="line">application = local_manager.make_middleware(application)</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> werkzeug.<span class="keyword">local</span> import Local, LocalManager</span><br><span class="line"></span><br><span class="line"><span class="keyword">local</span> = Local()</span><br><span class="line">local_manager = LocalManager([<span class="keyword">local</span>])</span><br><span class="line"></span><br><span class="line">def <span class="built_in">application</span>(environ, start_response):</span><br><span class="line">    <span class="keyword">local</span>.request = request = Request(environ)</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line"><span class="comment"># make_middleware会确保当request结束时，所有存储于local中的对象的reference被清除</span></span><br><span class="line"><span class="built_in">application</span> = local_manager.make_middleware(<span class="built_in">application</span>)</span><br></pre></td></tr></table></figure></p>
 <ul>
 <li>首先Local对象需要通过LocalManager来管理，初次生成LocalManager对象需要传一个list类型的参数，list中是Local对象，当有新的Local对象时，可以通过<code>local_manager.locals.append()</code>来添加。而当LocalManager对象清理的时候会将所有存储于locals中的当前context的数据都清理掉</li>
 <li>上例中当local.request被赋值之后，其可以在当前context中作为全局数据使用</li>
@@ -26,17 +401,17 @@
 <p>那么Werkzeug的Local对象是如何实现这种在相同的context环境下保证数据的全局性和隔离性的呢？</p>
 <h4>Local的实现</h4>
 <p>我们先来看下源代码
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"># 在有greenlet的情况下，get_indent实际获取的是greenlet的id，而没有greenlet的情况下获取的是thread id</span><br><span class="line">try:</span><br><span class="line">    from greenlet import getcurrent as get_ident</span><br><span class="line">except ImportError:</span><br><span class="line">    try:</span><br><span class="line">        from thread import get_ident</span><br><span class="line">    except ImportError:</span><br><span class="line">        from _thread import get_ident</span><br><span class="line"></span><br><span class="line">class Local(object):</span><br><span class="line">    __slots__ = (&apos;__storage__&apos;, &apos;__ident_func__&apos;)</span><br><span class="line"></span><br><span class="line">    def __init__(self):</span><br><span class="line">        object.__setattr__(self, &apos;__storage__&apos;, &#123;&#125;)</span><br><span class="line">        object.__setattr__(self, &apos;__ident_func__&apos;, get_ident)</span><br><span class="line"></span><br><span class="line">    def __iter__(self):</span><br><span class="line">        return iter(self.__storage__.items())</span><br><span class="line"></span><br><span class="line">    # 当调用Local对象时，返回对应的LocalProxy</span><br><span class="line">    def __call__(self, proxy):</span><br><span class="line">        &quot;&quot;&quot;Create a proxy for a name.&quot;&quot;&quot;</span><br><span class="line">        return LocalProxy(self, proxy)</span><br><span class="line"></span><br><span class="line">    # Local类中特有的method，用于清空greenlet id或线程id对应的dict数据</span><br><span class="line">    def __release_local__(self):</span><br><span class="line">        self.__storage__.pop(self.__ident_func__(), None)</span><br><span class="line"></span><br><span class="line">    def __getattr__(self, name):</span><br><span class="line">        try:</span><br><span class="line">            return self.__storage__[self.__ident_func__()][name]</span><br><span class="line">        except KeyError:</span><br><span class="line">            raise AttributeError(name)</span><br><span class="line"></span><br><span class="line">    def __setattr__(self, name, value):</span><br><span class="line">        ident = self.__ident_func__()</span><br><span class="line">        storage = self.__storage__</span><br><span class="line">        try:</span><br><span class="line">            storage[ident][name] = value</span><br><span class="line">        except KeyError:</span><br><span class="line">            storage[ident] = &#123;name: value&#125;</span><br><span class="line"></span><br><span class="line">    def __delattr__(self, name):</span><br><span class="line">        try:</span><br><span class="line">            del self.__storage__[self.__ident_func__()][name]</span><br><span class="line">        except KeyError:</span><br><span class="line">            raise AttributeError(name)</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在有greenlet的情况下，get_indent实际获取的是greenlet的id，而没有greenlet的情况下获取的是thread id</span></span><br><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    <span class="keyword">from</span> greenlet <span class="keyword">import</span> getcurrent <span class="keyword">as</span> get_ident</span><br><span class="line"><span class="keyword">except</span> ImportError:</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="keyword">from</span> thread <span class="keyword">import</span> get_ident</span><br><span class="line">    <span class="keyword">except</span> ImportError:</span><br><span class="line">        <span class="keyword">from</span> _thread <span class="keyword">import</span> get_ident</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Local</span><span class="params">(object)</span>:</span></span><br><span class="line">    __slots__ = (<span class="string">'__storage__'</span>, <span class="string">'__ident_func__'</span>)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self)</span>:</span></span><br><span class="line">        object.__setattr__(self, <span class="string">'__storage__'</span>, &#123;&#125;)</span><br><span class="line">        object.__setattr__(self, <span class="string">'__ident_func__'</span>, get_ident)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__iter__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> iter(self.__storage__.items())</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 当调用Local对象时，返回对应的LocalProxy</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__call__</span><span class="params">(self, proxy)</span>:</span></span><br><span class="line">        <span class="string">"""Create a proxy for a name."""</span></span><br><span class="line">        <span class="keyword">return</span> LocalProxy(self, proxy)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># Local类中特有的method，用于清空greenlet id或线程id对应的dict数据</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__release_local__</span><span class="params">(self)</span>:</span></span><br><span class="line">        self.__storage__.pop(self.__ident_func__(), <span class="keyword">None</span>)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__getattr__</span><span class="params">(self, name)</span>:</span></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            <span class="keyword">return</span> self.__storage__[self.__ident_func__()][name]</span><br><span class="line">        <span class="keyword">except</span> KeyError:</span><br><span class="line">            <span class="keyword">raise</span> AttributeError(name)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__setattr__</span><span class="params">(self, name, value)</span>:</span></span><br><span class="line">        ident = self.__ident_func__()</span><br><span class="line">        storage = self.__storage__</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            storage[ident][name] = value</span><br><span class="line">        <span class="keyword">except</span> KeyError:</span><br><span class="line">            storage[ident] = &#123;name: value&#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__delattr__</span><span class="params">(self, name)</span>:</span></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            <span class="keyword">del</span> self.__storage__[self.__ident_func__()][name]</span><br><span class="line">        <span class="keyword">except</span> KeyError:</span><br><span class="line">            <span class="keyword">raise</span> AttributeError(name)</span><br></pre></td></tr></table></figure></p>
 <ul>
 <li>这段代码实际是对<code>__storage__</code> dict的封装，而这个dict中的key使用的就是get_indent函数获取的id（当有greenlet时使用greenlet id，没有则使用thread id）</li>
 <li><code>__storage__</code> dict中的value也是一个dict，这个dict就是该greenlet(或者线程)对应的local存储空间</li>
 <li>通过重新实现<code>__getattr__</code>, <code>__setattr__</code>等魔术方法，我们在greenlet或者线程中使用local对象时，实际会自动获取greenlet id(或者线程id)，从而获取到对应的dict存储空间，再通过name key就可以获取到真正的存储的对象</li>
 <li>当我们需要释放local数据的内存时，可以通过调用release_local()函数来释放当前context的local数据，如下
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; loc = Local()</span><br><span class="line">&gt;&gt;&gt; loc.foo = 42</span><br><span class="line">&gt;&gt;&gt; release_local(loc)  # release_local实际调用local对象的__release_local__ method</span><br><span class="line">&gt;&gt;&gt; hasattr(loc, &apos;foo&apos;)</span><br><span class="line">False</span><br></pre></td></tr></table></figure></li>
+<figure class="highlight oxygene"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; loc = Local()</span><br><span class="line">&gt;&gt;&gt; loc.foo = <span class="number">42</span></span><br><span class="line">&gt;&gt;&gt; release_local(loc)  # release_local实际调用local对象的__release_local__ <span class="function"><span class="keyword">method</span></span></span><br><span class="line"><span class="function">&gt;&gt;&gt; <span class="title">hasattr</span><span class="params">(loc, <span class="string">'foo'</span>)</span></span></span><br><span class="line"><span class="function"><span class="title">False</span></span></span><br></pre></td></tr></table></figure></li>
 </ul>
 <h2>LocalStack</h2>
 <p>LocalStack与Local对象类似，都是可以基于Greenlet协程或者线程进行全局存储的存储空间(实际LocalStack是对Local进行了二次封装），区别在于其数据结构是栈的形式。示例如下：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; ls = LocalStack()</span><br><span class="line">&gt;&gt;&gt; ls.push(42)</span><br><span class="line">&gt;&gt;&gt; ls.top</span><br><span class="line">42</span><br><span class="line">&gt;&gt;&gt; ls.push(23)</span><br><span class="line">&gt;&gt;&gt; ls.top</span><br><span class="line">23</span><br><span class="line">&gt;&gt;&gt; ls.pop()</span><br><span class="line">23</span><br><span class="line">&gt;&gt;&gt; ls.top</span><br><span class="line">42</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;</span>&gt; ls = LocalStack()</span><br><span class="line"><span class="meta">&gt;&gt;</span>&gt; ls.push(<span class="number">42</span>)</span><br><span class="line"><span class="meta">&gt;&gt;</span>&gt; ls.top</span><br><span class="line"><span class="number">42</span></span><br><span class="line"><span class="meta">&gt;&gt;</span>&gt; ls.push(<span class="number">23</span>)</span><br><span class="line"><span class="meta">&gt;&gt;</span>&gt; ls.top</span><br><span class="line"><span class="number">23</span></span><br><span class="line"><span class="meta">&gt;&gt;</span>&gt; ls.pop()</span><br><span class="line"><span class="number">23</span></span><br><span class="line"><span class="meta">&gt;&gt;</span>&gt; ls.top</span><br><span class="line"><span class="number">42</span></span><br></pre></td></tr></table></figure></p>
 <ul>
 <li>从示例看出Local对象存储的时候是类似字典的方式，需要有key和value，而LocalStack是基于栈的，通过push和pop来存储和弹出数据</li>
 <li>另外，当我们想释放存储空间的时候，也可以调用release_local()</li>
@@ -55,23 +430,23 @@
 <p>初始化LocalProxy有三种方式：</p>
 <ol>
 <li>通过Local或者LocalStack对象的<code>__call__</code> method
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">from werkzeug.local import Local</span><br><span class="line">l = Local()</span><br><span class="line"></span><br><span class="line"># these are proxies</span><br><span class="line">request = l(&apos;request&apos;)</span><br><span class="line">user = l(&apos;user&apos;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">from werkzeug.local import LocalStack</span><br><span class="line">_response_local = LocalStack()</span><br><span class="line"></span><br><span class="line"># this is a proxy</span><br><span class="line">response = _response_local()</span><br></pre></td></tr></table></figure></li>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">from werkzeug.local import Local</span><br><span class="line">l = Local()</span><br><span class="line"></span><br><span class="line"><span class="comment"># these are proxies</span></span><br><span class="line">request = l('request')</span><br><span class="line">user = l('user')</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">from werkzeug.local import LocalStack</span><br><span class="line">_response_local = LocalStack()</span><br><span class="line"></span><br><span class="line"><span class="comment"># this is a proxy</span></span><br><span class="line">response = _response_local()</span><br></pre></td></tr></table></figure></li>
 </ol>
 <p>上述代码直接将对象像函数一样调用，这是因为Local和LocalStack都实现了<code>__call__</code> method，这样其对象就是callable的，因此当我们将对象作为函数调用时，实际调用的是<code>__call__</code> method，可以看下本文开头部分的Local的源代码，会发现<code>__call__</code> method会返回一个LocalProxy对象</p>
 <ol start="2">
 <li>通过LocalProxy类进行初始化
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">l = Local()</span><br><span class="line">request = LocalProxy(l, &apos;request&apos;)</span><br></pre></td></tr></table></figure></li>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">l</span> = Local()</span><br><span class="line"><span class="attr">request</span> = LocalProxy(l, <span class="string">'request'</span>)</span><br></pre></td></tr></table></figure></li>
 </ol>
 <p>实际上这段代码跟第一种方式是等价的，但这种方式是最'原始'的方式，我们在Local的源代码实现中看到其<code>__call__</code> method就是通过这种方式生成LocalProxy的</p>
 <ol start="3">
 <li>使用callable对象作为参数
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">request = LocalProxy(get_current_request())</span><br></pre></td></tr></table></figure></li>
+<figure class="highlight lisp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">request = LocalProxy(<span class="name">get_current_request</span>())</span><br></pre></td></tr></table></figure></li>
 </ol>
 <p>通过传递一个函数，我们可以自定义如何返回Local或LocalStack对象</p>
 <p>那么LocalProxy是如何实现这种代理的呢？接下来看下源码解析</p>
 <h4>LocalProxy代码解析</h4>
 <p>下面截取LocalProxy的部分代码，我们来进行解析
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"># LocalProxy部分代码</span><br><span class="line"></span><br><span class="line">@implements_bool</span><br><span class="line">class LocalProxy(object):</span><br><span class="line">    __slots__ = (&apos;__local&apos;, &apos;__dict__&apos;, &apos;__name__&apos;, &apos;__wrapped__&apos;)</span><br><span class="line"></span><br><span class="line">    def __init__(self, local, name=None):</span><br><span class="line">        object.__setattr__(self, &apos;_LocalProxy__local&apos;, local)</span><br><span class="line">        object.__setattr__(self, &apos;__name__&apos;, name)</span><br><span class="line">        if callable(local) and not hasattr(local, &apos;__release_local__&apos;):</span><br><span class="line">            # &quot;local&quot; is a callable that is not an instance of Local or</span><br><span class="line">            # LocalManager: mark it as a wrapped function.</span><br><span class="line">            object.__setattr__(self, &apos;__wrapped__&apos;, local)</span><br><span class="line"></span><br><span class="line">    def _get_current_object(self):</span><br><span class="line">        &quot;&quot;&quot;Return the current object.  This is useful if you want the real</span><br><span class="line">        object behind the proxy at a time for performance reasons or because</span><br><span class="line">        you want to pass the object into a different context.</span><br><span class="line">        &quot;&quot;&quot;</span><br><span class="line">        # 由于所有Local或LocalStack对象都有__release_local__ method, 所以如果没有该属性就表明self.__local为callable对象</span><br><span class="line">        if not hasattr(self.__local, &apos;__release_local__&apos;):</span><br><span class="line">            return self.__local()</span><br><span class="line">        try:</span><br><span class="line">            # 此处self.__local为Local或LocalStack对象</span><br><span class="line">            return getattr(self.__local, self.__name__)</span><br><span class="line">        except AttributeError:</span><br><span class="line">            raise RuntimeError(&apos;no object bound to %s&apos; % self.__name__)</span><br><span class="line"></span><br><span class="line">    @property</span><br><span class="line">    def __dict__(self):</span><br><span class="line">        try:</span><br><span class="line">            return self._get_current_object().__dict__</span><br><span class="line">        except RuntimeError:</span><br><span class="line">            raise AttributeError(&apos;__dict__&apos;)</span><br><span class="line"></span><br><span class="line">    def __getattr__(self, name):</span><br><span class="line">        if name == &apos;__members__&apos;:</span><br><span class="line">            return dir(self._get_current_object())</span><br><span class="line">        return getattr(self._get_current_object(), name)</span><br><span class="line"></span><br><span class="line">    def __setitem__(self, key, value):</span><br><span class="line">        self._get_current_object()[key] = value</span><br><span class="line"></span><br><span class="line">    def __delitem__(self, key):</span><br><span class="line">        del self._get_current_object()[key]</span><br><span class="line"></span><br><span class="line">    if PY2:</span><br><span class="line">        __getslice__ = lambda x, i, j: x._get_current_object()[i:j]</span><br><span class="line"></span><br><span class="line">        def __setslice__(self, i, j, seq):</span><br><span class="line">            self._get_current_object()[i:j] = seq</span><br><span class="line"></span><br><span class="line">        def __delslice__(self, i, j):</span><br><span class="line">            del self._get_current_object()[i:j]</span><br><span class="line"></span><br><span class="line">    # 截取部分操作符代码</span><br><span class="line">    __setattr__ = lambda x, n, v: setattr(x._get_current_object(), n, v)</span><br><span class="line">    __delattr__ = lambda x, n: delattr(x._get_current_object(), n)</span><br><span class="line">    __str__ = lambda x: str(x._get_current_object())</span><br><span class="line">    __lt__ = lambda x, o: x._get_current_object() &lt; o</span><br><span class="line">    __le__ = lambda x, o: x._get_current_object() &lt;= o</span><br><span class="line">    __eq__ = lambda x, o: x._get_current_object() == o</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># LocalProxy部分代码</span></span><br><span class="line"></span><br><span class="line">@implements_bool</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LocalProxy</span>(<span class="title">object</span>):</span></span><br><span class="line">    __slots_<span class="number">_</span> = (<span class="string">'__local'</span>, <span class="string">'__dict__'</span>, <span class="string">'__name__'</span>, <span class="string">'__wrapped__'</span>)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(<span class="keyword">self</span>, local, name=None)</span></span><span class="symbol">:</span></span><br><span class="line">        object.__setattr_<span class="number">_</span>(<span class="keyword">self</span>, <span class="string">'_LocalProxy__local'</span>, local)</span><br><span class="line">        object.__setattr_<span class="number">_</span>(<span class="keyword">self</span>, <span class="string">'__name__'</span>, name)</span><br><span class="line">        <span class="keyword">if</span> callable(local) <span class="keyword">and</span> <span class="keyword">not</span> hasattr(local, <span class="string">'__release_local__'</span>)<span class="symbol">:</span></span><br><span class="line">            <span class="comment"># "local" is a callable that is not an instance of Local or</span></span><br><span class="line">            <span class="comment"># LocalManager: mark it as a wrapped function.</span></span><br><span class="line">            object.__setattr_<span class="number">_</span>(<span class="keyword">self</span>, <span class="string">'__wrapped__'</span>, local)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_get_current_object</span><span class="params">(<span class="keyword">self</span>)</span></span><span class="symbol">:</span></span><br><span class="line">        <span class="string">""</span><span class="string">"Return the current object.  This is useful if you want the real</span></span><br><span class="line"><span class="string">        object behind the proxy at a time for performance reasons or because</span></span><br><span class="line"><span class="string">        you want to pass the object into a different context.</span></span><br><span class="line"><span class="string">        "</span><span class="string">""</span></span><br><span class="line">        <span class="comment"># 由于所有Local或LocalStack对象都有__release_local__ method, 所以如果没有该属性就表明self.__local为callable对象</span></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> hasattr(<span class="keyword">self</span>.__local, <span class="string">'__release_local__'</span>)<span class="symbol">:</span></span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">self</span>.__local()</span><br><span class="line">        <span class="symbol">try:</span></span><br><span class="line">            <span class="comment"># 此处self.__local为Local或LocalStack对象</span></span><br><span class="line">            <span class="keyword">return</span> getattr(<span class="keyword">self</span>.__local, <span class="keyword">self</span>.__name_<span class="number">_</span>)</span><br><span class="line">        except <span class="symbol">AttributeError:</span></span><br><span class="line">            raise RuntimeError(<span class="string">'no object bound to %s'</span> % <span class="keyword">self</span>.__name_<span class="number">_</span>)</span><br><span class="line"></span><br><span class="line">    @property</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__dict__</span><span class="params">(<span class="keyword">self</span>)</span></span><span class="symbol">:</span></span><br><span class="line">        <span class="symbol">try:</span></span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">self</span>._get_current_object().__dict_<span class="number">_</span></span><br><span class="line">        except <span class="symbol">RuntimeError:</span></span><br><span class="line">            raise AttributeError(<span class="string">'__dict__'</span>)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__getattr__</span><span class="params">(<span class="keyword">self</span>, name)</span></span><span class="symbol">:</span></span><br><span class="line">        <span class="keyword">if</span> name == <span class="string">'__members__'</span><span class="symbol">:</span></span><br><span class="line">            <span class="keyword">return</span> dir(<span class="keyword">self</span>._get_current_object())</span><br><span class="line">        <span class="keyword">return</span> getattr(<span class="keyword">self</span>._get_current_object(), name)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__setitem__</span><span class="params">(<span class="keyword">self</span>, key, value)</span></span><span class="symbol">:</span></span><br><span class="line">        <span class="keyword">self</span>._get_current_object()[key] = value</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__delitem__</span><span class="params">(<span class="keyword">self</span>, key)</span></span><span class="symbol">:</span></span><br><span class="line">        del <span class="keyword">self</span>._get_current_object()[key]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> <span class="symbol">PY2:</span></span><br><span class="line">        __getslice_<span class="number">_</span> = lambda x, i, <span class="symbol">j:</span> x._get_current_object()[<span class="symbol">i:</span>j]</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">def</span> <span class="title">__setslice__</span><span class="params">(<span class="keyword">self</span>, i, j, seq)</span></span><span class="symbol">:</span></span><br><span class="line">            <span class="keyword">self</span>._get_current_object()[<span class="symbol">i:</span>j] = seq</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">def</span> <span class="title">__delslice__</span><span class="params">(<span class="keyword">self</span>, i, j)</span></span><span class="symbol">:</span></span><br><span class="line">            del <span class="keyword">self</span>._get_current_object()[<span class="symbol">i:</span>j]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 截取部分操作符代码</span></span><br><span class="line">    __setattr_<span class="number">_</span> = lambda x, n, <span class="symbol">v:</span> setattr(x._get_current_object(), n, v)</span><br><span class="line">    __delattr_<span class="number">_</span> = lambda x, <span class="symbol">n:</span> delattr(x._get_current_object(), n)</span><br><span class="line">    __str_<span class="number">_</span> = lambda <span class="symbol">x:</span> str(x._get_current_object())</span><br><span class="line">    __lt_<span class="number">_</span> = lambda x, <span class="symbol">o:</span> x._get_current_object() &lt; o</span><br><span class="line">    __le_<span class="number">_</span> = lambda x, <span class="symbol">o:</span> x._get_current_object() &lt;= o</span><br><span class="line">    __eq_<span class="number">_</span> = lambda x, <span class="symbol">o:</span> x._get_current_object() == o</span><br></pre></td></tr></table></figure></p>
 <ul>
 <li>首先在<code>__init__</code> method中传递的<code>local</code>参数会被赋予属性<code>_LocalProxy__local</code>,该属性可以通过<code>self.local</code>进行访问，关于这一点可以看<a href="https://stackoverflow.com/questions/1301346/what-is-the-meaning-of-a-single-and-a-double-underscore-before-an-object-name" target="_blank" rel="noopener">StackOverflow的问题回答</a></li>
 <li>LocalProxy通过<code>_get_current_object</code>来获取代理的对象。需要注意的是当初始化参数为callable对象时，则直接调用以返回Local或LocalStack对象，具体看源代码的注释。</li>
@@ -81,37 +456,441 @@
 <p>可是说了这么多，为什么一定要用proxy，而不能直接调用Local或LocalStack对象呢？这主要是在有多个可供调用的对象的时候会出现问题，如下图：</p>
 <p><img src="http://upload-images.jianshu.io/upload_images/3959253-b474030cec52260b.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="multiple objects"></p>
 <p>我们再通过下面的代码也许可以看出一二：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"># use Local object directly</span><br><span class="line">from werkzeug.local import LocalStack</span><br><span class="line">user_stack = LocalStack()</span><br><span class="line">user_stack.push(&#123;&apos;name&apos;: &apos;Bob&apos;&#125;)</span><br><span class="line">user_stack.push(&#123;&apos;name&apos;: &apos;John&apos;&#125;)</span><br><span class="line"></span><br><span class="line">def get_user():</span><br><span class="line">    # do something to get User object and return it</span><br><span class="line">    return user_stack.pop()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># 直接调用函数获取user对象</span><br><span class="line">user = get_user()</span><br><span class="line">print user[&apos;name&apos;]</span><br><span class="line">print user[&apos;name&apos;]</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"># use Local object directly</span><br><span class="line"><span class="keyword">from</span> werkzeug.local <span class="keyword">import</span> LocalStack</span><br><span class="line">user_stack = LocalStack()</span><br><span class="line">user_stack.<span class="keyword">push</span>(&#123;<span class="string">'name'</span>: <span class="string">'Bob'</span>&#125;)</span><br><span class="line">user_stack.<span class="keyword">push</span>(&#123;<span class="string">'name'</span>: <span class="string">'John'</span>&#125;)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> get_user():</span><br><span class="line">    # <span class="keyword">do</span> something to get User object and <span class="keyword">return</span> it</span><br><span class="line">    <span class="keyword">return</span> user_stack.<span class="keyword">pop</span>()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># 直接调用函数获取user对象</span><br><span class="line">user = get_user()</span><br><span class="line"><span class="keyword">print</span> user[<span class="string">'name'</span>]</span><br><span class="line"><span class="keyword">print</span> user[<span class="string">'name'</span>]</span><br></pre></td></tr></table></figure></p>
 <p>打印结果是：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">John</span><br><span class="line">John</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">John</span></span><br><span class="line"><span class="attribute">John</span></span><br></pre></td></tr></table></figure></p>
 <p>再看下使用LocalProxy
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"># use LocalProxy</span><br><span class="line">from werkzeug.local import LocalStack, LocalProxy</span><br><span class="line">user_stack = LocalStack()</span><br><span class="line">user_stack.push(&#123;&apos;name&apos;: &apos;Bob&apos;&#125;)</span><br><span class="line">user_stack.push(&#123;&apos;name&apos;: &apos;John&apos;&#125;)</span><br><span class="line"></span><br><span class="line">def get_user():</span><br><span class="line">    # do something to get User object and return it</span><br><span class="line">    return user_stack.pop()</span><br><span class="line"></span><br><span class="line"># 通过LocalProxy使用user对象</span><br><span class="line">user = LocalProxy(get_user)</span><br><span class="line">print user[&apos;name&apos;]</span><br><span class="line">print user[&apos;name&apos;]</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"># use LocalProxy</span><br><span class="line"><span class="keyword">from</span> werkzeug.local <span class="keyword">import</span> LocalStack, LocalProxy</span><br><span class="line">user_stack = LocalStack()</span><br><span class="line">user_stack.<span class="keyword">push</span>(&#123;<span class="string">'name'</span>: <span class="string">'Bob'</span>&#125;)</span><br><span class="line">user_stack.<span class="keyword">push</span>(&#123;<span class="string">'name'</span>: <span class="string">'John'</span>&#125;)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> get_user():</span><br><span class="line">    # <span class="keyword">do</span> something to get User object and <span class="keyword">return</span> it</span><br><span class="line">    <span class="keyword">return</span> user_stack.<span class="keyword">pop</span>()</span><br><span class="line"></span><br><span class="line"># 通过LocalProxy使用user对象</span><br><span class="line">user = LocalProxy(get_user)</span><br><span class="line"><span class="keyword">print</span> user[<span class="string">'name'</span>]</span><br><span class="line"><span class="keyword">print</span> user[<span class="string">'name'</span>]</span><br></pre></td></tr></table></figure></p>
 <p>打印结果是：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">John</span><br><span class="line">Bob</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">John</span></span><br><span class="line"><span class="attribute">Bob</span></span><br></pre></td></tr></table></figure></p>
 <p>怎么样，看出区别了吧，直接使用LocalStack对象，user一旦赋值就无法再动态更新了，而使用Proxy，每次调用操作符(这里<code>[]操作符</code>用于获取属性)，都会重新获取user，从而实现了动态更新user的效果。见下图：</p>
 <p><img src="http://upload-images.jianshu.io/upload_images/3959253-b673a9a708167969.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="proxy auto select object"></p>
 <p>Flask以及Flask的插件很多时候都需要这种动态更新的效果，因此LocalProxy就会非常有用了。</p>
 <p>至此，我们针对Local、LocalStack和LocalProxy的概念已经做了详细阐释，如果你觉得文章对你有帮助，不妨点个赞吧！</p>
-</div><div class="container"><hr><div class="comment"></div><script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="//cdn.jsdelivr.net/npm/valine@1.1.6/dist/Valine.min.js"></script>
+
+        
+      </div>
+      
+      
+      
+    </div>
+    
+
+
+  
+  
+  <ul class="breadcrumb">
+    
+      
+      
+        
+          <li><a href="/2017/">2017</a></li>
+          
+            
+          
+        
+      
+    
+      
+      
+        
+          <li><a href="/2017/10/">10</a></li>
+          
+            
+          
+        
+      
+    
+      
+      
+        
+          <li><a href="/2017/10/08/">08</a></li>
+          
+            
+          
+        
+      
+    
+      
+      
+        
+          <li>WERKZEUG-LOCAL</li>
+        
+      
+    
+      
+      
+        
+          <li><a href="/2017/10/08//"></a></li>
+          
+            
+          
+        
+      
+    
+  </ul>
+
+
+    
+    
+    
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">geekpy</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">28</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">7</span>
+                    <span class="site-state-item-name">tags</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/geekpy" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:rebor.liu@gmail.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">Local</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">1.0.1.</span> <span class="nav-text">为什么需要Local？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">1.0.2.</span> <span class="nav-text">Local的使用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">1.0.3.</span> <span class="nav-text">Local的实现</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">LocalStack</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text">LocalProxy</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.0.1.</span> <span class="nav-text">LocalProxy的使用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.0.2.</span> <span class="nav-text">LocalProxy代码解析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">3.0.3.</span> <span class="nav-text">为什么要使用LocalProxy</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">geekpy</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> v3.7.1</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Muse</a> v6.4.2</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
 <script type="text/javascript">
-var leancloud_appid = '';
-var leancloud_appkey = '';
-var valine_url = 'http://yoursite.com/2017/10/08/Werkzeug-Local/';
-var valine_notify = false;
-var valine_verify = false;
-var valine_placeholder = 'input your comments here';
-new Valine({
-         av: AV, // source from av-min.js
-         el: '.comment' ,
-         notify: valine_notify,
-         verify: valine_verify,
-         app_id: leancloud_appid,
-         app_key: leancloud_appkey,
-         placeholder: valine_placeholder,
-         path: valine_url
-     });
-</script></div></article><footer id="footer"><div class="container"><div class="bar"><div class="social"><a href="mailto:rebor.liu@gmail.com" target="_blank"><i class="fa fa-envelope-o"></i></a><a href="https://github.com/geekpy" target="_blank"><i class="fa fa-github"></i></a></div><div class="footer">© 2018 <a href="/" rel="nofollow">geekpy</a>. Powered by <a rel="nofollow" target="_blank" href="https://hexo.io">Hexo</a>. Theme <a target="_blank" href="https://github.com/lotabout/very-simple">very-simple</a>.</div></div></div></footer><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.css"><script src="//cdn.bootcss.com/jquery/2.0.3/jquery.min.js"></script><script src="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.pack.js"></script><script>$(document).ready(function() {
-    $(".fancybox").fancybox();
-});
-</script></body></html>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'OCjgmQiFa9gpVkDabM6KTb8g-gzGzoHsz',
+        appKey: 'Ie7XE2V6spB6Q6C1W2GU9drV',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,9 +1,2549 @@
-<!DOCTYPE html><html><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>Geekpy's Blog</title><link rel="stylesheet" type="text/css" href="/css/normalize.css"><link rel="stylesheet" type="text/css" href="/css/highlight.css"><link rel="stylesheet" type="text/css" href="/css/very-simple.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/font-awesome/4.5.0/css/font-awesome.min.css"><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="alternate" type="application/atom+xml" href="/atom.xml"></head><body><!-- include the sidebar--><!-- include ./includes/sidebar.jade--><!-- Blog title and subtitle--><header><div class="container header"><a id="logo" href="/." class="title">Geekpy's Blog</a><span class="subtitle"></span><label id="toggle-menu" for="menu" onclick><i class="fa fa-bars"></i></label></div></header><!-- use checkbox hack for toggle nav-bar on small screens--><input id="menu" type="checkbox"><!-- Navigation Links--><nav id="nav"><div class="container"><a href="/" class="sidebar-nav-item active">Home</a><a href="/archives" class="sidebar-nav-item">Archives</a><a href="/about" class="sidebar-nav-item">About</a></div></nav><div id="header-margin-bar"></div><article><div id="index-main" class="container entries"><div class="post-entry"><div class="post-time">2017-04-22</div><div class="post-desc"><div class="post-title"><a href="/2017/04/22/Python字符编码之理解/">Python字符编码之理解</a></div><div class="post-content"><p>在从普通程序员进阶到优秀程序员的路上，字符编码是一个不得不跨过去的坎，我们几乎所有的程序都会涉及到字符处理，如果跨不过这个坎，那么几乎注定会面对一些坑。
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '6.4.2',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="keywords" content="computer, programming, data science, deep learning">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Geekpy&#39;s Blog">
+<meta property="og:url" content="http://yoursite.com/page/3/index.html">
+<meta property="og:site_name" content="Geekpy&#39;s Blog">
+<meta property="og:locale" content="default">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Geekpy&#39;s Blog">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Geekpy's Blog" type="application/atom+xml" />
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/page/3/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Geekpy's Blog</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left 
+  page-home">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Geekpy's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br />About</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />Tags</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />Categories</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />Archives</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+  <section id="posts" class="posts-expand">
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/04/22/Python字符编码之理解/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="geekpy">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Geekpy's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/04/22/Python字符编码之理解/" itemprop="url">
+                  Python字符编码之理解
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2017-04-22 18:18:18" itemprop="dateCreated datePublished" datetime="2017-04-22T18:18:18+08:00">2017-04-22</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2018-08-12 16:02:56" itemprop="dateModified" datetime="2018-08-12T16:02:56+08:00">2018-08-12</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/04/22/Python字符编码之理解/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">Comments: </span> <span class="post-comments-count valine-comment-count" data-xid="/2017/04/22/Python字符编码之理解/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>在从普通程序员进阶到优秀程序员的路上，字符编码是一个不得不跨过去的坎，我们几乎所有的程序都会涉及到字符处理，如果跨不过这个坎，那么几乎注定会面对一些坑。
 &lt;!--more--&gt;
 本篇文章试图通过实际的例子来阐释字符编码解码的过程，从而能够更加清晰地认识程序到底是怎样处理字符的。在进入正文之前，你需要先了解字符集和字符编码的区别，需要知道什么是Unicode，什么是UTF-8，GBK等基本概念，如果你不了解，请移步下面的几篇文章：
 <a href="http://noalgo.info/571.html" target="_blank" rel="noopener">字符编码详解</a>
 <a href="http://www.ruanyifeng.com/blog/2007/10/ascii_unicode_and_utf-8.html" target="_blank" rel="noopener">字符编码笔记</a>
-之后，我们试想一下，程序处理字符的过程是怎样的？我想最开始一定是先打开一个编辑器，把程序写出来，然后将程序保存为一个源文件（Python中就是.py文件），所以我们先从文件的存储开始说起。</p></div><div class="post-meta"></div></div></div><div class="post-entry"><div class="post-time">2017-02-19</div><div class="post-desc"><div class="post-title"><a href="/2017/02/19/python_async/">最新Python异步编程详解</a></div><div class="post-content"><p>我们都知道对于I/O相关的程序来说，异步编程可以大幅度的提高系统的吞吐量，因为在某个I/O操作的读写过程中，系统可以先去处理其它的操作（通常是其它的I/O操作），那么Python中是如何实现异步编程的呢？</p></div><div class="post-meta"></div></div></div><div class="post-entry"><div class="post-time">2017-02-10</div><div class="post-desc"><div class="post-title"><a href="/2017/02/10/spark_initial/">Spark启动时的master参数以及Spark的部署方式</a></div><div class="post-content"><p>我们在初始化SparkConf时，或者提交Spark任务时，都会有master参数需要设置，如下：</p></div><div class="post-meta"></div></div></div><div class="post-entry"><div class="post-time">2017-02-07</div><div class="post-desc"><div class="post-title"><a href="/2017/02/07/python_traceback/">Python Traceback 详解</a></div><div class="post-content"><p>刚接触Python的时候，简单的异常处理已经可以帮助我们解决大多数问题，但是随着逐渐地深入，我们会发现有很多情况下简单的异常处理已经无法解决问题了，如下代码，单纯的打印异常所能提供的信息会非常有限。</p></div><div class="post-meta"></div></div></div><div class="post-entry"><div class="post-time">2017-02-01</div><div class="post-desc"><div class="post-title"><a href="/2017/02/01/Arrow-一个最好用的日期时间Python处理库/">Arrow-一个最好用的日期时间Python处理库</a></div><div class="post-content"><p>写过Python程序的人大都知道，Python日期和时间的处理非常繁琐和麻烦，主要有以下几个问题：</p></div><div class="post-meta"></div></div></div><div class="post-entry"><div class="post-time">2016-12-21</div><div class="post-desc"><div class="post-title"><a href="/2016/12/21/why_ipython/">为什么要使用IPython</a></div><div class="post-content"><p>IPython提供了改进的交互式Python Shell，我们可以利用IPython来执行Python语句，并能够立刻看到结果，这一点跟Python自带的shell工具没有什么不同，但是IPython额外提供了很多实用的功能是Python自带的shell所没有的，下面就来看看这些实用的功能吧。</p></div><div class="post-meta"></div></div></div><div class="post-entry"><div class="post-time">2016-12-16</div><div class="post-desc"><div class="post-title"><a href="/2016/12/16/python_binary/">Python二进制表示和位操作</a></div><div class="post-content"><p>我们都知道在计算机中所有的信息最终都是以二进制的0和1来表示，而有些算法是通过操作bit位来进行运算的，这就需要我们了解Python中如何去表示二进制，又如何是进行位运算的。</p></div><div class="post-meta"></div></div></div><div class="post-entry"><div class="post-time">2016-12-06</div><div class="post-desc"><div class="post-title"><a href="/2016/12/06/flask_login_detail/">使用Flask实现用户登陆认证的详细过程</a></div><div class="post-content"><p>本文旨在详细讲解用户登录的原理和过程，并通过Flask框架来完整实现整个登录过程</p></div><div class="post-meta"></div></div></div></div></article><div class="container page-navigator-wrapper"><div class="page-navigator"><a class="extend prev" rel="prev" href="/page/2/">&laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span></div></div><footer id="footer"><div class="container"><div class="bar"><div class="social"><a href="mailto:rebor.liu@gmail.com" target="_blank"><i class="fa fa-envelope-o"></i></a><a href="https://github.com/geekpy" target="_blank"><i class="fa fa-github"></i></a></div><div class="footer">© 2018 <a href="/" rel="nofollow">geekpy</a>. Powered by <a rel="nofollow" target="_blank" href="https://hexo.io">Hexo</a>. Theme <a target="_blank" href="https://github.com/lotabout/very-simple">very-simple</a>.</div></div></div></footer><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.css"><script src="//cdn.bootcss.com/jquery/2.0.3/jquery.min.js"></script><script src="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.pack.js"></script><script>$(document).ready(function() {
-    $(".fancybox").fancybox();
-});
-</script></body></html>
+之后，我们试想一下，程序处理字符的过程是怎样的？我想最开始一定是先打开一个编辑器，把程序写出来，然后将程序保存为一个源文件（Python中就是.py文件），所以我们先从文件的存储开始说起。</p>
+<h3>源文件的存储</h3>
+<p>我们在编辑器中写的代码都是字符形式存在的，而当我们要将这些字符存储到硬盘时，必须有一个编码过程，因为计算机只能认识0/1序列，所以这些字符就必须通过一些编码规则转化成二进制序列，然后再存储到硬盘。比如我们写了下面一段程序
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">s = &apos;你好&apos;</span><br><span class="line">print repr(s), s</span><br></pre></td></tr></table></figure></p>
+<p>当我们存储该文件时，如果是以GB2312编码方式进行存储的，那么文件的二进制表示是这样的
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">➜  testProgram hexdump -C gb2312encodingfile.py</span><br><span class="line">00000000  73 20 3d 20 27 c4 e3 ba  c3 27 0a 70 72 69 6e 74  |s = &apos;....&apos;.print|</span><br><span class="line">00000010  20 72 65 70 72 28 73 29  2c 20 73 0a              | repr(s), s.|</span><br><span class="line">0000001c</span><br></pre></td></tr></table></figure></p>
+<p>这里73代表<code>s</code>
+20代表<code>空格</code>
+3d代表<code>=</code>
+27代表<code>'</code>
+c4 e3代表<code>你</code>
+ba c3代表<code>好</code>，以此类推
+在这里可以看出汉字在GB2312中是用两个字节来表示的。
+我们再使用utf-8来存储同样的一段代码，看看其二进制表示是什么样子
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">➜  testProgram hexdump -C utf8encodingfile.py</span><br><span class="line">00000000  73 20 3d 20 27 e4 bd a0  e5 a5 bd 27 0a 70 72 69  |s = &apos;......&apos;.pri|</span><br><span class="line">00000010  6e 74 20 72 65 70 72 28  73 29 2c 20 73 0a        |nt repr(s), s.|</span><br><span class="line">0000001e</span><br></pre></td></tr></table></figure></p>
+<p>同样的这里73代表<code>s</code>
+20代表<code>空格</code>
+3d代表<code>=</code>
+27代表<code>'</code>
+但是<code>你好</code>汉字是用三个字节来表示的
+e4 bd a0代表<code>你</code>
+e5 a5 bd代表<code>好</code></p>
+<p>现在源文件已经以二进制码流存储到了硬盘，那么源代码又是如何执行的呢？</p>
+<h3>源代码执行</h3>
+<p>源代码执行的时候，Python解释器首先会将源文件load进内存当中，然后一行行开始读取文件并解释执行。</p>
+<p>但是这里需要注意的是，如果是str字符串，python解释器只会读取其二进制码流，假设我们使用的是gb2312encodingfile.py，那么s指向的字符串<code>你好</code>读进内存后的表示就是<code>c4 e3 ba c3</code>, 当我们使用print打印的时候，如果是在Windows的console上执行，则可以正确执行，显示如下
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">➜  testProgram python gb2312encodingfile.py</span><br><span class="line">&apos;\xc4\xe3\xba\xc3&apos; 你好</span><br></pre></td></tr></table></figure></p>
+<p>但是在Linux上或者mac上无法正确执行，显示如下：
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">➜  testProgram python gb2312encodingfile.py</span><br><span class="line">&apos;\xc4\xe3\xba\xc3&apos; ���</span><br></pre></td></tr></table></figure></p>
+<p>这是由于Windows console默认是GBK编解码的(GB2312的扩展)，所以可以将<code>\xc4\xe3\xba\xc3</code>正确解码显示成汉字<code>你好</code>，但是在Linux或者Mac上，console的默认编解码方式是UTF-8，所以也就无法将<code>\xc4\xe3\xba\xc3</code>正确显示出来。</p>
+<p>另外一个小插曲是，如果代码中有汉字，需要在文件开头声明编码方式(#-*- coding: utf-8 <em>-</em> 或者# coding=utf8)，否则解释器默认使用ASCII编码方式去打开源文件，这样就会报错，如下</p>
+<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">➜  testProgram python gb2312encodingfile.py</span><br><span class="line">  File &quot;gb2312encodingfile.py&quot;, line 1</span><br><span class="line">SyntaxError: Non-UTF-8 code starting with &apos;\xc4&apos; in file gb2312encodingfile.py on line 1, but no encoding declared; see http://python.org/dev/peps/pep-0263/ for details</span><br></pre></td></tr></table></figure></p>
+<p>但是如果我们的字符串是unicode对象的字符串，那么Python解释器会将字符串的字节序列先进行<em>解码</em>，然后再将解码后的字节序列的引用赋给s，可以更改utf8encodingfile.py代码如下：
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">#-*- coding: utf-8 -*-</span><br><span class="line">s = &apos;你好&apos;</span><br><span class="line">print repr(s), s</span><br><span class="line"></span><br><span class="line">u = u&apos;你好&apos;</span><br><span class="line">print repr(u), u</span><br></pre></td></tr></table></figure></p>
+<p>保存后，使用hexdump查看其二进制编码如下：
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">➜  testProgram hexdump -C utf8encodingfile.py</span><br><span class="line">00000000  23 2d 2a 2d 20 63 6f 64  69 6e 67 3a 20 75 74 66  |#-*- coding: utf|</span><br><span class="line">00000010  2d 38 20 2d 2a 2d 0a 73  20 3d 20 27 e4 bd a0 e5  |-8 -*-.s = &apos;....|</span><br><span class="line">00000020  a5 bd 27 0a 70 72 69 6e  74 20 72 65 70 72 28 73  |..&apos;.print repr(s|</span><br><span class="line">00000030  29 2c 20 73 0a 0a 75 20  3d 20 75 27 e4 bd a0 e5  |), s..u = u&apos;....|</span><br><span class="line">00000040  a5 bd 27 0a 70 72 69 6e  74 20 72 65 70 72 28 75  |..&apos;.print repr(u|</span><br><span class="line">00000050  29 2c 20 75 0a                                    |), u.|</span><br><span class="line">00000055</span><br></pre></td></tr></table></figure></p>
+<p>仔细观察会发现两个<code>你好</code>字符串都编码成了<code>e4 bd a0 e5 a5 bd</code>
+然后在mac上执行，结果如下：
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">➜  testProgram python utf8encodingfile.py</span><br><span class="line">&apos;\xe4\xbd\xa0\xe5\xa5\xbd&apos; 你好</span><br><span class="line">u&apos;\u4f60\u597d&apos; 你好</span><br></pre></td></tr></table></figure></p>
+<p>可以看出s指向的字节序列是<code>\xe4\xbd\xa0\xe5\xa5\xbd</code>，而u指向的字节序列是<code>\u4f60\u597d</code> (也就是将e4 bd a0 e5 a5 bd 解码成了\u4f60\u597d)</p>
+<p>但是如果我们更改的是gb2312encodingfile.py，并使用gb2312编码保存，再执行这个程序看看会是什么结果。
+结果直接报错：
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">➜  testProgram python gb2312encodingfile.py</span><br><span class="line">  File &quot;gb2312encodingfile.py&quot;, line 5</span><br><span class="line">    u = u&apos;���&apos;</span><br><span class="line">SyntaxError: (unicode error) &apos;utf8&apos; codec can&apos;t decode byte 0xc4 in position 0: invalid continuation byte</span><br></pre></td></tr></table></figure></p>
+<p>这是由于Python解释器尝试用声明的utf-8编码方式去解码gb2312编码的字节序列，所以造成了这样的错误。</p>
+<p>至此我们已经知道了Python如何读写源文件的，那么Python执行的时候又是如何读写外部文件的呢？</p>
+<h3>文件读写</h3>
+<p>现在我们使用如下代码尝试将字符串写到文件当中，注意源码保存使用utf-8, 文件名为utf8encodingfile_write.py
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#-*- coding: utf-8 -*-</span><br><span class="line">s = &apos;你好&apos;</span><br><span class="line">with open(&apos;stroutput.txt&apos;, &apos;w&apos;) as f:</span><br><span class="line">    f.write(s)</span><br><span class="line"></span><br><span class="line">u = u&apos;你好&apos;</span><br><span class="line">with open(&apos;unicodeoutput.txt&apos;, &apos;w&apos;) as f:</span><br><span class="line">    f.write(u)</span><br></pre></td></tr></table></figure></p>
+<p>在mac上执行，结果如下：
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">➜  testProgram python utf8encodingfile_write.py</span><br><span class="line">Traceback (most recent call last):</span><br><span class="line">  File &quot;utf8encodingfile_write.py&quot;, line 8, in &lt;module&gt;</span><br><span class="line">    f.write(u)</span><br><span class="line">UnicodeEncodeError: &apos;ascii&apos; codec can&apos;t encode characters in position 0-1: ordinal not in range(128)</span><br></pre></td></tr></table></figure></p>
+<p>*'ascii' codec can't encode characters in position 0-1: ordinal not in range(128)*说明系统在写文件编码的时候尝试使用ASCII来进行编码，可是我们明明已经声明了使用utf-8啊。</p>
+<p>原来文件头声明使用utf-8，只是用于解释器去解释源码文件的时候使用，当我们调用write去写一个文件的时候，会调用系统默认的编码设置来进行编码。我们来看下系统默认的编码是什么：
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; import sys</span><br><span class="line">&gt;&gt;&gt; sys.getdefaultencoding()</span><br><span class="line">&apos;ascii&apos;</span><br></pre></td></tr></table></figure></p>
+<p>果然，系统默认就是ascii编码方式。
+解决这个问题有两种方式，一种是修改系统默认的编码方式，另一种是在open的时候指定编码方式，其中第二种显然更加优雅一些。
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"># 通过修改系统默认编码方式来实现utf-8编码</span><br><span class="line">import sys</span><br><span class="line">reload(sys) # 这里必须reload一下才能找到setdefaultencoding method</span><br><span class="line">sys.setdefaultencoding(&apos;utf-8&apos;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># 通过在codecs.open中设置编码方式</span><br><span class="line">import codecs</span><br><span class="line"></span><br><span class="line">with codecs.open(&quot;filename&quot;, &quot;w&quot;, encoding=&quot;utf-8&quot;) as f:</span><br><span class="line">    f.write(u)</span><br></pre></td></tr></table></figure></p>
+<p>同样的，当我们读取一个文件的时候，也可以通过codecs.open来设定编解码方式，但是首先我们需要知道这个要读取的文件的编码方式，假设文件是以utf-8的方式进行编码的，读取的时候就可以如下：
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">import codecs</span><br><span class="line"></span><br><span class="line">with open(&quot;somefile&quot;, &quot;r&quot;, encoding=&quot;utf-8&quot;) as f:</span><br><span class="line">    content = f.read()</span><br></pre></td></tr></table></figure></p>
+<p>另外，有时我们并非从文件中读取，而是直接使用了一个非标准字符，这是就需要使用decode先解码
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># if not decode, will raise exception: &apos;ascii&apos; codec can&apos;t</span><br><span class="line"># decode byte 0xe2 in position 0: ordinal not in range(128)</span><br><span class="line">dash = &apos;–&apos;.decode(&quot;utf8&quot;)</span><br><span class="line">if dash in title:</span><br><span class="line">    title = title.split(dash)[0]</span><br></pre></td></tr></table></figure></p>
+<p>至此，关于Python编码就讲完了，如果你有收获，就请点个赞鼓励下吧！</p>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/02/19/python_async/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="geekpy">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Geekpy's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/02/19/python_async/" itemprop="url">
+                  最新Python异步编程详解
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2017-02-19 18:18:18" itemprop="dateCreated datePublished" datetime="2017-02-19T18:18:18+08:00">2017-02-19</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2018-08-12 18:11:56" itemprop="dateModified" datetime="2018-08-12T18:11:56+08:00">2018-08-12</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/02/19/python_async/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">Comments: </span> <span class="post-comments-count valine-comment-count" data-xid="/2017/02/19/python_async/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>我们都知道对于I/O相关的程序来说，异步编程可以大幅度的提高系统的吞吐量，因为在某个I/O操作的读写过程中，系统可以先去处理其它的操作（通常是其它的I/O操作），那么Python中是如何实现异步编程的呢？</p>
+<p>&lt;!--more--&gt;</p>
+<p>简单的回答是Python通过协程(coroutine)来实现异步编程。那究竟啥是协程呢？这将是一个很长的故事。
+故事要从yield开始说起(已经熟悉yield的读者可以跳过这一节)。</p>
+<h3>yield</h3>
+<p>yield是用来生成一个生成器的(Generator), 生成器又是什么呢？这又是一个长长的story，所以这次我建议您移步到这里：
+<a href="https://foofish.net/iterators-vs-generators.html" target="_blank" rel="noopener">完全理解Python迭代对象、迭代器、生成器</a>，而关于yield是怎么回事，建议看这里：<a href="http://www.wklken.me/posts/2013/07/18/python-translate-yield.html" target="_blank" rel="noopener">[翻译]PYTHON中YIELD的解释</a></p>
+<p>好了，现在假设你已经明白了yield和generator的概念了，请原谅我这种不负责任的说法但是这真的是一个很长的story啊！</p>
+<p>总的来说，yield相当于return，它将相应的值返回给调用next()或者send()的调用者，从而交出了cpu使用权，而当调用者再调用next()或者send()时，又会返回到yield中断的地方，如果send有参数，又会将参数返回给yield赋值的变量，如果没有就跟next()一样赋值为None。但是这里会遇到一个问题，就是嵌套使用generator时外层的generator需要写大量代码，看如下示例：</p>
+<p><em>注意以下代码均在Python3.6上运行调试</em>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">#!/usr/bin/env python</span><br><span class="line"># encoding:utf-8</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def inner_generator():</span><br><span class="line">    i = 0</span><br><span class="line">    while True:</span><br><span class="line">        i = yield i</span><br><span class="line">        if i &gt; 10:</span><br><span class="line">            raise StopIteration</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def outer_generator():</span><br><span class="line">    print(&quot;do something before yield&quot;)</span><br><span class="line">    from_inner = 0</span><br><span class="line">    from_outer = 1</span><br><span class="line">    g = inner_generator()</span><br><span class="line">    g.send(None)</span><br><span class="line">    while 1:</span><br><span class="line">        try:</span><br><span class="line">            from_inner = g.send(from_outer)</span><br><span class="line">            from_outer = yield from_inner</span><br><span class="line">        except StopIteration:</span><br><span class="line">            break</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def main():</span><br><span class="line">    g = outer_generator()</span><br><span class="line">    g.send(None)</span><br><span class="line">    i = 0</span><br><span class="line">    while 1:</span><br><span class="line">        try:</span><br><span class="line">            i = g.send(i + 1)</span><br><span class="line">            print(i)</span><br><span class="line">        except StopIteration:</span><br><span class="line">            break</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">if __name__ == &apos;__main__&apos;:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure></p>
+<p>为了简化，在Python3.3中引入了<strong>yield from</strong></p>
+<h3>yield from</h3>
+<p>使用yield from有两个好处，</p>
+<ol>
+<li>可以将main中send的参数一直返回给最里层的generator，</li>
+<li>同时我们也不需要再使用while循环和send (), next()来进行迭代。</li>
+</ol>
+<p>我们可以将上边的代码修改如下：
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">def inner_generator():</span><br><span class="line">    i = 0</span><br><span class="line">    while True:</span><br><span class="line">        i = yield i</span><br><span class="line">        if i &gt; 10:</span><br><span class="line">            raise StopIteration</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def outer_generator():</span><br><span class="line">    print(&quot;do something before coroutine start&quot;)</span><br><span class="line">    yield from inner_generator()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def main():</span><br><span class="line">    g = outer_generator()</span><br><span class="line">    g.send(None)</span><br><span class="line">    i = 0</span><br><span class="line">    while 1:</span><br><span class="line">        try:</span><br><span class="line">            i = g.send(i + 1)</span><br><span class="line">            print(i)</span><br><span class="line">        except StopIteration:</span><br><span class="line">            break</span><br><span class="line"></span><br><span class="line">if __name__ == &apos;__main__&apos;:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure></p>
+<p>执行结果如下：
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">do something before coroutine start</span><br><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td></tr></table></figure></p>
+<p>这里inner_generator()中执行的代码片段我们实际就可以认为是协程，所以总的来说逻辑图如下：</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3959253-ba72641e07e5415c.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="coroutine and wrapper"></p>
+<p>接下来我们就看下究竟协程是啥样子</p>
+<h3>协程coroutine</h3>
+<p>协程的概念应该是从进程和线程演变而来的，他们都是独立的执行一段代码，但是不同是线程比进程要轻量级，协程比线程还要轻量级。多线程在同一个进程中执行，而协程通常也是在一个线程当中执行。它们的关系图如下：</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3959253-0bced0ca6ce584f2.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="process, thread and coroutine "></p>
+<p>我们都知道Python由于GIL(Global Interpreter Lock)原因，其线程效率并不高，并且在*nix系统中，创建线程的开销并不比进程小，因此在并发操作时，多线程的效率还是受到了很大制约的。所以后来人们发现通过yield来中断代码片段的执行，同时交出了cpu的使用权，于是协程的概念产生了。在Python3.4正式引入了协程的概念，代码示例如下：
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">import asyncio</span><br><span class="line"></span><br><span class="line"># Borrowed from http://curio.readthedocs.org/en/latest/tutorial.html.</span><br><span class="line">@asyncio.coroutine</span><br><span class="line">def countdown(number, n):</span><br><span class="line">    while n &gt; 0:</span><br><span class="line">        print(&apos;T-minus&apos;, n, &apos;(&#123;&#125;)&apos;.format(number))</span><br><span class="line">        yield from asyncio.sleep(1)</span><br><span class="line">        n -= 1</span><br><span class="line"></span><br><span class="line">loop = asyncio.get_event_loop()</span><br><span class="line">tasks = [</span><br><span class="line">    asyncio.ensure_future(countdown(&quot;A&quot;, 2)),</span><br><span class="line">    asyncio.ensure_future(countdown(&quot;B&quot;, 3))]</span><br><span class="line">loop.run_until_complete(asyncio.wait(tasks))</span><br><span class="line">loop.close()</span><br></pre></td></tr></table></figure></p>
+<p>示例显示了在Python3.4引入两个重要概念<strong>协程</strong>和<strong>事件循环</strong>，
+通过修饰符@asyncio.coroutine定义了一个协程，而通过event loop来执行tasks中所有的协程任务。之后在Python3.5引入了新的async &amp; await语法，从而有了原生协程的概念。</p>
+<h3>async &amp; await</h3>
+<p>在Python3.5中，引入了aync&amp;await 语法结构，通过&quot;aync def&quot;可以定义一个协程代码片段，作用类似于Python3.4中的@asyncio.coroutine修饰符，而await则相当于&quot;yield from&quot;。</p>
+<p>先来看一段代码，这个是我刚开始使用async&amp;await语法时，写的一段小程序。
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">#!/usr/bin/env python</span><br><span class="line"># encoding:utf-8</span><br><span class="line"></span><br><span class="line">import asyncio</span><br><span class="line">import requests</span><br><span class="line">import time</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">async def wait_download(url):</span><br><span class="line">    response = await requests.get(url)</span><br><span class="line">    print(&quot;get &#123;&#125; response complete.&quot;.format(url))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">async def main():</span><br><span class="line">    start = time.time()</span><br><span class="line">    await asyncio.wait([</span><br><span class="line">        wait_download(&quot;http://www.163.com&quot;),</span><br><span class="line">        wait_download(&quot;http://www.mi.com&quot;),</span><br><span class="line">        wait_download(&quot;http://www.google.com&quot;)])</span><br><span class="line">    end = time.time()</span><br><span class="line">    print(&quot;Complete in &#123;&#125; seconds&quot;.format(end - start))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">loop = asyncio.get_event_loop()</span><br><span class="line">loop.run_until_complete(main())</span><br></pre></td></tr></table></figure></p>
+<p>这里会收到这样的报错：
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Task exception was never retrieved</span><br><span class="line">future: &lt;Task finished coro=&lt;wait_download() done, defined at asynctest.py:9&gt; exception=TypeError(&quot;object Response can&apos;t be used in &apos;await&apos; expression&quot;,)&gt;</span><br><span class="line">Traceback (most recent call last):</span><br><span class="line">  File &quot;asynctest.py&quot;, line 10, in wait_download</span><br><span class="line">    data = await requests.get(url)</span><br><span class="line">TypeError: object Response can&apos;t be used in &apos;await&apos; expression</span><br></pre></td></tr></table></figure></p>
+<p>这是由于requests.get()函数返回的Response对象不能用于await表达式，可是如果不能用于await，还怎么样来实现异步呢？
+原来Python的await表达式是类似于&quot;yield from&quot;的东西，但是await会去做参数检查，它要求await表达式中的对象必须是awaitable的，那啥是awaitable呢？ awaitable对象必须满足如下条件中其中之一：</p>
+<ul>
+<li>
+<p>A native coroutine object returned from a native coroutine function .</p>
+<p>原生协程对象</p>
+</li>
+<li>
+<p>A generator-based coroutine object returned from a function decorated with types.coroutine() .</p>
+<p>types.coroutine()修饰的基于生成器的协程对象，注意不是Python3.4中asyncio.coroutine</p>
+</li>
+<li>
+<p>An object with an <strong>await</strong> method returning an iterator.</p>
+<p>实现了__await__ method，并在其中返回了iterator的对象</p>
+</li>
+</ul>
+<p>根据这些条件定义，我们可以修改代码如下：</p>
+<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">#!/usr/bin/env python</span><br><span class="line"># encoding:utf-8</span><br><span class="line"></span><br><span class="line">import asyncio</span><br><span class="line">import requests</span><br><span class="line">import time</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">async def download(url): # 通过async def定义的函数是原生的协程对象</span><br><span class="line">    print(&quot;get %s&quot; % url)    </span><br><span class="line">    response = requests.get(url)</span><br><span class="line">    print(response.status_code)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">async def wait_download(url):</span><br><span class="line">    await download(url) # 这里download(url)就是一个原生的协程对象</span><br><span class="line">    print(&quot;get &#123;&#125; data complete.&quot;.format(url))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">async def main():</span><br><span class="line">    start = time.time()</span><br><span class="line">    await asyncio.wait([</span><br><span class="line">        wait_download(&quot;http://www.163.com&quot;),</span><br><span class="line">        wait_download(&quot;http://www.mi.com&quot;),</span><br><span class="line">        wait_download(&quot;http://www.baidu.com&quot;)])</span><br><span class="line">    end = time.time()</span><br><span class="line">    print(&quot;Complete in &#123;&#125; seconds&quot;.format(end - start))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">loop = asyncio.get_event_loop()</span><br><span class="line">loop.run_until_complete(main())</span><br></pre></td></tr></table></figure></p>
+<p>至此，程序可以运行，不过仍然有一个问题就是<em>它并没有真正地异步执行</em>
+看一下运行结果：
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">get http://www.163.com</span><br><span class="line">200</span><br><span class="line">get http://www.163.com data complete.</span><br><span class="line">get http://www.baidu.com</span><br><span class="line">200</span><br><span class="line">get http://www.baidu.com data complete.</span><br><span class="line">get http://www.mi.com</span><br><span class="line">200</span><br><span class="line">get http://www.mi.com data complete.</span><br><span class="line">Complete in 0.49027466773986816 seconds</span><br></pre></td></tr></table></figure></p>
+<p>会发现程序始终是同步执行的，这就说明仅仅是把涉及I/O操作的代码封装到async当中是不能实现异步执行的。必须使用支持异步操作的非阻塞代码才能实现真正的异步。目前支持非阻塞异步I/O的库是aiohttp
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">#!/usr/bin/env python</span><br><span class="line"># encoding:utf-8</span><br><span class="line">import asyncio</span><br><span class="line">import aiohttp</span><br><span class="line">import time</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">async def download(url): # 通过async def定义的函数是原生的协程对象</span><br><span class="line">    print(&quot;get: %s&quot; % url)</span><br><span class="line">    async with aiohttp.ClientSession() as session:</span><br><span class="line">        async with session.get(url) as resp:</span><br><span class="line">            print(resp.status)</span><br><span class="line">            # response = await resp.read()</span><br><span class="line"></span><br><span class="line"># 此处的封装不再需要</span><br><span class="line"># async def wait_download(url):</span><br><span class="line">#    await download(url) # 这里download(url)就是一个原生的协程对象</span><br><span class="line">#    print(&quot;get &#123;&#125; data complete.&quot;.format(url))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">async def main():</span><br><span class="line">    start = time.time()</span><br><span class="line">    await asyncio.wait([</span><br><span class="line">        download(&quot;http://www.163.com&quot;),</span><br><span class="line">        download(&quot;http://www.mi.com&quot;),</span><br><span class="line">        download(&quot;http://www.baidu.com&quot;)])</span><br><span class="line">    end = time.time()</span><br><span class="line">    print(&quot;Complete in &#123;&#125; seconds&quot;.format(end - start))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">loop = asyncio.get_event_loop()</span><br><span class="line">loop.run_until_complete(main())</span><br></pre></td></tr></table></figure></p>
+<p>再看一下测试结果：
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">get: http://www.mi.com</span><br><span class="line">get: http://www.163.com</span><br><span class="line">get: http://www.baidu.com</span><br><span class="line">200</span><br><span class="line">200</span><br><span class="line">200</span><br><span class="line">Complete in 0.27292490005493164 seconds</span><br></pre></td></tr></table></figure></p>
+<p>可以看出这次是真正的异步了。
+好了现在一个真正的实现了异步编程的小程序终于诞生了。
+而目前更牛逼的异步是使用uvloop或者pyuv，这两个最新的Python库都是libuv实现的，可以提供更加高效的event loop。</p>
+<h3>uvloop和pyuv</h3>
+<p>关于uvloop可以参考<a href="https://magic.io/blog/uvloop-blazing-fast-python-networking/" target="_blank" rel="noopener">uvloop</a>
+pyuv可以参考这里<a href="https://github.com/saghul/pyuv" target="_blank" rel="noopener">pyuv</a></p>
+<p>pyuv实现了Python2.x和3.x，但是该项目在github上已经许久没有更新了，不知道是否还有人在维护。
+uvloop只实现了3.x, 但是该项目在github上始终活跃。</p>
+<p>它们的使用也非常简单，以uvloop为例，只需要添加以下代码就可以了
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">import asyncio</span><br><span class="line">import uvloop</span><br><span class="line">asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())</span><br></pre></td></tr></table></figure></p>
+<p>关于Python异步编程到这里就告一段落了，而引出这篇文章的引子实际是关于网上有关Sanic和uvloop的组合创造的惊人的性能，感兴趣的同学可以找下相关文章，也许后续我会再专门就此话题写一篇文章，欢迎交流！</p>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/02/10/spark_initial/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="geekpy">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Geekpy's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/02/10/spark_initial/" itemprop="url">
+                  Spark启动时的master参数以及Spark的部署方式
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2017-02-10 18:18:18" itemprop="dateCreated datePublished" datetime="2017-02-10T18:18:18+08:00">2017-02-10</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2018-08-12 18:12:24" itemprop="dateModified" datetime="2018-08-12T18:12:24+08:00">2018-08-12</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/02/10/spark_initial/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">Comments: </span> <span class="post-comments-count valine-comment-count" data-xid="/2017/02/10/spark_initial/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>我们在初始化SparkConf时，或者提交Spark任务时，都会有master参数需要设置，如下：</p>
+<p>&lt;!--more--&gt;</p>
+<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">conf = SparkConf().setAppName(appName).setMaster(master)</span><br><span class="line">sc = SparkContext(conf=conf)</span><br></pre></td></tr></table></figure></p>
+<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">/bin/spark-submit \</span><br><span class="line">        --cluster cluster_name \</span><br><span class="line">        --master yarn-cluster \</span><br><span class="line">        ...</span><br></pre></td></tr></table></figure></p>
+<p>但是这个master到底是何含义呢？文档说是设定master url，但是啥是master url呢？说到这就必须先要了解下Spark的部署方式了。</p>
+<p>我们要部署Spark这套计算框架，有多种方式，可以部署到一台计算机，也可以是多台(cluster)。我们要去计算数据，就必须要有计算机帮我们计算，当然计算机越多(集群规模越大)，我们的计算力就越强。但有时候我们只想在本机做个试验或者小型的计算，因此直接部署在单机上也是可以的。Spark部署方式可以用如下图形展示：</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3959253-8988e02415d0df29.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="Spark部署方式"></p>
+<p>下面我们就来分别介绍下。</p>
+<h3>Local模式</h3>
+<p>Local模式就是运行在一台计算机上的模式，通常就是用于在本机上练手和测试。它可以通过以下集中方式设置master。</p>
+<ul>
+<li>local: 所有计算都运行在一个线程当中，没有任何并行计算，通常我们在本机执行一些测试代码，或者练手，就用这种模式。</li>
+<li>local[K]: 指定使用几个线程来运行计算，比如local[4]就是运行4个worker线程。通常我们的cpu有几个core，就指定几个线程，最大化利用cpu的计算能力</li>
+<li>local[*]: 这种模式直接帮你按照cpu最多cores来设置线程数了。</li>
+</ul>
+<p>使用示例：
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">/bin/spark-submit \</span><br><span class="line">        --cluster cluster_name \</span><br><span class="line">        --master local[*] \</span><br><span class="line">        ...</span><br></pre></td></tr></table></figure></p>
+<p>总而言之这几种local模式都是运行在本地的单机版模式，通常用于练手和测试，而实际的大规模计算就需要下面要介绍的cluster模式。</p>
+<h3>cluster模式</h3>
+<p>cluster模式肯定就是运行很多机器上了，但是它又分为以下三种模式，区别在于谁去管理资源调度。（说白了，就好像后勤管家，哪里需要资源，后勤管家要负责调度这些资源）</p>
+<h4>standalone模式</h4>
+<p>这种模式下，Spark会自己负责资源的管理调度。它将cluster中的机器分为master机器和worker机器，master通常就一个，可以简单的理解为那个后勤管家，worker就是负责干计算任务活的苦劳力。具体怎么配置可以参考<a href="http://spark.apache.org/docs/latest/spark-standalone.html" target="_blank" rel="noopener">Spark Standalone Mode</a>
+使用standalone模式示例：
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">/bin/spark-submit \</span><br><span class="line">        --cluster cluster_name \</span><br><span class="line">        --master spark://host:port \</span><br><span class="line">        ...</span><br></pre></td></tr></table></figure></p>
+<p>--master就是指定master那台机器的地址和端口，我想这也正是--master参数名称的由来吧。</p>
+<h4>mesos模式</h4>
+<p>这里就很好理解了，如果使用mesos来管理资源调度，自然就应该用mesos模式了，示例如下：</p>
+<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">/bin/spark-submit \</span><br><span class="line">        --cluster cluster_name \</span><br><span class="line">        --master mesos://host:port \</span><br><span class="line">        ...</span><br></pre></td></tr></table></figure></p>
+<h4>yarn模式</h4>
+<p>同样，如果采用yarn来管理资源调度，就应该用yarn模式，由于很多时候我们需要和mapreduce使用同一个集群，所以都采用Yarn来管理资源调度，这也是生产环境大多采用yarn模式的原因。yarn模式又分为yarn cluster模式和yarn client模式：</p>
+<ul>
+<li>yarn cluster: 这个就是生产环境常用的模式，所有的资源调度和计算都在集群环境上运行。</li>
+<li>yarn client: 这个是说Spark Driver和ApplicationMaster进程均在本机运行，而计算任务在cluster上。</li>
+</ul>
+<p>使用示例：
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">/bin/spark-submit \</span><br><span class="line">        --cluster cluster_name \</span><br><span class="line">        --master yarn-cluster \</span><br><span class="line">        ...</span><br></pre></td></tr></table></figure></p>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/02/07/python_traceback/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="geekpy">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Geekpy's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/02/07/python_traceback/" itemprop="url">
+                  Python Traceback 详解
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2017-02-07 18:18:18" itemprop="dateCreated datePublished" datetime="2017-02-07T18:18:18+08:00">2017-02-07</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2018-08-12 18:14:46" itemprop="dateModified" datetime="2018-08-12T18:14:46+08:00">2018-08-12</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/02/07/python_traceback/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">Comments: </span> <span class="post-comments-count valine-comment-count" data-xid="/2017/02/07/python_traceback/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>刚接触Python的时候，简单的异常处理已经可以帮助我们解决大多数问题，但是随着逐渐地深入，我们会发现有很多情况下简单的异常处理已经无法解决问题了，如下代码，单纯的打印异常所能提供的信息会非常有限。</p>
+<p>&lt;!--more--&gt;</p>
+<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">def func1():</span><br><span class="line">    raise Exception(&quot;--func1 exception--&quot;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def main():</span><br><span class="line">    try:</span><br><span class="line">        func1()</span><br><span class="line">    except Exception as e:</span><br><span class="line">        print e</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">if __name__ == &apos;__main__&apos;:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure></p>
+<p>执行后输出如下：
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--func1 exception--</span><br></pre></td></tr></table></figure></p>
+<p>通过示例，我们发现普通的打印异常只有很少量的信息（通常是异常的value值），这种情况下我们很难定位在哪块代码出的问题，以及如何出现这种异常。那么到底要如何打印更加详细的信息呢？下面我们就来一一介绍。</p>
+<h3>sys.exc_info和traceback object</h3>
+<p>Python程序的traceback信息均来源于一个叫做<strong>traceback object</strong>的对象，而这个traceback object通常是通过函数sys.exc_info()来获取的，先来看一个例子：</p>
+<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">import sys</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def func1():</span><br><span class="line">    raise NameError(&quot;--func1 exception--&quot;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def main():</span><br><span class="line">    try:</span><br><span class="line">        func1()</span><br><span class="line">    except Exception as e:</span><br><span class="line">        exc_type, exc_value, exc_traceback_obj = sys.exc_info()</span><br><span class="line">        print &quot;exc_type: %s&quot; % exc_type</span><br><span class="line">        print &quot;exc_value: %s&quot; % exc_value</span><br><span class="line">        print &quot;exc_traceback_obj: %s&quot; % exc_traceback_obj</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">if __name__ == &apos;__main__&apos;:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure></p>
+<p>执行后输出如下：
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">exc_type: &lt;type &apos;exceptions.NameError&apos;&gt;</span><br><span class="line">exc_value: --func1 exception--</span><br><span class="line">exc_traceback_obj: &lt;traceback object at 0x7faddf5d93b0&gt;</span><br></pre></td></tr></table></figure></p>
+<p>通过以上示例我们可以看出，sys.exc_info()获取了当前处理的exception的相关信息，并返回一个元组，元组的第一个数据是异常的类型(示例是NameError类型)，第二个返回值是异常的value值，第三个就是我们要的traceback object.</p>
+<p>有了traceback object我们就可以通过traceback module来打印和格式化traceback的相关信息，下面我们就来看下traceback module的相关函数。</p>
+<h3>traceback module</h3>
+<p>Python的traceback module提供一整套接口用于提取，格式化和打印Python程序的stack traces信息，下面我们通过例子来详细了解下这些接口：</p>
+<h4>print_tb</h4>
+<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">import sys</span><br><span class="line">import traceback</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def func1():</span><br><span class="line">    raise NameError(&quot;--func1 exception--&quot;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def main():</span><br><span class="line">    try:</span><br><span class="line">        func1()</span><br><span class="line">    except Exception as e:</span><br><span class="line">        exc_type, exc_value, exc_traceback_obj = sys.exc_info()</span><br><span class="line">        traceback.print_tb(exc_traceback_obj)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">if __name__ == &apos;__main__&apos;:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure></p>
+<p>输出：
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">File &quot;&lt;ipython-input-23-52bdf2c9489c&gt;&quot;, line 11, in main</span><br><span class="line">    func1()</span><br><span class="line">File &quot;&lt;ipython-input-23-52bdf2c9489c&gt;&quot;, line 6, in func1</span><br><span class="line">    raise NameError(&quot;--func1 exception--&quot;)</span><br></pre></td></tr></table></figure></p>
+<p>这里我们可以发现打印的异常信息更加详细了，下面我们了解下print_tb的详细信息：
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">traceback.print_tb(tb[, limit[, file]])</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li>tb: 这个就是traceback object, 是我们通过sys.exc_info获取到的</li>
+<li>limit: 这个是限制stack trace层级的，如果不设或者为None，就会打印所有层级的stack trace</li>
+<li>file: 这个是设置打印的输出流的，可以为文件，也可以是stdout之类的file-like object。如果不设或为None，则输出到sys.stderr。</li>
+</ul>
+<h4>print_exception</h4>
+<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">import sys</span><br><span class="line">import traceback</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def func1():</span><br><span class="line">    raise NameError(&quot;--func1 exception--&quot;)</span><br><span class="line"></span><br><span class="line">def func2():</span><br><span class="line">    func1()</span><br><span class="line"></span><br><span class="line">def main():</span><br><span class="line">    try:</span><br><span class="line">        func2()</span><br><span class="line">    except Exception as e:</span><br><span class="line">        exc_type, exc_value, exc_traceback_obj = sys.exc_info()</span><br><span class="line">        traceback.print_exception(exc_type, exc_value, exc_traceback_obj, limit=2, file=sys.stdout)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">if __name__ == &apos;__main__&apos;:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure></p>
+<p>输出：
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Traceback (most recent call last):</span><br><span class="line">  File &quot;&lt;ipython-input-24-a68061acf52f&gt;&quot;, line 13, in main</span><br><span class="line">    func2()</span><br><span class="line">  File &quot;&lt;ipython-input-24-a68061acf52f&gt;&quot;, line 9, in func2</span><br><span class="line">    func1()</span><br><span class="line">NameError: --func1 exception--</span><br></pre></td></tr></table></figure></p>
+<p>看下定义：
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">traceback.print_exception(etype, value, tb[, limit[, file]])</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li>跟print_tb相比多了两个参数etype和value，分别是exception type和exception value，加上tb(traceback object)，正好是sys.exc_info()返回的三个值</li>
+<li>另外，与print_tb相比，打印信息多了开头的&quot;Traceback (most...)&quot;信息以及最后一行的异常类型和value信息</li>
+<li>还有一个不同是当异常为SyntaxError时，会有&quot;^&quot;来指示语法错误的位置</li>
+</ul>
+<h4>print_exc</h4>
+<p>print_exc是简化版的print_exception, 由于exception type, value和traceback object都可以通过sys.exc_info()获取，因此print_exc()就自动执行exc_info()来帮助获取这三个参数了，也因此这个函数是我们的程序中最常用的，因为它足够简单
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">import sys</span><br><span class="line">import traceback</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def func1():</span><br><span class="line">    raise NameError(&quot;--func1 exception--&quot;)</span><br><span class="line"></span><br><span class="line">def func2():</span><br><span class="line">    func1()</span><br><span class="line"></span><br><span class="line">def main():</span><br><span class="line">    try:</span><br><span class="line">        func2()</span><br><span class="line">    except Exception as e:</span><br><span class="line">        traceback.print_exc(limit=1, file=sys.stdout)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">if __name__ == &apos;__main__&apos;:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure></p>
+<p>输出（由于limit=1，因此只有一个层级被打印出来）：
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Traceback (most recent call last):</span><br><span class="line">  File &quot;&lt;ipython-input-25-a1f5c73b97c4&gt;&quot;, line 13, in main</span><br><span class="line">    func2()</span><br><span class="line">NameError: --func1 exception--</span><br></pre></td></tr></table></figure></p>
+<p>定义如下：
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">traceback.print_exc([limit[, file]])</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li>只有两个参数，够简单</li>
+</ul>
+<h4>format_exc</h4>
+<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">import logging</span><br><span class="line">import sys</span><br><span class="line">import traceback</span><br><span class="line">logger = logging.getLogger(&quot;traceback_test&quot;)</span><br><span class="line"></span><br><span class="line">def func1():</span><br><span class="line">    raise NameError(&quot;--func1 exception--&quot;)</span><br><span class="line"></span><br><span class="line">def func2():</span><br><span class="line">    func1()</span><br><span class="line"></span><br><span class="line">def main():</span><br><span class="line">    try:</span><br><span class="line">        func2()</span><br><span class="line">    except Exception as e:</span><br><span class="line">        logger.error(traceback.format_exc(limit=1, file=sys.stdout))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">if __name__ == &apos;__main__&apos;:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure></p>
+<p>从这个例子可以看出有时候我们想得到的是一个字符串，比如我们想通过logger将异常记录在log里，这个时候就需要format_exc了，这个也是最常用的一个函数，它跟print_exc用法相同，只是不直接打印而是返回了字符串。</p>
+<p>traceback module中还有一些其它的函数，但因为并不常用，就不在展开来讲，感兴趣的同学可以看下参考链接中的文档。</p>
+<h3>获取线程中的异常信息</h3>
+<p>通常情况下我们无法将多线程中的异常带回主线程，所以也就无法打印线程中的异常，而通过上边学到这些知识，我们可以对线程做如下修改，从而实现捕获线程异常的目的。
+以下示例来自weidong的博客文章，稍有修改（见参考链接）
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">import threading</span><br><span class="line">import traceback</span><br><span class="line"></span><br><span class="line">def my_func():</span><br><span class="line">    raise BaseException(&quot;thread exception&quot;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">class ExceptionThread(threading.Thread):</span><br><span class="line"></span><br><span class="line">    def __init__(self, group=None, target=None, name=None, args=(), kwargs=None, verbose=None):</span><br><span class="line">        &quot;&quot;&quot;</span><br><span class="line">        Redirect exceptions of thread to an exception handler.</span><br><span class="line">        &quot;&quot;&quot;</span><br><span class="line">        threading.Thread.__init__(self, group, target, name, args, kwargs, verbose)</span><br><span class="line">        if kwargs is None:</span><br><span class="line">            kwargs = &#123;&#125;</span><br><span class="line">        self._target = target</span><br><span class="line">        self._args = args</span><br><span class="line">        self._kwargs = kwargs</span><br><span class="line">        self._exc = None</span><br><span class="line"></span><br><span class="line">    def run(self):</span><br><span class="line">        try:</span><br><span class="line">            if self._target:</span><br><span class="line">                self._target()</span><br><span class="line">        except BaseException as e:</span><br><span class="line">            import sys</span><br><span class="line">            self._exc = sys.exc_info()</span><br><span class="line">        finally:</span><br><span class="line">            #Avoid a refcycle if the thread is running a function with</span><br><span class="line">            #an argument that has a member that points to the thread.</span><br><span class="line">            del self._target, self._args, self._kwargs</span><br><span class="line"></span><br><span class="line">    def join(self):</span><br><span class="line">        threading.Thread.join(self)</span><br><span class="line">        if self._exc:</span><br><span class="line">            msg = &quot;Thread &apos;%s&apos; threw an exception: %s&quot; % (self.getName(), self._exc[1])</span><br><span class="line">            new_exc = Exception(msg)</span><br><span class="line">            raise new_exc.__class__, new_exc, self._exc[2]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">t = ExceptionThread(target=my_func, name=&apos;my_thread&apos;)</span><br><span class="line">t.start()</span><br><span class="line">try:</span><br><span class="line">    t.join()</span><br><span class="line">except:</span><br><span class="line">    traceback.print_exc()</span><br></pre></td></tr></table></figure></p>
+<p>输出如下：
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Traceback (most recent call last):</span><br><span class="line">  File &quot;/data/code/testcode/thread_exc.py&quot;, line 43, in &lt;module&gt;</span><br><span class="line">    t.join()</span><br><span class="line">  File &quot;/data/code/testcode/thread_exc.py&quot;, line 23, in run</span><br><span class="line">    self._target()</span><br><span class="line">  File &quot;/data/code/testcode/thread_exc.py&quot;, line 5, in my_func</span><br><span class="line">    raise BaseException(&quot;thread exception&quot;)</span><br><span class="line">Exception: Thread &apos;my_thread&apos; threw an exception: thread exception</span><br></pre></td></tr></table></figure></p>
+<p>这样我们就得到了线程中的异常信息。</p>
+<h3>参考链接</h3>
+<p><a href="https://docs.python.org/2/library/traceback.html" target="_blank" rel="noopener">traceback官方文档</a></p>
+<p><a href="http://swdtalent.github.io/weidong.github.com/2015-10-24/python-catch-thread-exception/" target="_blank" rel="noopener">weidong's blog</a></p>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/02/01/Arrow-一个最好用的日期时间Python处理库/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="geekpy">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Geekpy's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/02/01/Arrow-一个最好用的日期时间Python处理库/" itemprop="url">
+                  Arrow-一个最好用的日期时间Python处理库
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2017-02-01 18:18:18" itemprop="dateCreated datePublished" datetime="2017-02-01T18:18:18+08:00">2017-02-01</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2018-08-12 15:55:20" itemprop="dateModified" datetime="2018-08-12T15:55:20+08:00">2018-08-12</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/02/01/Arrow-一个最好用的日期时间Python处理库/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">Comments: </span> <span class="post-comments-count valine-comment-count" data-xid="/2017/02/01/Arrow-一个最好用的日期时间Python处理库/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>写过Python程序的人大都知道，Python日期和时间的处理非常繁琐和麻烦，主要有以下几个问题：</p>
+<ul>
+<li>有众多的package，类和方法，包括time，datetime，pytz等等</li>
+<li>经常需要各种转换，比如时间戳，structtime，时间字符串之间相互转换，localtime和utctime的转换</li>
+<li>难以记忆，有违人性的时间格式化字符串%Y %M %m %D %d</li>
+</ul>
+<p>基于以上几点，每次做时间处理的时候总是需要翻看以前的代码或者文档，可见此处Python做的有多烂，好了废话不多说，今天给大家介绍的这个arrow极大地解放了我等Python程序员的脑容量。</p>
+<h3>安装</h3>
+<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install arrow</span><br></pre></td></tr></table></figure></p>
+<h3>使用</h3>
+<h5>获取当前时间</h5>
+<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">In [13]: import arrow</span><br><span class="line"></span><br><span class="line">In [14]: t = arrow.utcnow()</span><br><span class="line"></span><br><span class="line">In [15]: t</span><br><span class="line">Out[15]: &lt;Arrow [2017-02-01T08:30:37.627622+00:00]&gt;</span><br><span class="line"></span><br><span class="line">In [19]: arrow.now()</span><br><span class="line">Out[19]: &lt;Arrow [2017-02-01T16:32:02.857411+08:00]&gt;</span><br></pre></td></tr></table></figure></p>
+<p>通过utcnow()和now()分别获取了utc时间和local时间，最终获取的是一个Arrow时间对象，通过这个对象我们可以做各种时间转换，后边会看到。</p>
+<h5>时间形式转换</h5>
+<p>我们经常需要转换时间对象，比如转换称timestamp，有时需要转换成特定格式的时间字符串。</p>
+<ul>
+<li>转换成timestamp</li>
+</ul>
+<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">In [13]: import arrow</span><br><span class="line"></span><br><span class="line">In [14]: t = arrow.utcnow()</span><br><span class="line"></span><br><span class="line">In [16]: t.timestamp</span><br><span class="line">Out[16]: 1485937837</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li>转换成时间字符串</li>
+</ul>
+<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">In [23]: t = arrow.now()</span><br><span class="line"></span><br><span class="line">In [24]: t.format()</span><br><span class="line">Out[24]: u&apos;2017-02-01 17:00:42+08:00&apos;</span><br><span class="line"></span><br><span class="line">In [25]: t.format(&quot;YYYY-MM-DD HH:mm&quot;)</span><br><span class="line">Out[25]: u&apos;2017-02-01 17:00&apos;</span><br></pre></td></tr></table></figure></p>
+<p>怎么样？是不是感觉很简单，心里感觉轻舒了一口气！这里可以注意到格式化字符串非常人性化便于记忆，对不对？完整的时间格式字符串参见<a href="http://arrow.readthedocs.io/en/latest/#tokens" target="_blank" rel="noopener">这里</a></p>
+<ul>
+<li>从字符串转换成Arrow对象</li>
+</ul>
+<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">In [20]: arrow.get(&quot;2017-01-20 11:30&quot;, &quot;YYYY-MM-DD HH:mm&quot;)</span><br><span class="line">Out[20]: &lt;Arrow [2017-01-20T11:30:00+00:00]&gt;</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li>从时间戳转化为Arrow对象</li>
+</ul>
+<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">In [26]: arrow.get(&quot;1485937858.659424&quot;)</span><br><span class="line">Out[26]: &lt;Arrow [2017-02-01T08:30:58.659424+00:00]&gt;</span><br><span class="line"></span><br><span class="line">In [27]: arrow.get(1485937858.659424)</span><br><span class="line">Out[27]: &lt;Arrow [2017-02-01T08:30:58.659424+00:00]&gt;</span><br></pre></td></tr></table></figure></p>
+<p>注意这里无论传递的是时间戳字符串还是float类型的时间戳都可以进行转化，很人性有木有？</p>
+<ul>
+<li>直接生成Arrow对象</li>
+</ul>
+<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">In [28]: arrow.Arrow(2017, 2, 1)</span><br><span class="line">Out[28]: &lt;Arrow [2017-02-01T00:00:00+00:00]&gt;</span><br><span class="line"></span><br><span class="line">In [29]: arrow.get(2017, 2, 1)</span><br><span class="line">Out[29]: &lt;Arrow [2017-02-01T00:00:00+00:00]&gt;</span><br></pre></td></tr></table></figure></p>
+<h5>时间推移</h5>
+<p>时间推移就是要获取某个时间之前的时间或者之后的时间，比如要获取相对于当前时间前一天的时间。
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">In [30]: t = arrow.now()</span><br><span class="line">In [31]: t</span><br><span class="line">Out[31]: &lt;Arrow [2017-02-01T17:19:19.933507+08:00]&gt;</span><br><span class="line"></span><br><span class="line">In [33]: t.shift(days=-1)  # 前一天</span><br><span class="line">Out[33]: &lt;Arrow [2017-01-31T17:19:19.933507+08:00]&gt;</span><br><span class="line"></span><br><span class="line">In [34]: t.shift(weeks=-1)  # 前一周</span><br><span class="line">Out[34]: &lt;Arrow [2017-01-25T17:19:19.933507+08:00]&gt;</span><br><span class="line"></span><br><span class="line">In [35]: t.shift(months=-2) # 前两个月</span><br><span class="line">Out[35]: &lt;Arrow [2016-12-01T17:19:19.933507+08:00]&gt;</span><br><span class="line"></span><br><span class="line">In [37]: t.shift(years=1)  # 明年</span><br><span class="line">Out[37]: &lt;Arrow [2018-02-01T17:19:19.933507+08:00]&gt;</span><br></pre></td></tr></table></figure></p>
+<p>看是不是很简单，比用timedelta要简单明了多了，是不是？</p>
+<p>更多请参考官方文档和Github
+<a href="http://arrow.readthedocs.io/en/latest/" target="_blank" rel="noopener">官方文档</a>
+<a href="https://github.com/crsmithdev/arrow/" target="_blank" rel="noopener">Github</a>
+顺便说一句点赞是一种美德，Arrow第4000个赞就是我点的，哈哈。如果你觉的我的文章有帮助，也赶紧点个赞吧！</p>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/12/21/why_ipython/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="geekpy">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Geekpy's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/12/21/why_ipython/" itemprop="url">
+                  为什么要使用IPython
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2016-12-21 18:18:18" itemprop="dateCreated datePublished" datetime="2016-12-21T18:18:18+08:00">2016-12-21</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2018-08-12 18:12:49" itemprop="dateModified" datetime="2018-08-12T18:12:49+08:00">2018-08-12</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2016/12/21/why_ipython/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">Comments: </span> <span class="post-comments-count valine-comment-count" data-xid="/2016/12/21/why_ipython/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>IPython提供了改进的交互式Python Shell，我们可以利用IPython来执行Python语句，并能够立刻看到结果，这一点跟Python自带的shell工具没有什么不同，但是IPython额外提供了很多实用的功能是Python自带的shell所没有的，下面就来看看这些实用的功能吧。</p>
+<p>&lt;!--more--&gt;</p>
+<p>####Tab自动补全
+使用过Linux命令行的同学都知道tab自动补全有多实用吧，IPython可以针对之前输入过的变量，对象的方法等进行自动补全。我们只需要输入一部分，就可以看到命名空间中所有相匹配的变量，函数等</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3959253-1db6cf5999a46cef.JPG?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="1.JPG"></p>
+<p>这个示例显示了，当输入mylist. 之后按tab键就自动出现的可以使用的method。
+tab补全还可以针对文件路径进行补全，例如下面的例子在输入Anaconda之后按tab自动显示路径下的所有可选路径</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3959253-fb281fe67f8656c1.JPG?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2.JPG"></p>
+<p>####内省
+在变量的前面或者后面加问号?就可以查询改对象相关的信息(简要信息)，有的时候对象的描述信息较多时，需要两个问号??来显示全部信息.</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3959253-c756f716132319ce.JPG?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="3.JPG"></p>
+<p>####魔术命令
+魔术命令(magic commands)是IPython提供一整套命令，用这些命令可以操作IPython本身，以及提供一些系统功能。魔术命令分为两种：一种是基于行的(line-oriented), 命令只针对一行；另一种是基于单元的(cell-oriented)， 命令可以针对多行，均作为其参数。
+比如：下面这个%timeit魔术命令就是line-oriented
+%timeit range(1000)
+下面的魔术命令是cell-oriented
+%%timeit x = numpy.random.rann((100, 100))
+numpy.linalg.svd(x)
+注：这里timeit只针对svd进行测试，不会针对x变量的赋值做测试。</p>
+<p>IPython提供了很多类似的魔术命令，如果你想看都有哪些魔术命令，可以通过%lsmagic来查询，如果想查询某个命令的详细信息，可以通过%cmd?来获取，例如：%run?
+另外，默认情况下automagic是ON状态，也就是说对于line-oriented命令我们不需要使用前面的百分号%，直接输入命令即可（例如：timeit range(1000) )，但是对于cell-oriented命令我们必须输入%%，可以通过%automagic来打开/关闭这个automagic功能。</p>
+<p>下面仅就常用的魔术命令做下介绍：</p>
+<h5>%run 命令</h5>
+<p>该命令可以直接执行python脚本，并输出结果，比如我们有一个python文件如下：
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># test.py</span><br><span class="line">def main():</span><br><span class="line">    print &quot;this is a test.&quot;</span><br><span class="line"></span><br><span class="line">if __name__ == &apos;__main__&apos;:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure></p>
+<p>在IPython中执行如下图：</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3959253-4f5b8302d6da7e74.JPG?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="run.JPG"></p>
+<h5>%paste 和 %cpaste命令</h5>
+<p>我们经常会将python文件中的代码粘贴到IPython中执行，以便查看效果，尤其是针对现实图形的代码。这时如果直接拷贝粘贴，IPython可能无法正确的执行，这是因为IPython一旦遇到空行就认为粘贴结束，然后就开始执行了。
+例如，我们有如下代码：
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">def add(x, y):</span><br><span class="line">    result = x + y</span><br><span class="line">    print result</span><br><span class="line"></span><br><span class="line">add(1, 2)</span><br></pre></td></tr></table></figure></p>
+<p>如果直接拷贝粘贴到IPython当中，就会报错，如下：</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3959253-85d9feee0f25cc75.JPG?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="paste.JPG"></p>
+<p>这时我们就需要使用%paste或者%cpaste来粘贴了，先拷贝代码，然后在IPython中输入%paste，结果如下：</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3959253-46fd6f21e584f4d6.JPG?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="paste_cmd.JPG"></p>
+<p>%cpaste也可以粘贴代码，与%paste区别就是它可以持续粘贴(即continue paste)，直到我们按Ctrl+D或者输入双减号&quot;--&quot;以结束粘贴</p>
+<h5>%pdb</h5>
+<p>用以打开/关闭自动pdb唤出功能，当我们打开这个功能的时候(通过%pdb on 或者%pdb 1)，程序一旦遇到exception就会自动调用pdb，进入pdb交互界面(如果要关闭该功能可以通过%pdb off 或者%pdb 0)
+例如我们有一个test2.py文件如下：
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">def raise_exception():</span><br><span class="line">    var_before_exception = 1</span><br><span class="line">    raise Exception(&quot;test&quot;)</span><br><span class="line">    var_after_exception = 2</span><br><span class="line">    print var_before_exception</span><br><span class="line">    print var_after_exception</span><br><span class="line"></span><br><span class="line">raise_exception()</span><br></pre></td></tr></table></figure></p>
+<p>当我们打开pdb开关后，执行如下图所示：</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3959253-e49d8fc237e4369a.JPG?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="pdb.JPG"></p>
+<p>可以发现pdb在raise exception的地方被唤出了。</p>
+<h5>%edit</h5>
+<p>用于启动一个编辑器。在Linux上会启动vim，在Windows上会启动notepad。我们可以在编辑器上编辑代码，保存退出后就会执行相应代码。</p>
+<h5>！cmd</h5>
+<p>！后可以跟一个shell指令，从而在IPython界面就可以直接执行shell指令而不需要再退出IPython了
+例如下面执行一条ping命令：</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3959253-ae3c2c63b7ee044c.JPG?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="ping.JPG"></p>
+<p>除上述魔术命令外，IPython还提供了很多其它命令，下表列出了常用的一些命令，如果要查看完整列表，请使用%lsmagic</p>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>命令说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>%hist</td>
+<td>查询输入的历史</td>
+</tr>
+<tr>
+<td>%reset</td>
+<td>清空namespace</td>
+</tr>
+<tr>
+<td>%prun</td>
+<td>使用Python profiler运行python代码。注：profiler是用于测试代码性能的工具</td>
+</tr>
+<tr>
+<td>%time</td>
+<td>用于显示Python语句的执行时间，包括cpu time和wall clock time</td>
+</tr>
+<tr>
+<td>%timeit</td>
+<td>用于显示Python语句的执行时间，但是这个命令会多次执行相应的语句（可以指定次数）%timeit只针对一行Python语句，如果有多条语句，需要用分号分隔开，同时%%timeit是cell-oriented魔术命令，紧跟在命令后面的语句是作为setup code的，在cell body中的代码才会被timeit多次执行并计算时间</td>
+</tr>
+<tr>
+<td>%bookmark</td>
+<td>用于存储常用路径</td>
+</tr>
+<tr>
+<td>%cd</td>
+<td>进入目录命令</td>
+</tr>
+<tr>
+<td>%env</td>
+<td>显示系统环境变量</td>
+</tr>
+<tr>
+<td>%pushd dir</td>
+<td>将当前目录入栈，并进入dir指定的目录</td>
+</tr>
+<tr>
+<td>%popd</td>
+<td>弹出栈顶目录</td>
+</tr>
+</tbody>
+</table>
+<h4>matplotlib集成和pylab模式</h4>
+<p>IPython在使用matplotlib库生成图形的时候，仍然可以在IPython交互界面输入和操作，这是它比Python shell强大的一个重要功能点，使得我们在做科学计算的时候，可以更好的与数据交互并可视化。而要使用此功能，需要在启动IPython的时候，开启pylab模式，如下
+$ipython --pylab</p>
+<h4>输入和输出</h4>
+<p>IPython的交互界面提示符分为In和Out，In代表输入并在后面的中括号中带有行号，如: In [2]:
+Out代表输出，同样也有行号。IPython提供了一下几种快捷方式方便我们操作输入和输出：
+● _ 和__: 单下划线_代表上一个输出，双下划线代表上上个输出
+● _iX和_X: X代表行号，_iX代表第X行的输入的字符串，_X代表输出的字符串
+● exec：我们可以利用exec命令来执行历史的输入操作
+下图展示了如何利用这些快捷方式更方便的进行输入和输出的操作：</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3959253-5694a399cc400d7d.JPG?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="inout.JPG"></p>
+<h4>键盘快捷键</h4>
+<p>IPython提供了类似Linux的快捷键操作方式，可以方便我们的命令操作</p>
+<table>
+<thead>
+<tr>
+<th>快捷键</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ctrl + A</td>
+<td>光标移到行首</td>
+</tr>
+<tr>
+<td>Ctrl + E</td>
+<td>光标移到行尾</td>
+</tr>
+<tr>
+<td>Ctrl + K</td>
+<td>删除从光标开始到行尾的字符</td>
+</tr>
+<tr>
+<td>Ctrl + U</td>
+<td>删除从光标开始到行首的字符</td>
+</tr>
+<tr>
+<td>Ctrl + R</td>
+<td>搜索匹配的历史命令</td>
+</tr>
+<tr>
+<td>Ctrl + P或上箭头</td>
+<td>搜索之前的历史命令</td>
+</tr>
+<tr>
+<td>Ctrl + N或下箭头</td>
+<td>搜索之后的历史命令</td>
+</tr>
+<tr>
+<td>Ctrl + L</td>
+<td>清屏</td>
+</tr>
+</tbody>
+</table>
+<p>总而言之，IPython为我们提供了很多强大的功能，本篇文章只是简要概述了下IPython的强大之处，还有很多有待大家自己去探索，尤其值得一提的是IPython还提供了notebook功能，也非常强大，由于篇幅所限，大家可以自己在网上搜索相关文章来参考。</p>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/12/16/python_binary/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="geekpy">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Geekpy's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/12/16/python_binary/" itemprop="url">
+                  Python二进制表示和位操作
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2016-12-16 18:18:18" itemprop="dateCreated datePublished" datetime="2016-12-16T18:18:18+08:00">2016-12-16</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2018-08-12 18:13:22" itemprop="dateModified" datetime="2018-08-12T18:13:22+08:00">2018-08-12</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2016/12/16/python_binary/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">Comments: </span> <span class="post-comments-count valine-comment-count" data-xid="/2016/12/16/python_binary/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>我们都知道在计算机中所有的信息最终都是以二进制的0和1来表示，而有些算法是通过操作bit位来进行运算的，这就需要我们了解Python中如何去表示二进制，又如何是进行位运算的。</p>
+<p>&lt;!--more--&gt;</p>
+<h3>二进制的表示</h3>
+<p>首先在Python中可以通过以&quot;0b&quot;或者&quot;-0b&quot;开头的字符串来表示二进制，如下所示
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">print 0b101 # 输出5</span><br><span class="line">print 0b10  # 输出2</span><br><span class="line">print 0b111 # 输出7</span><br><span class="line">print -0b101 # 输出-5</span><br></pre></td></tr></table></figure></p>
+<p>由此可知我们用二进制表示的数字在打印之后会变成我们更为熟悉的十进制数，更容易被人理解。
+当我们需要看十进制数字的二进制表示时，可以使用bin函数
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bin(5)  # 输出0b101</span><br></pre></td></tr></table></figure></p>
+<h3>二进制的位操作</h3>
+<p>首先一点需要明确的是所有的运算（包括位操作）在计算机内部都是通过补码形式来进行运算的，关于补码可以参考文章<a href="https://www.cnblogs.com/zhangziqiu/archive/2011/03/30/ComputerCode.htmlhttp://note.youdao.com/" target="_blank" rel="noopener">原码，反码和补码</a>，计算机内部运算示意图如下：
+<img src="https://segmentfault.com/img/bVp6Ux" alt="image"></p>
+<p>在Python中提供了如下二进制的位操作：
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;  #右移</span><br><span class="line">&lt;&lt;  #左移</span><br><span class="line">|   #位或 </span><br><span class="line">&amp;   #位与</span><br><span class="line">^   #位异或</span><br><span class="line">~   #非</span><br></pre></td></tr></table></figure></p>
+<p>位运算法则：</p>
+<p><img src="https://segmentfault.com/img/bVp6Uv" alt="image"></p>
+<p>下面我们分别来看下：</p>
+<h5>左移</h5>
+<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">0b11 &lt;&lt; 2   #输出为12, 即0b1100</span><br><span class="line">5 &lt;&lt; 2      #输出为20, 即0b10100</span><br><span class="line">-2 &lt;&lt; 2     #输出为-8</span><br><span class="line">5 &lt;&lt; 64     #输出为92233720368547758080L</span><br></pre></td></tr></table></figure></p>
+<ol>
+<li>以0b11为例，0b11的补码就是0b11，所以左移就是将所有的0和1的位置进行左移，移位之后将空位补0。</li>
+<li>负数的左移相对来说就比较复杂，以-2 &lt;&lt; 2为例，-2的原码是10000000000000000000000000000010（32位系统），其补码为11111111111111111111111111111110，左移之后变为11111111111111111111111111111000，再转化为原码即10000000000000000000000000001000，也就是-8，也就是-2*(2**2)=-8</li>
+<li>左移超过32位或者64位（根据系统的不同）自动转化为long类型。</li>
+<li>左移操作相当于乘以2**n，以5 &lt;&lt; 3为例，相当于5*(2**3),结果为40。</li>
+</ol>
+<h5>右移</h5>
+<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">0b11 &gt;&gt; 1   #输出为1, 即0b1</span><br><span class="line">5 &gt;&gt; 1      #输出为2，即0b10</span><br><span class="line">-8 &gt;&gt; 3     #输出为-1</span><br></pre></td></tr></table></figure></p>
+<ol>
+<li>在Python中如果符号位为0，则右移后高位补0，如果符号位为1，则高位补1；</li>
+<li>同样需要先转化为补码再进行计算，以-8 &gt;&gt; 3为例，-8的原码为10...01000,相应的补码为11...11000,右移后变为1...1,相应的原码为10...01,即-1。</li>
+<li>右移操作相当于除以2**n，8 &gt;&gt; 3相当于8/(2**3)=1</li>
+</ol>
+<h5>或</h5>
+<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">0b110 | 0b101   #输出7,即0b111</span><br><span class="line">-0b001 | 0b101  #输出-1</span><br></pre></td></tr></table></figure></p>
+<p>同样是转化为补码后再进行或运算, 只要有一位有1就为1。
+所以或运算常常用于mask技术中的打开开关，即针对某一位把其置为1
+比如将某个数字的第三位置为1，我们可以将mask设置为0b100，然后再或运算
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mask = 0b100</span><br><span class="line">0b110000 | mask  #turn on bit 3</span><br></pre></td></tr></table></figure></p>
+<h5>与</h5>
+<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0b110 &amp; 0b011   #输出2，即0b010</span><br></pre></td></tr></table></figure></p>
+<p>与运算常常用于mask技术的关闭开关，即针对某一位把其置为0
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mask = 0b10</span><br><span class="line">0b111111 &amp; mask  #turn off bit 2</span><br></pre></td></tr></table></figure></p>
+<h5>异或</h5>
+<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">0b111 ^ 0b111   #输出0</span><br><span class="line">0b100 ^ 0b111   #输出3</span><br></pre></td></tr></table></figure></p>
+<p>异或常用于将所有的位反转
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0b1010 ^ 0b1111  #输出5，即0b0101</span><br></pre></td></tr></table></figure></p>
+<h5>非</h5>
+<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">~0b101  #输出2，即0b010</span><br><span class="line">~-3     #输出2</span><br></pre></td></tr></table></figure></p>
+<p>非运算就是把0变1，1变0，唯一需要注意的是取非时符号位也会变换，比如-3，原码是10...011,补码是11...101,取非后变为00...010,由于符号位为0，所以对应的原码即为其本身，即2。</p>
+<h3>二进制工具</h3>
+<h5>bitarray</h5>
+<p>关于bit有一个很有用的Packag叫做bitarray，其中bitarray对象可以帮助我们存储0，1值或者Boolean值，并像list一样进行操作。
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">from bitarray import bitarray</span><br><span class="line"></span><br><span class="line">#初始化一个有10个bit位的数组，初始值为0</span><br><span class="line">a = bitarray(10)</span><br><span class="line"></span><br><span class="line">#可以像操作list一样操作bitarray对象</span><br><span class="line">a[1:8] = 1</span><br><span class="line"></span><br><span class="line">#bitarray还提供了一些特殊的方法，如：all()</span><br><span class="line">#当bitarray中所有的元素都为1时，all()返回为True</span><br><span class="line">if a.all():</span><br><span class="line">    print &quot;all bits are True.&quot;</span><br></pre></td></tr></table></figure></p>
+<p>关于bitarrary的说明详见Github上的<a href="https://github.com/ilanschnell/bitarrayhttp://note.youdao.com/" target="_blank" rel="noopener">bitarray项目</a></p>
+<h3>位运算的应用</h3>
+<p>常见的应用如判断奇偶数 X &amp; 0x1，变换符号位 ~X + 1，数字交换等，详细可以看参考链接中的文章
+下面笔者想就实际项目中的一个例子来说明位操作的应用。</p>
+<p>下表是一个TS Package header的说明（TS流是流媒体行业常用的传输格式），我们看到为了减少不必要的浪费，包头在定义域的时候都是按位进行定义的，那么我们如果想要取相应的域的值，也就需要使用位操作了。</p>
+<p><strong>Packet Header（包头）信息说明</strong></p>
+<table>
+<thead>
+<tr>
+<th>序号</th>
+<th>名称</th>
+<th>bit数</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>sync_byte</td>
+<td>8bits</td>
+<td>同步字节</td>
+</tr>
+<tr>
+<td>2</td>
+<td>transport_error_indicator</td>
+<td>1bit</td>
+<td>错误指示信息（1：该包至少有1bits传输错误）</td>
+</tr>
+<tr>
+<td>3</td>
+<td>payload_unit_start_indicator</td>
+<td>1bit</td>
+<td>负载单元开始标志（packet不满188字节时需填充）</td>
+</tr>
+<tr>
+<td>4</td>
+<td>transport_priority</td>
+<td>1bit</td>
+<td>传输优先级标志（1：优先级高）</td>
+</tr>
+<tr>
+<td>5</td>
+<td>PID</td>
+<td>13bits</td>
+<td>Packet ID号码，唯一的号码对应不同的包</td>
+</tr>
+<tr>
+<td>6</td>
+<td>transport_scrambling_control</td>
+<td>2bits</td>
+<td>加密标志（00：未加密；其他表示已加密）</td>
+</tr>
+<tr>
+<td>7</td>
+<td>adaptation_field_control</td>
+<td>2bits</td>
+<td>附加区域控制</td>
+</tr>
+<tr>
+<td>8</td>
+<td>continuity_counter</td>
+<td>4bits</td>
+<td>包递增计数器</td>
+</tr>
+</tbody>
+</table>
+<p>我们以取PID值为例，当我们获取到包头的字节串之后，我们需要如下几个步骤：</p>
+<ol>
+<li>需要取到第2个字节，然后忽略第二个字节的高三位（从表中可以看出高三位为其它信息与PID无关）；</li>
+<li>将第二个字节的后5位数字左移8位，这样将其移到高位；</li>
+<li>移位后与第3个字节的数值相加得到PID的值。</li>
+</ol>
+<p>要实现第一步，首先就要用到位操作中常用的mask技术，即通过将对应位为0的数值进行&amp;操作
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0b10110111 &amp; 0b00011111 #将高位的3位进行mask关闭操作，使得其值被去除</span><br></pre></td></tr></table></figure></p>
+<p>要实现第二步，就需要用到左移操作，左移操作之后与第三个字节的数值相加就是实际的PID值
+完整代码实现如下：
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">def get_package_pid(package):</span><br><span class="line">    if package is None:</span><br><span class="line">        raise Exception(&quot;get_package_pid param package is None.&quot;)</span><br><span class="line">    return ((ord(package[1]) &amp; 0x1f) &lt;&lt; 8) + ord(package[2])</span><br></pre></td></tr></table></figure></p>
+<p>注:</p>
+<p>1, ord()将byte串转化为对应的数字从而进行位运算；</p>
+<p>2, 0x1f是十六进制表示，转化为二进制就是0b00011111.</p>
+<h3>参考链接：</h3>
+<p>https://segmentfault.com/a/1190000003789802</p>
+<p>https://www.cnblogs.com/zhangziqiu/archive/2011/03/30/ComputerCode.html</p>
+<p>https://github.com/wnduan/codecademy-py/blob/master/Bitwise-Operators.md</p>
+<p>http://developer.51cto.com/art/200808/83641_all.htm</p>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/12/06/flask_login_detail/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="geekpy">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Geekpy's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/12/06/flask_login_detail/" itemprop="url">
+                  使用Flask实现用户登陆认证的详细过程
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2016-12-06 11:57:18" itemprop="dateCreated datePublished" datetime="2016-12-06T11:57:18+08:00">2016-12-06</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2018-08-12 18:13:44" itemprop="dateModified" datetime="2018-08-12T18:13:44+08:00">2018-08-12</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2016/12/06/flask_login_detail/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">Comments: </span> <span class="post-comments-count valine-comment-count" data-xid="/2016/12/06/flask_login_detail/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>本文旨在详细讲解用户登录的原理和过程，并通过Flask框架来完整实现整个登录过程</p>
+<p>&lt;!--more--&gt;</p>
+<h3>用户认证的原理</h3>
+<p>在了解使用Flask来实现用户认证之前，我们首先要明白用户认证的原理。假设现在我们要自己去实现用户认证，需要做哪些事情呢？</p>
+<ol>
+<li>首先，用户要能够输入用户名和密码，所以需要网页和表单，用以实现用户输入和提交的过程。</li>
+<li>用户提交了用户名和密码，我们就需要比对用户名，密码是否正确，而要想比对，首先我们的系统中就要有存储用户名，密码的地方，大多数后台系统会通过数据库来存储，但是实际上我们也可以简单的存储到文件当中。(为简明起见，本文将用户信息存储到json文件当中)</li>
+<li>登录之后，我们需要维持用户登录状态，以便用户在访问特定网页的时候来判断用户是否已经登录，以及是否有权限访问改网页。这就需要有维护一个会话来保存用户的登录状态和用户信息。</li>
+<li>从第三步我们也可以看出，如果我们的网页需要权限保护，那么当请求到来的时候，我们就首先要检查用户的信息，比如是否已经登录，是否有权限等，如果检查通过，那么在response的时候就会将相应网页回复给请求的用户，但是如果检查不通过，那么就需要返回错误信息。</li>
+<li>在第二步，我们知道要将用户名和密码存储起来，但是如果只是简单的用明文存储用户名和密码，很容易被“有心人”盗取，从而造成用户信息泄露，那么我们实际上应当将用户信息尤其是密码做加密处理之后再存储比较安全。</li>
+<li>用户登出</li>
+</ol>
+<h3>通过Flask以及相应的插件来实现登录过程</h3>
+<p>接下来讲述如何通过Flask框架以及相应的插件来实现整个登录过程，需要用到的插件如下：</p>
+<ul>
+<li>flask-wtf</li>
+<li>wtf</li>
+<li>werkzeug</li>
+<li>flask_login</li>
+</ul>
+<h4>使用flask-wtf和wtf来实现表单功能</h4>
+<p>flask-wtf对wtf做了一些封装，不过有些东西还是要直接用wtf，比如StringField等。flask-wtf和wtf主要是用于建立html中的元素和Python中的类的对应关系，通过在Python代码中操作对应的类，对象等从而控制html中的元素。我们需要在python代码中使用flask-wtf和wtf来定义前端页面的表单（实际是定义一个表单类），再将对应的表单对象作为render_template函数的参数，传递给相应的template，之后Jinja模板引擎会将相应的template渲染成html文本，再作为http response返回给用户。</p>
+<p>定义表单类示例代码：
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"># forms.py</span><br><span class="line">from flask_wtf import FlaskForm</span><br><span class="line">from wtforms import StringField, BooleanField, PasswordField</span><br><span class="line">from wtforms.validators import DataRequired</span><br><span class="line"></span><br><span class="line"># 定义的表单都需要继承自FlaskForm</span><br><span class="line">class LoginForm(FlaskForm):</span><br><span class="line">    # 域初始化时，第一个参数是设置label属性的</span><br><span class="line">    username = StringField(&apos;User Name&apos;, validators=[DataRequired()])</span><br><span class="line">    password = PasswordField(&apos;Password&apos;, validators=[DataRequired()])</span><br><span class="line">    remember_me = BooleanField(&apos;remember me&apos;, default=False)</span><br></pre></td></tr></table></figure></p>
+<p>在wtf当中，每个域代表就是html中的元素，比如StringField代表的是&lt;input type=&quot;text&quot;&gt;元素，当然wtf的域还定义了一些特定功能，比如validators，可以通过validators来对这个域的数据做检查，详细请参考wtf教程。
+对应的html模板可能如下login.html：
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">&#123;% extends &quot;layout.html&quot; %&#125;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">    &lt;head&gt;</span><br><span class="line">        &lt;title&gt;Login Page&lt;/title&gt;</span><br><span class="line">    &lt;/head&gt;</span><br><span class="line">    &lt;body&gt;</span><br><span class="line">        &lt;form action=&quot;&#123;&#123; url_for(&quot;login&quot;) &#125;&#125;&quot; method=&quot;POST&quot;&gt;</span><br><span class="line">        &lt;p&gt;</span><br><span class="line">            User Name:&lt;br&gt;</span><br><span class="line">            &lt;input type=&quot;text&quot; name=&quot;username&quot; /&gt;&lt;br&gt;</span><br><span class="line">        &lt;/p&gt;</span><br><span class="line">        &lt;p&gt;</span><br><span class="line">            Password:&lt;/br&gt;</span><br><span class="line">            &lt;input type=&quot;password&quot; name=&quot;password&quot; /&gt;&lt;br&gt;</span><br><span class="line">        &lt;/p&gt;</span><br><span class="line">        &lt;p&gt;</span><br><span class="line">            &lt;input type=&quot;checkbox&quot; name=&quot;remember_me&quot;/&gt;Remember Me</span><br><span class="line">        &lt;/p&gt;</span><br><span class="line">            &#123;&#123; form.csrf_token &#125;&#125; </span><br><span class="line">        &lt;/form&gt;</span><br><span class="line">    &lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br><span class="line"></span><br><span class="line">&#123;% 这里\&#123;\&#123; form.csrf_token \&#125;\&#125;也可以使用&#123;&#123; form.hidden_tag() &#125;&#125;来替换i%&#125;</span><br></pre></td></tr></table></figure></p>
+<p>同时我们也可以使用form去定义模板，跟直接用html标签去定义效果是相同的，Jinja模板引擎会将对象、属性转化为对应的html标签，
+相对应的template，如下login.html：</p>
+<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">&lt;!-- 模板的语法应当符合Jinja语法 --&gt;</span><br><span class="line">&lt;!-- extend from base layout --&gt;</span><br><span class="line">&#123;% extends &quot;base.html&quot; %&#125;</span><br><span class="line"></span><br><span class="line">&#123;% block content %&#125;</span><br><span class="line">  &lt;h1&gt;Sign In&lt;/h1&gt;</span><br><span class="line">  &lt;form action=&quot;&#123;&#123; url_for(&quot;login&quot;) &#125;&#125;&quot; method=&quot;post&quot; name=&quot;login&quot;&gt;</span><br><span class="line">      &#123;&#123; form.csrf_token &#125;&#125;</span><br><span class="line">      &lt;p&gt;</span><br><span class="line">          &#123;&#123; form.username.label &#125;&#125;&lt;br&gt;</span><br><span class="line">          &#123;&#123; form.username(size=80) &#125;&#125;&lt;br&gt;</span><br><span class="line">      &lt;/p&gt;</span><br><span class="line">      &lt;p&gt;</span><br><span class="line">          &#123;&#123; form.password.label &#125;&#125;&lt;br&gt;</span><br><span class="line">          &lt;!-- 我们可以传递input标签的属性，这里传递的是size属性 --&gt;</span><br><span class="line">          &#123;&#123; form.password(size=80) &#125;&#125;&lt;br&gt;</span><br><span class="line">      &lt;/p&gt;</span><br><span class="line">      &lt;p&gt;&#123;&#123; form.remember_me &#125;&#125; Remember Me&lt;/p&gt;</span><br><span class="line">      &lt;p&gt;&lt;input type=&quot;submit&quot; value=&quot;Sign In&quot;&gt;&lt;/p&gt;</span><br><span class="line">  &lt;/form&gt;</span><br><span class="line">&#123;% endblock %&#125;</span><br></pre></td></tr></table></figure></p>
+<p>现在我们需要在view中定义相应的路由，并将相应的登录界面展示给用户。
+简单起见，将view的相关路由定义放在主程序当中
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># app.py</span><br><span class="line">@app.route(&apos;/login&apos;)</span><br><span class="line">def login():</span><br><span class="line">    form = LoginForm()</span><br><span class="line">    return render_template(&apos;login.html&apos;, title=&quot;Sign In&quot;, form=form)</span><br></pre></td></tr></table></figure></p>
+<p>这里简单起见，当用户请求'/login'路由时，直接返回login.html网页，注意这里的html网页是经过Jinja模板引擎将相应的模板转换后的html网页。
+至此，如果我们把以上代码整合到flask当中，就应该能够看到相应的登录界面了，那么当用户提交之后，我们应当怎样存储呢？这里我们暂时先不用数据库这样复杂的工具存储，先简单地存为文件。接下来就看下如何去存储。</p>
+<h4>加密和存储</h4>
+<p>我们可以首先定义一个User类，用于处理与用户相关的操作，包括存储和验证等。
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br></pre></td><td class="code"><pre><span class="line"># models.py</span><br><span class="line"></span><br><span class="line">from werkzeug.security import generate_password_hash</span><br><span class="line">from werkzeug.security import check_password_hash</span><br><span class="line">from flask_login import UserMixin</span><br><span class="line">import json</span><br><span class="line">import uuid</span><br><span class="line"></span><br><span class="line"># define profile.json constant, the file is used to</span><br><span class="line"># save user name and password_hash</span><br><span class="line">PROFILE_FILE = &quot;profiles.json&quot;</span><br><span class="line"></span><br><span class="line">class User(UserMixin):</span><br><span class="line">    def __init__(self, username):</span><br><span class="line">        self.username = username</span><br><span class="line">        self.id = self.get_id()</span><br><span class="line"></span><br><span class="line">    @property</span><br><span class="line">    def password(self):</span><br><span class="line">        raise AttributeError(&apos;password is not a readable attribute&apos;)</span><br><span class="line"></span><br><span class="line">    @password.setter</span><br><span class="line">    def password(self, password):</span><br><span class="line">        &quot;&quot;&quot;save user name, id and password hash to json file&quot;&quot;&quot;</span><br><span class="line">        self.password_hash = generate_password_hash(password)</span><br><span class="line">        with open(PROFILE_FILE, &apos;w+&apos;) as f:</span><br><span class="line">            try:</span><br><span class="line">                profiles = json.load(f)</span><br><span class="line">            except ValueError:</span><br><span class="line">                profiles = &#123;&#125;</span><br><span class="line">            profiles[self.username] = [self.password_hash,</span><br><span class="line">                                       self.id]</span><br><span class="line">            f.write(json.dumps(profiles))</span><br><span class="line"></span><br><span class="line">    def verify_password(self, password):</span><br><span class="line">        password_hash = self.get_password_hash()</span><br><span class="line">        if password_hash is None:</span><br><span class="line">            return False</span><br><span class="line">        return check_password_hash(self.password_hash, password)</span><br><span class="line"></span><br><span class="line">    def get_password_hash(self):</span><br><span class="line">        &quot;&quot;&quot;try to get password hash from file.</span><br><span class="line"></span><br><span class="line">        :return password_hash: if the there is corresponding user in</span><br><span class="line">                the file, return password hash.</span><br><span class="line">                None: if there is no corresponding user, return None.</span><br><span class="line">        &quot;&quot;&quot;</span><br><span class="line">        try:</span><br><span class="line">            with open(PROFILE_FILE) as f:</span><br><span class="line">                user_profiles = json.load(f)</span><br><span class="line">                user_info = user_profiles.get(self.username, None)</span><br><span class="line">                if user_info is not None:</span><br><span class="line">                    return user_info[0]</span><br><span class="line">        except IOError:</span><br><span class="line">            return None</span><br><span class="line">        except ValueError:</span><br><span class="line">            return None</span><br><span class="line">        return None</span><br><span class="line"></span><br><span class="line">    def get_id(self):</span><br><span class="line">        &quot;&quot;&quot;get user id from profile file, if not exist, it will</span><br><span class="line">        generate a uuid for the user.</span><br><span class="line">        &quot;&quot;&quot;</span><br><span class="line">        if self.username is not None:</span><br><span class="line">            try:</span><br><span class="line">                with open(PROFILE_FILE) as f:</span><br><span class="line">                    user_profiles = json.load(f)</span><br><span class="line">                    if self.username in user_profiles:</span><br><span class="line">                        return user_profiles[self.username][1]</span><br><span class="line">            except IOError:</span><br><span class="line">                pass</span><br><span class="line">            except ValueError:</span><br><span class="line">                pass</span><br><span class="line">        return unicode(uuid.uuid4())</span><br><span class="line"></span><br><span class="line">    @staticmethod</span><br><span class="line">    def get(user_id):</span><br><span class="line">        &quot;&quot;&quot;try to return user_id corresponding User object.</span><br><span class="line">        This method is used by load_user callback function</span><br><span class="line">        &quot;&quot;&quot;</span><br><span class="line">        if not user_id:</span><br><span class="line">            return None</span><br><span class="line">        try:</span><br><span class="line">            with open(PROFILE_FILE) as f:</span><br><span class="line">                user_profiles = json.load(f)</span><br><span class="line">                for user_name, profile in user_profiles.iteritems():</span><br><span class="line">                    if profile[1] == user_id:</span><br><span class="line">                        return User(user_name)</span><br><span class="line">        except:</span><br><span class="line">            return None</span><br><span class="line">        return None</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li>User类需要继承flask-login中的UserMixin类，用于实现相应的用户会话管理。</li>
+<li>这里我们是直接存储用户信息到一个json文件&quot;profiles.json&quot;</li>
+<li>我们并不直接存储密码，而是存储加密后的hash值，在这里我们使用了werkzeug.security包中的generate_password_hash函数来进行加密，由于此函数默认使用了sha1算法，并添加了长度为8的盐值，所以还是相当安全的。一般用途的话也就够用了。</li>
+<li>验证password的时候，我们需要使用werkzeug.security包中的check_password_hash函数来验证密码</li>
+<li>get_id是UserMixin类中就有的method，在这我们需要overwrite这个method。在json文件中没有对应的user id时，可以使用uuid.uuid4()生成一个用户唯一id</li>
+</ul>
+<p>至此，我们就实现了第二步和第五步，接下来要看第三步，如何去维护一个session</p>
+<h4>维护用户session</h4>
+<p>先看下代码，这里把相应代码也放入到app.py当中
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">from forms import LoginForm</span><br><span class="line">from flask_wtf.csrf import CsrfProtect</span><br><span class="line">from model import User</span><br><span class="line">from flask_login import login_user, login_required</span><br><span class="line">from flask_login import LoginManager, current_user</span><br><span class="line">from flask_login import logout_user</span><br><span class="line"></span><br><span class="line">app = Flask(__name__)</span><br><span class="line"></span><br><span class="line">app.secret_key = os.urandom(24)</span><br><span class="line"></span><br><span class="line"># use login manager to manage session</span><br><span class="line">login_manager = LoginManager()</span><br><span class="line">login_manager.session_protection = &apos;strong&apos;</span><br><span class="line">login_manager.login_view = &apos;login&apos;</span><br><span class="line">login_manager.init_app(app=app)</span><br><span class="line"></span><br><span class="line"># 这个callback函数用于reload User object，根据session中存储的user id</span><br><span class="line">@login_manager.user_loader</span><br><span class="line">def load_user(user_id):</span><br><span class="line">    return User.get(user_id)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># csrf protection</span><br><span class="line">csrf = CsrfProtect()</span><br><span class="line">csrf.init_app(app)</span><br><span class="line"></span><br><span class="line">@app.route(&apos;/login&apos;)</span><br><span class="line">def login():</span><br><span class="line">    form = LoginForm()</span><br><span class="line">    if form.validate_on_submit():</span><br><span class="line">        user_name = request.form.get(&apos;username&apos;, None)</span><br><span class="line">        password = request.form.get(&apos;password&apos;, None)</span><br><span class="line">        remember_me = request.form.get(&apos;remember_me&apos;, False)</span><br><span class="line">        user = User(user_name)</span><br><span class="line">        if user.verify_password(password):</span><br><span class="line">            login_user(user, remember=remember_me)</span><br><span class="line">            return redirect(request.args.get(&apos;next&apos;) or url_for(&apos;main&apos;))</span><br><span class="line">    return render_template(&apos;login.html&apos;, title=&quot;Sign In&quot;, form=form)</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li>维护用户的会话，关键就在这个LoginManager对象。</li>
+<li>必须实现这个load_user callback函数，用以reload user object</li>
+<li>当密码验证通过后，使用login_user()函数来登录用户，这时用户在会话中的状态就是登录状态了</li>
+</ul>
+<h4>受保护网页</h4>
+<p>保护特定网页，只需要对特定路由加一个装饰器就可以，如下
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"># app.py</span><br><span class="line"></span><br><span class="line"># ...</span><br><span class="line">@app.route(&apos;/&apos;)</span><br><span class="line">@app.route(&apos;/main&apos;)</span><br><span class="line">@login_required</span><br><span class="line">def main():</span><br><span class="line">    return render_template(</span><br><span class="line">        &apos;main.html&apos;, username=current_user.username)</span><br><span class="line"># ...</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li>current_user保存的就是当前用户的信息，实质上是一个User对象，所以我们直接调用其属性, 例如这里我们要给模板传一个username的参数，就可以直接用current_user.username</li>
+<li>使用@login_required来标识改路由需要登录用户，非登录用户会被重定向到'/login'路由(这个就是由login_manager.login_view = 'login' 语句来指定的)</li>
+</ul>
+<h4>用户登出</h4>
+<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"># app.py</span><br><span class="line"></span><br><span class="line"># ...</span><br><span class="line">@app.route(&apos;/logout&apos;)</span><br><span class="line">@login_required</span><br><span class="line">def logout():</span><br><span class="line">    logout_user()</span><br><span class="line">    return redirect(url_for(&apos;login&apos;))</span><br><span class="line"># ...</span><br></pre></td></tr></table></figure></p>
+<p>至此，我们就实现了一个完整的登陆和登出的过程。</p>
+<p>另外我们可能还需要其它辅助的功能，诸如发送确认邮件，密码重置，权限分级管理等，这些功能都可以通过flask及其插件来完成，这个大家可以自己探索下啦！</p>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+  </section>
+
+  
+  <nav class="pagination">
+    <a class="extend prev" rel="prev" href="/page/2/"><i class="fa fa-angle-left" aria-label="Previous page"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span>
+  </nav>
+
+
+
+          </div>
+          
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">geekpy</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">28</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">7</span>
+                    <span class="site-state-item-name">tags</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/geekpy" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:rebor.liu@gmail.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">geekpy</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> v3.7.1</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Muse</a> v6.4.2</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+  
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'OCjgmQiFa9gpVkDabM6KTb8g-gzGzoHsz',
+        appKey: 'Ie7XE2V6spB6Q6C1W2GU9drV',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

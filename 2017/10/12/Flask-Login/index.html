@@ -1,5 +1,379 @@
-<!DOCTYPE html><html><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>Flask-Login详解 | Geekpy's Blog</title><link rel="stylesheet" type="text/css" href="/css/normalize.css"><link rel="stylesheet" type="text/css" href="/css/highlight.css"><link rel="stylesheet" type="text/css" href="/css/very-simple.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/font-awesome/4.5.0/css/font-awesome.min.css"><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="alternate" type="application/atom+xml" href="/atom.xml"></head><body><!-- include the sidebar--><!-- include ./includes/sidebar.jade--><!-- Blog title and subtitle--><header><div class="container header"><a id="logo" href="/." class="title">Geekpy's Blog</a><span class="subtitle"></span><label id="toggle-menu" for="menu" onclick><i class="fa fa-bars"></i></label></div></header><!-- use checkbox hack for toggle nav-bar on small screens--><input id="menu" type="checkbox"><!-- Navigation Links--><nav id="nav"><div class="container"><a href="/" class="sidebar-nav-item active">Home</a><a href="/archives" class="sidebar-nav-item">Archives</a><a href="/about" class="sidebar-nav-item">About</a></div></nav><div id="header-margin-bar"></div><div class="wrapper"><div class="container post-header"><h1>Flask-Login详解</h1></div></div><article><div class="container post"><p>本文主要通过源码分析Flask-Login插件，并详述其使用方法</p>
-<p>&lt;!--more--&gt;</p>
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '6.4.2',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="本文主要通过源码分析Flask-Login插件，并详述其使用方法 &amp;lt;!-- more --&amp;gt; 关于Flask登录认证的详细过程请参见拙作&amp;lt;&amp;lt;使用Flask实现用户登陆认证的详细过程&amp;gt;&amp;gt;一文，而本文则偏重于详细介绍Flask-Login的原理，代码的解析。 首次登陆 我们首先来看一下首次登录验证的流程图：  Flask-Login在登录过程中主要负责：  将用户对">
+<meta name="keywords" content="flask">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Flask-Login详解">
+<meta property="og:url" content="http://yoursite.com/2017/10/12/Flask-Login/index.html">
+<meta property="og:site_name" content="Geekpy&#39;s Blog">
+<meta property="og:description" content="本文主要通过源码分析Flask-Login插件，并详述其使用方法 &amp;lt;!-- more --&amp;gt; 关于Flask登录认证的详细过程请参见拙作&amp;lt;&amp;lt;使用Flask实现用户登陆认证的详细过程&amp;gt;&amp;gt;一文，而本文则偏重于详细介绍Flask-Login的原理，代码的解析。 首次登陆 我们首先来看一下首次登录验证的流程图：  Flask-Login在登录过程中主要负责：  将用户对">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3959253-b34989af4a0d0b2c.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3959253-7ea20e139da6e2ae.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:updated_time" content="2018-10-05T14:24:37.606Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Flask-Login详解">
+<meta name="twitter:description" content="本文主要通过源码分析Flask-Login插件，并详述其使用方法 &amp;lt;!-- more --&amp;gt; 关于Flask登录认证的详细过程请参见拙作&amp;lt;&amp;lt;使用Flask实现用户登陆认证的详细过程&amp;gt;&amp;gt;一文，而本文则偏重于详细介绍Flask-Login的原理，代码的解析。 首次登陆 我们首先来看一下首次登录验证的流程图：  Flask-Login在登录过程中主要负责：  将用户对">
+<meta name="twitter:image" content="http://upload-images.jianshu.io/upload_images/3959253-b34989af4a0d0b2c.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Geekpy's Blog" type="application/atom+xml" />
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/10/12/Flask-Login/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Flask-Login详解 | Geekpy's Blog</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Geekpy's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br />About</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />Tags</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />Categories</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />Archives</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+    
+    
+    <div class="post-block page">
+      <header class="post-header">
+
+<h1 class="post-title" itemprop="name headline">Flask-Login详解</h1>
+
+<div class="post-meta">
+  
+  
+
+
+  
+  
+  <ul class="breadcrumb">
+    
+      
+      
+        
+          <li><a href="/2017/">2017</a></li>
+          
+            
+          
+        
+      
+    
+      
+      
+        
+          <li><a href="/2017/10/">10</a></li>
+          
+            
+          
+        
+      
+    
+      
+      
+        
+          <li><a href="/2017/10/12/">12</a></li>
+          
+            
+          
+        
+      
+    
+      
+      
+        
+          <li>FLASK-LOGIN</li>
+        
+      
+    
+      
+      
+        
+          <li><a href="/2017/10/12//"></a></li>
+          
+            
+          
+        
+      
+    
+  </ul>
+
+
+</div>
+
+</header>
+
+      
+      
+      
+      <div class="post-body">
+        
+        
+          <p>本文主要通过源码分析Flask-Login插件，并详述其使用方法</p>
+<p>&lt;!-- more --&gt;</p>
 <p>关于Flask登录认证的详细过程请参见拙作<a href="http://geekpy.github.io/2016/12/06/flask_login_detail/" target="_blank" rel="noopener">&lt;&lt;使用Flask实现用户登陆认证的详细过程&gt;&gt;</a>一文，而本文则偏重于详细介绍Flask-Login的原理，代码的解析。</p>
 <h3>首次登陆</h3>
 <p>我们首先来看一下首次登录验证的流程图：</p>
@@ -9,10 +383,10 @@
 <li>将用户对象存入request context中</li>
 <li>将用户ID，Session ID等信息存入Session中
 在<a href="http://www.jianshu.com/p/06bd93e21945" target="_blank" rel="noopener">&lt;&lt;使用Flask实现用户登陆认证的详细过程&gt;&gt;</a>中我们已经介绍过如何通过Flask-Login来实现登录的过程，其中最重要的代码就是login_user，如下：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">login_user(user, remember=remember_me)</span><br></pre></td></tr></table></figure></li>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="title">login_user</span><span class="params">(user, remember=remember_me)</span></span></span><br></pre></td></tr></table></figure></li>
 </ul>
 <p>那么login_user具体做了什么呢？我们来看下源码
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">def login_user(user, remember=False, force=False, fresh=True):</span><br><span class="line">    if not force and not user.is_active:</span><br><span class="line">        return False</span><br><span class="line"></span><br><span class="line">    user_id = getattr(user, current_app.login_manager.id_attribute)()</span><br><span class="line">    session[&apos;user_id&apos;] = user_id</span><br><span class="line">    session[&apos;_fresh&apos;] = fresh</span><br><span class="line">    session[&apos;_id&apos;] = current_app.login_manager._session_identifier_generator()</span><br><span class="line"></span><br><span class="line">    if remember:</span><br><span class="line">        session[&apos;remember&apos;] = &apos;set&apos;</span><br><span class="line"></span><br><span class="line">    _request_ctx_stack.top.user = user</span><br><span class="line">    user_logged_in.send(current_app._get_current_object(), user=_get_user())</span><br><span class="line">    return True</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight sqf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">def login_user(user, remember=<span class="literal">False</span>, force=<span class="literal">False</span>, fresh=<span class="literal">True</span>):</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">not</span> force <span class="built_in">and</span> <span class="built_in">not</span> user.is_active:</span><br><span class="line">        return <span class="literal">False</span></span><br><span class="line"></span><br><span class="line">    user_id = getattr(user, current_app.login_manager.id_attribute)()</span><br><span class="line">    session[<span class="string">'user_id'</span>] = user_id</span><br><span class="line">    session[<span class="string">'_fresh'</span>] = fresh</span><br><span class="line">    session[<span class="string">'_id'</span>] = current_app.login_manager.<span class="variable">_session_identifier_generator</span>()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> remember:</span><br><span class="line">        session[<span class="string">'remember'</span>] = <span class="string">'set'</span></span><br><span class="line"></span><br><span class="line">    <span class="variable">_request_ctx_stack</span>.top.user = user</span><br><span class="line">    user_logged_in.send(current_app.<span class="variable">_get_current_object</span>(), user=<span class="variable">_get_user</span>())</span><br><span class="line">    return <span class="literal">True</span></span><br></pre></td></tr></table></figure></p>
 <ul>
 <li><code>getattr(user, current_app.login_manager.id_attribute)()</code> 这里<code>login_manager.id_attribute</code>是一个字符串<code>'get_id'</code>。因此这句的意思是获取User对象的get_id method，然后执行，从而获取到用户的ID</li>
 <li>通过<code>session['user_id'] = user_id</code>来将用户的ID存储进Session当中，后面紧跟着将fresh信息，session id信息，remember信息存储进session。</li>
@@ -32,25 +406,25 @@
 <li>从session中获取用户ID</li>
 <li>当用户的请求访问的是受登录保护的路由时，就要通过用户ID重新load user，如果load user失败则进入鉴权失败处理流程，如果成功，则允许正常处理请求
 那么Flask-Login究竟是如何保护路由的呢？我们来看个例子：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">@app.route(&apos;/&apos;)</span><br><span class="line">@app.route(&apos;/main&apos;)</span><br><span class="line">@login_required</span><br><span class="line">def main():</span><br><span class="line">    return render_template(</span><br><span class="line">        &apos;main.html&apos;, username=current_user.username)</span><br></pre></td></tr></table></figure></li>
+<figure class="highlight less"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">@app</span>.route(<span class="string">'/'</span>)</span><br><span class="line"><span class="variable">@app</span>.route(<span class="string">'/main'</span>)</span><br><span class="line"><span class="variable">@login_required</span></span><br><span class="line">def main():</span><br><span class="line">    return render_template(</span><br><span class="line">        <span class="string">'main.html'</span>, username=current_user.username)</span><br></pre></td></tr></table></figure></li>
 </ol>
 <p>我们看到只要给路由函数加一个<code>@login_required</code>装饰器就可以了，那么这个装饰器究竟是怎么做到的呢？来看下源码：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"># flask_login/utils.py</span><br><span class="line">def login_required(func):</span><br><span class="line">    @wraps(func)</span><br><span class="line">    def decorated_view(*args, **kwargs):</span><br><span class="line">        # 如果request method为例外method，即在EXEMPT_METHODS中的method，可以不必鉴权</span><br><span class="line">        if request.method in EXEMPT_METHODS:</span><br><span class="line">            return func(*args, **kwargs)</span><br><span class="line"></span><br><span class="line">        # 如果_login_disabled为True则不必鉴权</span><br><span class="line">        elif current_app.login_manager._login_disabled:</span><br><span class="line">            return func(*args, **kwargs)</span><br><span class="line"></span><br><span class="line">        # 正常鉴权</span><br><span class="line">        elif not current_user.is_authenticated:</span><br><span class="line">            return current_app.login_manager.unauthorized()</span><br><span class="line">        return func(*args, **kwargs)</span><br><span class="line">    return decorated_view</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight autoit"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta"># flask_login/utils.py</span></span><br><span class="line">def login_required(<span class="function"><span class="keyword">func</span>):</span></span><br><span class="line">    <span class="symbol">@wraps</span>(<span class="function"><span class="keyword">func</span>)</span></span><br><span class="line">    def decorated_view(*args, **kwargs):</span><br><span class="line">        <span class="meta"># 如果request method为例外method，即在EXEMPT_METHODS中的method，可以不必鉴权</span></span><br><span class="line">        <span class="keyword">if</span> request.method <span class="keyword">in</span> EXEMPT_METHODS:</span><br><span class="line">            <span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">(*args, **kwargs)</span></span></span><br><span class="line"></span><br><span class="line">        <span class="meta"># 如果_login_disabled为True则不必鉴权</span></span><br><span class="line">        elif current_app.login_manager._login_disabled:</span><br><span class="line">            <span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">(*args, **kwargs)</span></span></span><br><span class="line"></span><br><span class="line">        <span class="meta"># 正常鉴权</span></span><br><span class="line">        elif <span class="literal">not</span> current_user.is_authenticated:</span><br><span class="line">            <span class="keyword">return</span> current_app.login_manager.unauthorized()</span><br><span class="line">        <span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">(*args, **kwargs)</span></span></span><br><span class="line">    <span class="keyword">return</span> decorated_view</span><br></pre></td></tr></table></figure></p>
 <ul>
 <li>默认情况下只有<em>OPTIONS</em> method在EXEMPT_METHODS set中，而GET、PUT、POST等常见的methods都需要鉴权</li>
 <li><code>_login_disabled</code>默认为False</li>
 <li>正常鉴权的关键在于<code>current_user.is_authenticated</code>是否为True，为True则正常处理请求，为False则进入unauthorized处理流程。那么这个current_user到底怎么就能鉴权了？它是怎么来的呢？来看下定义：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># flask_login/utils.py</span><br><span class="line">current_user = LocalProxy(lambda: _get_user())</span><br></pre></td></tr></table></figure></li>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># flask_login/utils.py</span></span><br><span class="line"><span class="attr">current_user</span> = LocalProxy(lambda: _get_user())</span><br></pre></td></tr></table></figure></li>
 </ul>
 <p>原来current_user是一个LocalProxy对象，其代理的对象需要通过<code>_get_user()</code>来获取，简单来说_get_user()会返回两种用户，一种是正常的用户对象(鉴权成功)，一种是anonymous用户对象(鉴权失败)。而正常的用户对象其<code>is_authenticated</code>属性总是为True，相对的anonymous用户对象的<code>is_authenticated</code>属性总是为False</p>
 <blockquote>
 <p>LocalProxy对象每次操作都会重新获取代理的对象从而实现动态更新，关于LocalProxy的详细说明请参考拙作<a href="http://www.jianshu.com/p/3f38b777a621" target="_blank" rel="noopener">&lt;&lt;Werkzeug(Flask)之Local、LocalStack和LocalProxy&gt;&gt;</a></p>
 </blockquote>
 <p>而要实现动态更新的关键就在于<code>_get_user</code>函数，接下来我们看下<code>_get_user</code>函数是如何获取user对象的：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># flask_login/utils.py</span><br><span class="line">def _get_user():</span><br><span class="line">    if has_request_context() and not hasattr(_request_ctx_stack.top, &apos;user&apos;):</span><br><span class="line">        current_app.login_manager._load_user()</span><br><span class="line"></span><br><span class="line">    return getattr(_request_ctx_stack.top, &apos;user&apos;, None)</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># flask_login/utils.py</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_get_user</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="keyword">if</span> has_request_context() <span class="keyword">and</span> <span class="keyword">not</span> hasattr(_request_ctx_stack.top, <span class="string">'user'</span>):</span><br><span class="line">        current_app.login_manager._load_user()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> getattr(_request_ctx_stack.top, <span class="string">'user'</span>, <span class="keyword">None</span>)</span><br></pre></td></tr></table></figure></p>
 <p>在之前的首次登陆那小节中，我们已经知道用户鉴权成功后，会将User对象保存在当前的request context当中，这时我们调用<code>_get_user</code>函数时就会直接从request context中获取user对象<code>return getattr(_request_ctx_stack.top, 'user', None)</code>
 但如果是非首次登陆，当前request context中并没有保存user对象，就需要调用<code>current_app.login_manager._load_user()</code>来去load user对象，接下来再看看如何去load：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"># flask_login/login_manager.py</span><br><span class="line">def _load_user(self):</span><br><span class="line">        &apos;&apos;&apos;Loads user from session or remember_me cookie as applicable&apos;&apos;&apos;</span><br><span class="line">        user_accessed.send(current_app._get_current_object())</span><br><span class="line"></span><br><span class="line">        # first check SESSION_PROTECTION</span><br><span class="line">        config = current_app.config</span><br><span class="line">        if config.get(&apos;SESSION_PROTECTION&apos;, self.session_protection):</span><br><span class="line">            deleted = self._session_protection()</span><br><span class="line">            if deleted:</span><br><span class="line">                return self.reload_user()</span><br><span class="line"></span><br><span class="line">        # If a remember cookie is set, and the session is not, move the</span><br><span class="line">        # cookie user ID to the session.</span><br><span class="line">        #</span><br><span class="line">        # However, the session may have been set if the user has been</span><br><span class="line">        # logged out on this request, &apos;remember&apos; would be set to clear,</span><br><span class="line">        # so we should check for that and not restore the session.</span><br><span class="line">        is_missing_user_id = &apos;user_id&apos; not in session</span><br><span class="line">        if is_missing_user_id:</span><br><span class="line">            cookie_name = config.get(&apos;REMEMBER_COOKIE_NAME&apos;, COOKIE_NAME)</span><br><span class="line">            header_name = config.get(&apos;AUTH_HEADER_NAME&apos;, AUTH_HEADER_NAME)</span><br><span class="line">            has_cookie = (cookie_name in request.cookies and</span><br><span class="line">                          session.get(&apos;remember&apos;) != &apos;clear&apos;)</span><br><span class="line">            if has_cookie:</span><br><span class="line">                return self._load_from_cookie(request.cookies[cookie_name])</span><br><span class="line">            elif self.request_callback:</span><br><span class="line">                return self._load_from_request(request)</span><br><span class="line">            elif header_name in request.headers:</span><br><span class="line">                return self._load_from_header(request.headers[header_name])</span><br><span class="line"></span><br><span class="line">        return self.reload_user()</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># flask_login/login_manager.py</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_load_user</span><span class="params">(<span class="keyword">self</span>)</span></span><span class="symbol">:</span></span><br><span class="line">        <span class="string">''</span><span class="string">'Loads user from session or remember_me cookie as applicable'</span><span class="string">''</span></span><br><span class="line">        user_accessed.send(current_app._get_current_object())</span><br><span class="line"></span><br><span class="line">        <span class="comment"># first check SESSION_PROTECTION</span></span><br><span class="line">        config = current_app.config</span><br><span class="line">        <span class="keyword">if</span> config.get(<span class="string">'SESSION_PROTECTION'</span>, <span class="keyword">self</span>.session_protection)<span class="symbol">:</span></span><br><span class="line">            deleted = <span class="keyword">self</span>._session_protection()</span><br><span class="line">            <span class="keyword">if</span> <span class="symbol">deleted:</span></span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">self</span>.reload_user()</span><br><span class="line"></span><br><span class="line">        <span class="comment"># If a remember cookie is set, and the session is not, move the</span></span><br><span class="line">        <span class="comment"># cookie user ID to the session.</span></span><br><span class="line">        <span class="comment">#</span></span><br><span class="line">        <span class="comment"># However, the session may have been set if the user has been</span></span><br><span class="line">        <span class="comment"># logged out on this request, 'remember' would be set to clear,</span></span><br><span class="line">        <span class="comment"># so we should check for that and not restore the session.</span></span><br><span class="line">        is_missing_user_id = <span class="string">'user_id'</span> <span class="keyword">not</span> <span class="keyword">in</span> session</span><br><span class="line">        <span class="keyword">if</span> <span class="symbol">is_missing_user_id:</span></span><br><span class="line">            cookie_name = config.get(<span class="string">'REMEMBER_COOKIE_NAME'</span>, COOKIE_NAME)</span><br><span class="line">            header_name = config.get(<span class="string">'AUTH_HEADER_NAME'</span>, AUTH_HEADER_NAME)</span><br><span class="line">            has_cookie = (cookie_name <span class="keyword">in</span> request.cookies <span class="keyword">and</span></span><br><span class="line">                          session.get(<span class="string">'remember'</span>) != <span class="string">'clear'</span>)</span><br><span class="line">            <span class="keyword">if</span> <span class="symbol">has_cookie:</span></span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">self</span>._load_from_cookie(request.cookies[cookie_name])</span><br><span class="line">            elif <span class="keyword">self</span>.<span class="symbol">request_callback:</span></span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">self</span>._load_from_request(request)</span><br><span class="line">            elif header_name <span class="keyword">in</span> request.<span class="symbol">headers:</span></span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">self</span>._load_from_header(request.headers[header_name])</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">self</span>.reload_user()</span><br></pre></td></tr></table></figure></p>
 <ul>
 <li><code>_load_user</code>大体的过程是首先检查<em>SESSION_PROTECTION</em>设置，如果<em>SESSION_PROTECTION</em> 为strong或者basic类型，那么就会执行<code>_session_protection()</code>动作，否则不执行此操作。<code>_session_protection</code>在session_id不一致的时候(比如IP变化会导致session id的变化)才真正有用，这时，如果为basic类型或者session permanent为True时，只标注session为非新鲜的(not fresh)；而如果为strong，则会删除session中的用户信息，并重新load user，即调用<code>reload_user</code>。</li>
 </ul>
@@ -64,33 +438,437 @@
 <p>remember cookie是指，当用户勾选'remember me'复选框时，Flask-Login会将用户信息放入到指定的cookie当中，同样也是加密的。这就是为什么当session中没有携带用户信息时，我们可以通过remember cookie来获取用户的信息</p>
 </blockquote>
 <p>而<code>reload_user</code>是如何获取用户的呢，来看下源代码：
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"># flask_login/login_manager.py</span><br><span class="line">def reload_user(self, user=None):</span><br><span class="line">        ctx = _request_ctx_stack.top</span><br><span class="line"></span><br><span class="line">        if user is None:</span><br><span class="line">            user_id = session.get(&apos;user_id&apos;)</span><br><span class="line">            if user_id is None:</span><br><span class="line">                # 当无法获取到有效的用户id时，就认为是anonymous user</span><br><span class="line">                ctx.user = self.anonymous_user()</span><br><span class="line">            else:</span><br><span class="line">                # user callback就是我们通过@login_manager.user_loader装饰的函数，用于获取user object</span><br><span class="line">                if self.user_callback is None:</span><br><span class="line">                    raise Exception(</span><br><span class="line">                        &quot;No user_loader has been installed for this &quot;</span><br><span class="line">                        &quot;LoginManager. Add one with the &quot;</span><br><span class="line">                        &quot;&apos;LoginManager.user_loader&apos; decorator.&quot;)</span><br><span class="line">                user = self.user_callback(user_id)</span><br><span class="line">                if user is None:</span><br><span class="line">                    ctx.user = self.anonymous_user()</span><br><span class="line">                else:</span><br><span class="line">                    ctx.user = user</span><br><span class="line">        else:</span><br><span class="line">            ctx.user = user</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># flask_login/login_manager.py</span></span><br><span class="line">def reload_user(self, <span class="attr">user=</span>None):</span><br><span class="line">        ctx = _request_ctx_stack.top</span><br><span class="line"></span><br><span class="line">        if <span class="keyword">user</span> <span class="title">is</span> None:</span><br><span class="line">            user_id = session.get('user_id')</span><br><span class="line">            if user_id is None:</span><br><span class="line">                <span class="comment"># 当无法获取到有效的用户id时，就认为是anonymous user</span></span><br><span class="line">                ctx.<span class="keyword">user</span> <span class="title">= self</span>.anonymous_user()</span><br><span class="line">            else:</span><br><span class="line">                <span class="comment"># user callback就是我们通过@login_manager.user_loader装饰的函数，用于获取user object</span></span><br><span class="line">                if self.user_callback is None:</span><br><span class="line">                    raise Exception(</span><br><span class="line">                        <span class="string">"No user_loader has been installed for this "</span></span><br><span class="line">                        <span class="string">"LoginManager. Add one with the "</span></span><br><span class="line">                        <span class="string">"'LoginManager.user_loader' decorator."</span>)</span><br><span class="line">                <span class="keyword">user</span> <span class="title">= self</span>.user_callback(user_id)</span><br><span class="line">                if <span class="keyword">user</span> <span class="title">is</span> None:</span><br><span class="line">                    ctx.<span class="keyword">user</span> <span class="title">= self</span>.anonymous_user()</span><br><span class="line">                else:</span><br><span class="line">                    ctx.<span class="keyword">user</span> <span class="title">= user</span></span><br><span class="line">        else:</span><br><span class="line">            ctx.<span class="keyword">user</span> <span class="title">= user</span></span><br></pre></td></tr></table></figure></p>
 <ul>
 <li>首先获取user id，如果获取不到有效的id，就将user设为anonymous user</li>
 <li>获取到id后，再通过@login_manager.user_loader装饰的函数获取到user对象，如果没有获取到有效的user对象，就认为是anonymous user</li>
 <li>最后将user保存于request context中（无论是正常的用户还是anonymous用户）</li>
 </ul>
 <p>至此，我们已经将Flask-Login的核心代码剖析了一遍，如果你有收获，不妨点个赞鼓励一下吧！</p>
-</div><div class="container"><hr><div class="comment"></div><script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="//cdn.jsdelivr.net/npm/valine@1.1.6/dist/Valine.min.js"></script>
+
+        
+      </div>
+      
+      
+      
+    </div>
+    
+
+
+  
+  
+  <ul class="breadcrumb">
+    
+      
+      
+        
+          <li><a href="/2017/">2017</a></li>
+          
+            
+          
+        
+      
+    
+      
+      
+        
+          <li><a href="/2017/10/">10</a></li>
+          
+            
+          
+        
+      
+    
+      
+      
+        
+          <li><a href="/2017/10/12/">12</a></li>
+          
+            
+          
+        
+      
+    
+      
+      
+        
+          <li>FLASK-LOGIN</li>
+        
+      
+    
+      
+      
+        
+          <li><a href="/2017/10/12//"></a></li>
+          
+            
+          
+        
+      
+    
+  </ul>
+
+
+    
+    
+    
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">geekpy</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">28</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">7</span>
+                    <span class="site-state-item-name">tags</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/geekpy" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:rebor.liu@gmail.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">首次登陆</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">非首次登陆</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">geekpy</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> v3.7.1</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Muse</a> v6.4.2</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
 <script type="text/javascript">
-var leancloud_appid = '';
-var leancloud_appkey = '';
-var valine_url = 'http://yoursite.com/2017/10/12/Flask-Login/';
-var valine_notify = false;
-var valine_verify = false;
-var valine_placeholder = 'input your comments here';
-new Valine({
-         av: AV, // source from av-min.js
-         el: '.comment' ,
-         notify: valine_notify,
-         verify: valine_verify,
-         app_id: leancloud_appid,
-         app_key: leancloud_appkey,
-         placeholder: valine_placeholder,
-         path: valine_url
-     });
-</script></div></article><footer id="footer"><div class="container"><div class="bar"><div class="social"><a href="mailto:rebor.liu@gmail.com" target="_blank"><i class="fa fa-envelope-o"></i></a><a href="https://github.com/geekpy" target="_blank"><i class="fa fa-github"></i></a></div><div class="footer">© 2018 <a href="/" rel="nofollow">geekpy</a>. Powered by <a rel="nofollow" target="_blank" href="https://hexo.io">Hexo</a>. Theme <a target="_blank" href="https://github.com/lotabout/very-simple">very-simple</a>.</div></div></div></footer><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.css"><script src="//cdn.bootcss.com/jquery/2.0.3/jquery.min.js"></script><script src="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.pack.js"></script><script>$(document).ready(function() {
-    $(".fancybox").fancybox();
-});
-</script></body></html>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'OCjgmQiFa9gpVkDabM6KTb8g-gzGzoHsz',
+        appKey: 'Ie7XE2V6spB6Q6C1W2GU9drV',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

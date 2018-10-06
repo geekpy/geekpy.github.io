@@ -1,4 +1,377 @@
-<!DOCTYPE html><html><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>Pandas系列1-DataFrame之初始化 | Geekpy's Blog</title><link rel="stylesheet" type="text/css" href="/css/normalize.css"><link rel="stylesheet" type="text/css" href="/css/highlight.css"><link rel="stylesheet" type="text/css" href="/css/very-simple.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/font-awesome/4.5.0/css/font-awesome.min.css"><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="alternate" type="application/atom+xml" href="/atom.xml"></head><body><!-- include the sidebar--><!-- include ./includes/sidebar.jade--><!-- Blog title and subtitle--><header><div class="container header"><a id="logo" href="/." class="title">Geekpy's Blog</a><span class="subtitle"></span><label id="toggle-menu" for="menu" onclick><i class="fa fa-bars"></i></label></div></header><!-- use checkbox hack for toggle nav-bar on small screens--><input id="menu" type="checkbox"><!-- Navigation Links--><nav id="nav"><div class="container"><a href="/" class="sidebar-nav-item active">Home</a><a href="/archives" class="sidebar-nav-item">Archives</a><a href="/about" class="sidebar-nav-item">About</a></div></nav><div id="header-margin-bar"></div><div class="wrapper"><div class="container post-header"><h1>Pandas系列1-DataFrame之初始化</h1></div></div><article><div class="container post"><p>Pandas中如果要初始化DataFrame对象，实际又很多种方式，本文将详解Pandas初始化的几种不同方式。</p>
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '6.4.2',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="Pandas中如果要初始化DataFrame对象，实际又很多种方式，本文将详解Pandas初始化的几种不同方式。 &amp;lt;!--more--&amp;gt; DataFrame有多种初始化方法，主要分为以下几种情况：  通过Object初始化 通过文件初始化 通过SQL查询结果初始化 通过NoSQL数据库查询结果初始化  下面分别介绍： 通过object初始化 这又分为以下几种方式  Dict of 1D">
+<meta name="keywords" content="pandas">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Pandas系列1-DataFrame之初始化">
+<meta property="og:url" content="http://yoursite.com/2018/06/08/Pandas系列1-DataFrame之初始化/index.html">
+<meta property="og:site_name" content="Geekpy&#39;s Blog">
+<meta property="og:description" content="Pandas中如果要初始化DataFrame对象，实际又很多种方式，本文将详解Pandas初始化的几种不同方式。 &amp;lt;!--more--&amp;gt; DataFrame有多种初始化方法，主要分为以下几种情况：  通过Object初始化 通过文件初始化 通过SQL查询结果初始化 通过NoSQL数据库查询结果初始化  下面分别介绍： 通过object初始化 这又分为以下几种方式  Dict of 1D">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/3959253-4ebb77efcd970e59.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:updated_time" content="2018-10-05T14:17:12.035Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Pandas系列1-DataFrame之初始化">
+<meta name="twitter:description" content="Pandas中如果要初始化DataFrame对象，实际又很多种方式，本文将详解Pandas初始化的几种不同方式。 &amp;lt;!--more--&amp;gt; DataFrame有多种初始化方法，主要分为以下几种情况：  通过Object初始化 通过文件初始化 通过SQL查询结果初始化 通过NoSQL数据库查询结果初始化  下面分别介绍： 通过object初始化 这又分为以下几种方式  Dict of 1D">
+<meta name="twitter:image" content="https://upload-images.jianshu.io/upload_images/3959253-4ebb77efcd970e59.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Geekpy's Blog" type="application/atom+xml" />
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/06/08/Pandas系列1-DataFrame之初始化/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Pandas系列1-DataFrame之初始化 | Geekpy's Blog</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Geekpy's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br />About</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />Tags</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />Categories</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />Archives</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+    
+    
+    <div class="post-block page">
+      <header class="post-header">
+
+<h1 class="post-title" itemprop="name headline">Pandas系列1-DataFrame之初始化</h1>
+
+<div class="post-meta">
+  
+  
+
+
+  
+  
+  <ul class="breadcrumb">
+    
+      
+      
+        
+          <li><a href="/2018/">2018</a></li>
+          
+            
+          
+        
+      
+    
+      
+      
+        
+          <li><a href="/2018/06/">06</a></li>
+          
+            
+          
+        
+      
+    
+      
+      
+        
+          <li><a href="/2018/06/08/">08</a></li>
+          
+            
+          
+        
+      
+    
+      
+      
+        
+          <li>PANDAS系列1-DATAFRAME之初始化</li>
+        
+      
+    
+      
+      
+        
+          <li><a href="/2018/06/08//"></a></li>
+          
+            
+          
+        
+      
+    
+  </ul>
+
+
+</div>
+
+</header>
+
+      
+      
+      
+      <div class="post-body">
+        
+        
+          <p>Pandas中如果要初始化DataFrame对象，实际又很多种方式，本文将详解Pandas初始化的几种不同方式。</p>
 <p>&lt;!--more--&gt;</p>
 <p>DataFrame有多种初始化方法，主要分为以下几种情况：</p>
 <ul>
@@ -19,25 +392,25 @@
 </ul>
 <h4>通过list</h4>
 <p>通过1D data series初始化的时候，如果有多列，那么需要等长
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"># columns参数是通过一个list参数来指定column labels</span><br><span class="line">df = pd.DataFrame([[&apos;a1&apos;, 1], [&apos;a2&apos;, 4]], columns=[&apos;uid&apos;, &apos;score&apos;])</span><br><span class="line">In [477]: df</span><br><span class="line">Out[477]:</span><br><span class="line">  uid  score</span><br><span class="line">0  a1      1</span><br><span class="line">1  a2      4</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight prolog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"># columns参数是通过一个list参数来指定column labels</span><br><span class="line">df = pd.<span class="symbol">DataFrame</span>([[<span class="string">'a1'</span>, <span class="number">1</span>], [<span class="string">'a2'</span>, <span class="number">4</span>]], columns=[<span class="string">'uid'</span>, <span class="string">'score'</span>])</span><br><span class="line"><span class="symbol">In</span> [<span class="number">477</span>]: df</span><br><span class="line"><span class="symbol">Out</span>[<span class="number">477</span>]:</span><br><span class="line">  uid  score</span><br><span class="line"><span class="number">0</span>  a1      <span class="number">1</span></span><br><span class="line"><span class="number">1</span>  a2      <span class="number">4</span></span><br></pre></td></tr></table></figure></p>
 <h4>通过Dict of 1D ndarray</h4>
-<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">In [298]: df = pd.DataFrame(&#123;&apos;col1&apos;: np.arange(3), &apos;col2&apos;: np.arange(5, 8)&#125;)</span><br><span class="line"></span><br><span class="line">In [299]: df</span><br><span class="line">Out[299]:</span><br><span class="line">   col1  col2</span><br><span class="line">0     0     5</span><br><span class="line">1     1     6</span><br><span class="line">2     2     7</span><br></pre></td></tr></table></figure></p>
+<p><figure class="highlight ada"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">In</span> [<span class="number">298</span>]: df = pd.DataFrame(&#123;<span class="symbol">'col1</span>': np.arange(<span class="number">3</span>), <span class="symbol">'col2</span>': np.arange(<span class="number">5</span>, <span class="number">8</span>)&#125;)</span><br><span class="line"></span><br><span class="line"><span class="keyword">In</span> [<span class="number">299</span>]: df</span><br><span class="line"><span class="keyword">Out</span>[<span class="number">299</span>]:</span><br><span class="line">   col1  col2</span><br><span class="line"><span class="number">0</span>     <span class="number">0</span>     <span class="number">5</span></span><br><span class="line"><span class="number">1</span>     <span class="number">1</span>     <span class="number">6</span></span><br><span class="line"><span class="number">2</span>     <span class="number">2</span>     <span class="number">7</span></span><br></pre></td></tr></table></figure></p>
 <h4>通过Dict of lists</h4>
-<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">In [294]: df = pd.DataFrame(&#123;&apos;col1&apos;: [1, 2, 3, 4], &apos;col2&apos;: [&apos;a&apos;, &apos;b&apos;, &apos;c&apos;, &apos;d&apos;]&#125;)</span><br><span class="line"></span><br><span class="line">In [295]: df</span><br><span class="line">Out[295]:</span><br><span class="line">   col1 col2</span><br><span class="line">0     1    a</span><br><span class="line">1     2    b</span><br><span class="line">2     3    c</span><br><span class="line">3     4    d</span><br></pre></td></tr></table></figure></p>
+<p><figure class="highlight prolog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">In</span> [<span class="number">294</span>]: df = pd.<span class="symbol">DataFrame</span>(&#123;<span class="string">'col1'</span>: [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>], <span class="string">'col2'</span>: [<span class="string">'a'</span>, <span class="string">'b'</span>, <span class="string">'c'</span>, <span class="string">'d'</span>]&#125;)</span><br><span class="line"></span><br><span class="line"><span class="symbol">In</span> [<span class="number">295</span>]: df</span><br><span class="line"><span class="symbol">Out</span>[<span class="number">295</span>]:</span><br><span class="line">   col1 col2</span><br><span class="line"><span class="number">0</span>     <span class="number">1</span>    a</span><br><span class="line"><span class="number">1</span>     <span class="number">2</span>    b</span><br><span class="line"><span class="number">2</span>     <span class="number">3</span>    c</span><br><span class="line"><span class="number">3</span>     <span class="number">4</span>    d</span><br></pre></td></tr></table></figure></p>
 <h4>通过list of dicts</h4>
 <p>注意与上边的dict of lists区分，如果最外层是dict，那么key值默认是column label。
 而在list of dicts中，每个dict都是一个record，或者说一行
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"># 可以不等长，缺失值自动设为NaN</span><br><span class="line">In [49]: data2 = [&#123;&apos;a&apos;: 1, &apos;b&apos;: 2&#125;, &#123;&apos;a&apos;: 5, &apos;b&apos;: 10, &apos;c&apos;: 20&#125;]</span><br><span class="line"></span><br><span class="line">In [50]: pd.DataFrame(data2)</span><br><span class="line">Out[50]: </span><br><span class="line">   a   b     c</span><br><span class="line">0  1   2   NaN</span><br><span class="line">1  5  10  20.0</span><br><span class="line"></span><br><span class="line">In [51]: pd.DataFrame(data2, index=[&apos;first&apos;, &apos;second&apos;])</span><br><span class="line">Out[51]: </span><br><span class="line">        a   b     c</span><br><span class="line">first   1   2   NaN</span><br><span class="line">second  5  10  20.0</span><br><span class="line"></span><br><span class="line">In [52]: pd.DataFrame(data2, columns=[&apos;a&apos;, &apos;b&apos;])</span><br><span class="line">Out[52]: </span><br><span class="line">   a   b</span><br><span class="line">0  1   2</span><br><span class="line">1  5  10</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight prolog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"># 可以不等长，缺失值自动设为<span class="symbol">NaN</span></span><br><span class="line"><span class="symbol">In</span> [<span class="number">49</span>]: data2 = [&#123;<span class="string">'a'</span>: <span class="number">1</span>, <span class="string">'b'</span>: <span class="number">2</span>&#125;, &#123;<span class="string">'a'</span>: <span class="number">5</span>, <span class="string">'b'</span>: <span class="number">10</span>, <span class="string">'c'</span>: <span class="number">20</span>&#125;]</span><br><span class="line"></span><br><span class="line"><span class="symbol">In</span> [<span class="number">50</span>]: pd.<span class="symbol">DataFrame</span>(data2)</span><br><span class="line"><span class="symbol">Out</span>[<span class="number">50</span>]: </span><br><span class="line">   a   b     c</span><br><span class="line"><span class="number">0</span>  <span class="number">1</span>   <span class="number">2</span>   <span class="symbol">NaN</span></span><br><span class="line"><span class="number">1</span>  <span class="number">5</span>  <span class="number">10</span>  <span class="number">20.0</span></span><br><span class="line"></span><br><span class="line"><span class="symbol">In</span> [<span class="number">51</span>]: pd.<span class="symbol">DataFrame</span>(data2, index=[<span class="string">'first'</span>, <span class="string">'second'</span>])</span><br><span class="line"><span class="symbol">Out</span>[<span class="number">51</span>]: </span><br><span class="line">        a   b     c</span><br><span class="line">first   <span class="number">1</span>   <span class="number">2</span>   <span class="symbol">NaN</span></span><br><span class="line">second  <span class="number">5</span>  <span class="number">10</span>  <span class="number">20.0</span></span><br><span class="line"></span><br><span class="line"><span class="symbol">In</span> [<span class="number">52</span>]: pd.<span class="symbol">DataFrame</span>(data2, columns=[<span class="string">'a'</span>, <span class="string">'b'</span>])</span><br><span class="line"><span class="symbol">Out</span>[<span class="number">52</span>]: </span><br><span class="line">   a   b</span><br><span class="line"><span class="number">0</span>  <span class="number">1</span>   <span class="number">2</span></span><br><span class="line"><span class="number">1</span>  <span class="number">5</span>  <span class="number">10</span></span><br></pre></td></tr></table></figure></p>
 <h4>通过Dict of Series</h4>
-<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">In [314]: s = pd.Series(range(5))</span><br><span class="line"></span><br><span class="line">In [315]: s</span><br><span class="line">Out[315]:</span><br><span class="line">0    0</span><br><span class="line">1    1</span><br><span class="line">2    2</span><br><span class="line">3    3</span><br><span class="line">4    4</span><br><span class="line">dtype: int64</span><br><span class="line"></span><br><span class="line">In [316]: p = pd.Series(range(8, 13))</span><br><span class="line"></span><br><span class="line">In [317]: p</span><br><span class="line">Out[317]:</span><br><span class="line">0     8</span><br><span class="line">1     9</span><br><span class="line">2    10</span><br><span class="line">3    11</span><br><span class="line">4    12</span><br><span class="line">dtype: int64</span><br><span class="line"></span><br><span class="line">In [318]: df = pd.DataFrame(&#123;&apos;a&apos;: s, &apos;b&apos;: p&#125;)</span><br><span class="line"></span><br><span class="line">In [319]: df</span><br><span class="line">Out[319]:</span><br><span class="line">   a   b</span><br><span class="line">0  0   8</span><br><span class="line">1  1   9</span><br><span class="line">2  2  10</span><br><span class="line">3  3  11</span><br><span class="line">4  4  12</span><br></pre></td></tr></table></figure></p>
+<p><figure class="highlight ada"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">In</span> [<span class="number">314</span>]: s = pd.Series(<span class="keyword">range</span>(<span class="number">5</span>))</span><br><span class="line"></span><br><span class="line"><span class="keyword">In</span> [<span class="number">315</span>]: s</span><br><span class="line"><span class="keyword">Out</span>[<span class="number">315</span>]:</span><br><span class="line"><span class="number">0</span>    <span class="number">0</span></span><br><span class="line"><span class="number">1</span>    <span class="number">1</span></span><br><span class="line"><span class="number">2</span>    <span class="number">2</span></span><br><span class="line"><span class="number">3</span>    <span class="number">3</span></span><br><span class="line"><span class="number">4</span>    <span class="number">4</span></span><br><span class="line">dtype: int64</span><br><span class="line"></span><br><span class="line"><span class="keyword">In</span> [<span class="number">316</span>]: p = pd.Series(<span class="keyword">range</span>(<span class="number">8</span>, <span class="number">13</span>))</span><br><span class="line"></span><br><span class="line"><span class="keyword">In</span> [<span class="number">317</span>]: p</span><br><span class="line"><span class="keyword">Out</span>[<span class="number">317</span>]:</span><br><span class="line"><span class="number">0</span>     <span class="number">8</span></span><br><span class="line"><span class="number">1</span>     <span class="number">9</span></span><br><span class="line"><span class="number">2</span>    <span class="number">10</span></span><br><span class="line"><span class="number">3</span>    <span class="number">11</span></span><br><span class="line"><span class="number">4</span>    <span class="number">12</span></span><br><span class="line">dtype: int64</span><br><span class="line"></span><br><span class="line"><span class="keyword">In</span> [<span class="number">318</span>]: df = pd.DataFrame(&#123;<span class="string">'a'</span>: s, <span class="string">'b'</span>: p&#125;)</span><br><span class="line"></span><br><span class="line"><span class="keyword">In</span> [<span class="number">319</span>]: df</span><br><span class="line"><span class="keyword">Out</span>[<span class="number">319</span>]:</span><br><span class="line">   a   b</span><br><span class="line"><span class="number">0</span>  <span class="number">0</span>   <span class="number">8</span></span><br><span class="line"><span class="number">1</span>  <span class="number">1</span>   <span class="number">9</span></span><br><span class="line"><span class="number">2</span>  <span class="number">2</span>  <span class="number">10</span></span><br><span class="line"><span class="number">3</span>  <span class="number">3</span>  <span class="number">11</span></span><br><span class="line"><span class="number">4</span>  <span class="number">4</span>  <span class="number">12</span></span><br></pre></td></tr></table></figure></p>
 <h4>通过2-D numpy.ndarray</h4>
-<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">In [289]: df = pd.DataFrame(np.arange(16).reshape((4,4)), columns=[&apos;one&apos;, &apos;two&apos;, &apos;three&apos;,</span><br><span class="line">     ...:  &apos;four&apos;], index=[&apos;a&apos;, &apos;b&apos;, &apos;c&apos;,&apos;d&apos;])</span><br><span class="line"></span><br><span class="line">In [290]: df</span><br><span class="line">Out[290]:</span><br><span class="line">   one  two  three  four</span><br><span class="line">a    0    1      2     3</span><br><span class="line">b    4    5      6     7</span><br><span class="line">c    8    9     10    11</span><br><span class="line">d   12   13     14    15</span><br></pre></td></tr></table></figure></p>
+<p><figure class="highlight livecodeserver"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">In [<span class="number">289</span>]: df = pd.DataFrame(np.arange(<span class="number">16</span>).reshape((<span class="number">4</span>,<span class="number">4</span>)), columns=[<span class="string">'one'</span>, <span class="string">'two'</span>, <span class="string">'three'</span>,</span><br><span class="line">     ...:  <span class="string">'four'</span>], index=[<span class="string">'a'</span>, <span class="string">'b'</span>, <span class="string">'c'</span>,<span class="string">'d'</span>])</span><br><span class="line"></span><br><span class="line">In [<span class="number">290</span>]: df</span><br><span class="line">Out[<span class="number">290</span>]:</span><br><span class="line">   <span class="literal">one</span>  <span class="literal">two</span>  <span class="literal">three</span>  <span class="literal">four</span></span><br><span class="line"><span class="keyword">a</span>    <span class="number">0</span>    <span class="number">1</span>      <span class="number">2</span>     <span class="number">3</span></span><br><span class="line">b    <span class="number">4</span>    <span class="number">5</span>      <span class="number">6</span>     <span class="number">7</span></span><br><span class="line">c    <span class="number">8</span>    <span class="number">9</span>     <span class="number">10</span>    <span class="number">11</span></span><br><span class="line">d   <span class="number">12</span>   <span class="number">13</span>     <span class="number">14</span>    <span class="number">15</span></span><br></pre></td></tr></table></figure></p>
 <h2>通过文件初始化</h2>
 <p>pandas通过各种数据文件也可以初始化，比如csv文件，excel文件，json文件，html文件等，详见下图
 <img src="https://upload-images.jianshu.io/upload_images/3959253-4ebb77efcd970e59.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="IO Tools"></p>
 <p>下面以<code>read_csv</code>详细解释下读取csv文件以及初始化的过程
 <code>read_csv</code>的完整文档参考<a href="https://pandas.pydata.org/pandas-docs/version/0.22/generated/pandas.read_csv.html#pandas.read_csv" target="_blank" rel="noopener">read_csv api</a>，下面通过示例对常用的parameter进行解释：</p>
-<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">csv_path = &quot;./test.csv&quot;</span><br><span class="line">columns = [&apos;id&apos;, &apos;name&apos;, &apos;age&apos;]</span><br><span class="line">dtype = &#123;&apos;id&apos;: int, &apos;name&apos;: object, &apos;age&apos;: int&#125;</span><br><span class="line">pd.read_csv(csv_path, header=None, names=columns, dtype=dtype)</span><br></pre></td></tr></table></figure></p>
+<p><figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">csv_path = <span class="string">"./test.csv"</span></span><br><span class="line"><span class="attribute">columns</span> = [<span class="string">'id'</span>, <span class="string">'name'</span>, <span class="string">'age'</span>]</span><br><span class="line">dtype = &#123;<span class="string">'id'</span>: int, <span class="string">'name'</span>: <span class="selector-tag">object</span>, <span class="string">'age'</span>: int&#125;</span><br><span class="line">pd.read_csv(csv_path, header=None, names=<span class="attribute">columns</span>, dtype=dtype)</span><br></pre></td></tr></table></figure></p>
 <ul>
 <li>filepath_or_buffer, 这个是最基本的参数，用以指明文件的路径(路径可以是字符串，也可以是各种path对象，详见文档)或者文件对象(也可以接收类文件对象, 即提供read method， 如StringIO对象)。另外，这个参数也可以是一个URL，而这个URL可以http, ftp, 或者s3的url.</li>
 </ul>
@@ -52,10 +425,10 @@
 <li>usecols, 用于选定列，即指定哪些列load进DataFrame中，通过这个参数可以只读取我们需要的数据，从而减少内存占用，加快load速度。</li>
 </ul>
 <h2>通过SQL查询结果初始化</h2>
-<p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">import pandas.io.sql as sql</span><br><span class="line"></span><br><span class="line"># conn是数据库的连接对象</span><br><span class="line">sql.read_frame(&apos;select * from test&apos;, conn)</span><br></pre></td></tr></table></figure></p>
+<p><figure class="highlight capnproto"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pandas.io.sql <span class="keyword">as</span> sql</span><br><span class="line"></span><br><span class="line"><span class="comment"># conn是数据库的连接对象</span></span><br><span class="line">sql.read_frame('select * <span class="keyword">from</span> test', conn)</span><br></pre></td></tr></table></figure></p>
 <h2>NoSQL查询结果初始化</h2>
 <p>这里以MongoDB为例
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># 从MongoDB中查询年龄大于20岁的用户，查询返回一个cursor对象</span><br><span class="line">user_results = user.find(&#123;&quot;age&quot;: &#123;&quot;$gt&quot;: 20&#125;&#125;)</span><br><span class="line"></span><br><span class="line"># 将cursor对象转化为list，然后初始化</span><br><span class="line"># columns可以用于选取相应的field的数据，只有在这个列表中的field才会被load进DataFrame对象当中，如果没有对应的数据，会被填入NaN</span><br><span class="line">df = pd.DataFrame(list(user_results), columns=[&apos;id&apos;, &apos;age&apos;, &apos;name&apos;]</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 从MongoDB中查询年龄大于20岁的用户，查询返回一个cursor对象</span></span><br><span class="line"><span class="attr">user_results</span> = user.find(&#123;<span class="string">"age"</span>: &#123;<span class="string">"$gt"</span>: <span class="number">20</span>&#125;&#125;)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 将cursor对象转化为list，然后初始化</span></span><br><span class="line"><span class="comment"># columns可以用于选取相应的field的数据，只有在这个列表中的field才会被load进DataFrame对象当中，如果没有对应的数据，会被填入NaN</span></span><br><span class="line"><span class="attr">df</span> = pd.DataFrame(list(user_results), columns=[<span class="string">'id'</span>, <span class="string">'age'</span>, <span class="string">'name'</span>]</span><br></pre></td></tr></table></figure></p>
 <p>这里需要注意的是如果不指定columns参数，有可能导致某些为空的field没有对应的列，如果指定了列名称，则如果相对应的域没有数据的话，就会自动置为nan</p>
 <h2>References</h2>
 <ul>
@@ -63,26 +436,430 @@
 <li><a href="https://pandas.pydata.org/pandas-docs/version/0.22/io.html#io-read-csv-table" target="_blank" rel="noopener">IO Tools</a></li>
 <li>《利用Python进行数据分析》</li>
 </ul>
-</div><div class="container"><hr><div class="comment"></div><script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="//cdn.jsdelivr.net/npm/valine@1.1.6/dist/Valine.min.js"></script>
+
+        
+      </div>
+      
+      
+      
+    </div>
+    
+
+
+  
+  
+  <ul class="breadcrumb">
+    
+      
+      
+        
+          <li><a href="/2018/">2018</a></li>
+          
+            
+          
+        
+      
+    
+      
+      
+        
+          <li><a href="/2018/06/">06</a></li>
+          
+            
+          
+        
+      
+    
+      
+      
+        
+          <li><a href="/2018/06/08/">08</a></li>
+          
+            
+          
+        
+      
+    
+      
+      
+        
+          <li>PANDAS系列1-DATAFRAME之初始化</li>
+        
+      
+    
+      
+      
+        
+          <li><a href="/2018/06/08//"></a></li>
+          
+            
+          
+        
+      
+    
+  </ul>
+
+
+    
+    
+    
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">geekpy</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">28</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">7</span>
+                    <span class="site-state-item-name">tags</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/geekpy" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:rebor.liu@gmail.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">通过object初始化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">1.0.1.</span> <span class="nav-text">通过list</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">1.0.2.</span> <span class="nav-text">通过Dict of 1D ndarray</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">1.0.3.</span> <span class="nav-text">通过Dict of lists</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">1.0.4.</span> <span class="nav-text">通过list of dicts</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">1.0.5.</span> <span class="nav-text">通过Dict of Series</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">1.0.6.</span> <span class="nav-text">通过2-D numpy.ndarray</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">通过文件初始化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text">通过SQL查询结果初始化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">4.</span> <span class="nav-text">NoSQL查询结果初始化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">5.</span> <span class="nav-text">References</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">geekpy</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> v3.7.1</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Muse</a> v6.4.2</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
 <script type="text/javascript">
-var leancloud_appid = '';
-var leancloud_appkey = '';
-var valine_url = 'http://yoursite.com/2018/06/08/Pandas系列1-DataFrame之初始化/';
-var valine_notify = false;
-var valine_verify = false;
-var valine_placeholder = 'input your comments here';
-new Valine({
-         av: AV, // source from av-min.js
-         el: '.comment' ,
-         notify: valine_notify,
-         verify: valine_verify,
-         app_id: leancloud_appid,
-         app_key: leancloud_appkey,
-         placeholder: valine_placeholder,
-         path: valine_url
-     });
-</script></div></article><footer id="footer"><div class="container"><div class="bar"><div class="social"><a href="mailto:rebor.liu@gmail.com" target="_blank"><i class="fa fa-envelope-o"></i></a><a href="https://github.com/geekpy" target="_blank"><i class="fa fa-github"></i></a></div><div class="footer">© 2018 <a href="/" rel="nofollow">geekpy</a>. Powered by <a rel="nofollow" target="_blank" href="https://hexo.io">Hexo</a>. Theme <a target="_blank" href="https://github.com/lotabout/very-simple">very-simple</a>.</div></div></div></footer><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.css"><script src="//cdn.bootcss.com/jquery/2.0.3/jquery.min.js"></script><script src="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.pack.js"></script><script>$(document).ready(function() {
-    $(".fancybox").fancybox();
-});
-</script></body></html>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'OCjgmQiFa9gpVkDabM6KTb8g-gzGzoHsz',
+        appKey: 'Ie7XE2V6spB6Q6C1W2GU9drV',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
