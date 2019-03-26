@@ -304,6 +304,618 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/02/22/MongoDB索引详解/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="geekpy">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Geekpy's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/02/22/MongoDB索引详解/" itemprop="url">
+                  MongoDB索引详解
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-02-22 16:03:58" itemprop="dateCreated datePublished" datetime="2019-02-22T16:03:58+08:00">2019-02-22</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2019-03-26 16:05:55" itemprop="dateModified" datetime="2019-03-26T16:05:55+08:00">2019-03-26</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/database/" itemprop="url" rel="index"><span itemprop="name">database</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/02/22/MongoDB索引详解/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">Comments: </span> <span class="post-comments-count valine-comment-count" data-xid="/2019/02/22/MongoDB索引详解/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2019/02/22/MongoDB索引详解/" class="leancloud_visitors" data-flag-title="MongoDB索引详解">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">Views: </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1>索引基础知识</h1>
+<h2>什么是索引</h2>
+<p>索引最常用的比喻就是书籍的目录，查询索引就像查询一本书的目录。本质上目录是将书中一小部分内容信息（比如题目）和内容的位置信息（页码）共同构成，而由于信息量小（只有题目），所以我们可以很快找到我们想要的信息片段，再根据页码找到相应的内容。同样索引也是只保留某个域的一部分信息（建立了索引的field的信息），以及对应的文档的位置信息。
+假设我们有如下文档（每行的数据在MongoDB中是存在于一个Document当中）</p>
+<table>
+<thead>
+<tr>
+<th>姓名</th>
+<th>id</th>
+<th>部门</th>
+<th>city</th>
+<th>score</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>张三</td>
+<td>2</td>
+<td>xxx</td>
+<td>Beijing</td>
+<td>90</td>
+</tr>
+<tr>
+<td>李四</td>
+<td>1</td>
+<td>xxx</td>
+<td>Shanghai</td>
+<td>70</td>
+</tr>
+<tr>
+<td>王五</td>
+<td>3</td>
+<td>xxx</td>
+<td>guangzhou</td>
+<td>60</td>
+</tr>
+</tbody>
+</table>
+<p>假如我们想找id为2的document(即张三的记录)，如果没有索引，我们就需要扫描整个数据表，然后找出所有为2的document。当数据表中有大量documents的时候，这个时间就会非常长（从磁盘上查找数据还涉及大量的IO操作)。建立索引后会有什么变化呢？MongoDB会将id数据拿出来建立索引数据，如下</p>
+<table>
+<thead>
+<tr>
+<th>索引值</th>
+<th>位置</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>pos2</td>
+</tr>
+<tr>
+<td>2</td>
+<td>pos1</td>
+</tr>
+<tr>
+<td>3</td>
+<td>pos3</td>
+</tr>
+</tbody>
+</table>
+<p>这样我们就可以通过扫描这个小表找到document对应的位置。</p>
+<p>查找过程示意图如下：
+<img src="https://upload-images.jianshu.io/upload_images/3959253-7e2a31d0b5301c9f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="图片来源MongoDB官网"></p>
+<p>为什么这样速度会快呢？这主要有几方面的因素</p>
+<ol>
+<li>索引数据通过B+树来存储，从而使得搜索的时间复杂度为O(log&lt;sub&gt;d&lt;/sub&gt;&lt;sup&gt;N&lt;/sup&gt;)级别的(d是B+树的度, 通常d的值比较大，比如大于100)，比原先O(N)的复杂度大幅下降。这个差距是惊人的，以一个实际例子来看，假设d=100，N=1亿，那么O(log&lt;sub&gt;d&lt;/sub&gt;&lt;sup&gt;N&lt;/sup&gt;) = 8, 而O(N)是1亿。是的，这就是算法的威力。</li>
+<li>索引本身是在高速缓存当中，相比磁盘IO操作会有大幅的性能提升。（需要注意的是，有的时候数据量非常大的时候，索引数据也会非常大，当大到超出内存容量的时候，会导致部分索引数据存储在磁盘上，这会导致磁盘IO的开销大幅增加，从而影响性能，所以务必要保证有足够的内存能容下所有的索引数据）</li>
+</ol>
+<p>当然，事物总有其两面性，在提升查询速度的同时，由于要建立索引，所以写入操作时就需要额外的添加索引的操作，这必然会影响写入的性能，所以当有大量写操作而读操作比较少的时候，且对读操作性能不需要考虑的时候，就不适合建立索引。当然，目前大多数互联网应用都是读操作远大于写操作，因此建立索引很多时候是非常划算和必要的操作。</p>
+<p>关于索引原理的详细解释可以参考文章<a href="http://blog.codinglabs.org/articles/theory-of-mysql-index.html" target="_blank" rel="noopener">MySQL索引背后的数据结构及算法原理</a>，虽然讲得是MySQL但是原理相似。</p>
+<h2>MongoDB有哪些类型的索引</h2>
+<h3>单字段索引 （Single Field Index）</h3>
+<p>这个是最简单最常用的索引类型，比如我们上边的例子，为id建立一个单独的索引就是此种类型。
+<figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"> <span class="meta"># 为id field建立索引，1表示升序，-1表示降序，没有差别</span></span><br><span class="line">db.employee.createIndex(&#123;'id': <span class="number">1</span>&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>需要注意的是通常MongoDB会自动为我们的文档插入'_id' field，且已经按照升序进行索引，如果我们插入的文档中包含有'_id' field，则MongoDB就不会自动创建'_id' field，但是需要我们自己来保证唯一性从而唯一标识一个文档</p>
+<h3>复合索引 (Compound Index)</h3>
+<p>符合索引的原理如下图所示：
+<img src="https://upload-images.jianshu.io/upload_images/3959253-6b00f39c08c49406.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="复合索引示意图">
+上图查询索引的时候会先查询userid，再查询score，然后就可以找到对应的文档。
+对于复合索引需要注意以下几点：</p>
+<h4>索引field的先后顺序很关键，影响有两方面：</h4>
+<ol>
+<li>MongoDB在复合索引中是根据prefix排序查询，就是说排在前面的可以单独使用。我们创建一个如下的索引
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">db<span class="selector-class">.collection</span><span class="selector-class">.createIndex</span>(&#123;<span class="string">'id'</span>: <span class="number">1</span>, <span class="string">'city'</span>: <span class="number">1</span>, <span class="string">'score'</span>: <span class="number">1</span>&#125;)</span><br></pre></td></tr></table></figure></li>
+</ol>
+<p>我们如下的查询可以利用索引
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">db<span class="selector-class">.collection</span><span class="selector-class">.find</span>(&#123;<span class="string">'id'</span>: xxx&#125;)</span><br><span class="line">db<span class="selector-class">.collection</span><span class="selector-class">.find</span>(&#123;<span class="string">'id'</span>: xxx, <span class="string">'city'</span>: xxx&#125;)</span><br><span class="line">db<span class="selector-class">.collection</span><span class="selector-class">.find</span>(&#123;<span class="string">'id'</span>: xxx, <span class="string">'city'</span>:xxx, <span class="string">'score'</span>: xxxx&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>但是如下的查询无法利用该索引
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">db<span class="selector-class">.collection</span><span class="selector-class">.find</span>(&#123;<span class="string">'city'</span>: xxx&#125;)</span><br><span class="line">db<span class="selector-class">.collection</span><span class="selector-class">.find</span>(&#123;<span class="string">'city'</span>:xxx, <span class="string">'score'</span>: xxxx&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>还有一种特殊的情况，就是如下查询：
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">db<span class="selector-class">.collection</span><span class="selector-class">.find</span>(&#123;<span class="string">'id'</span>: xxx, <span class="string">'score'</span>: xxxx&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>这个查询也可以利用索引的前缀'id'来查询，但是却不能针对score进行查询，你可以说是部分利用了索引，因此其效率可能不如如下索引：
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">db<span class="selector-class">.collection</span><span class="selector-class">.createIndex</span>(&#123;<span class="string">'id'</span>: <span class="number">1</span>, <span class="string">'score'</span>: <span class="number">1</span>&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>2.过滤出的document越少的field越应该放在前面，比如此例中id如果是唯一的，那么就应该放在最前面，因为这样通过id就可以锁定唯一一个文档。而如果通过city或者score过滤完成后还是会有大量文档，这就会影响最终的性能。</p>
+<h4>索引的排序顺序不同</h4>
+<p>复合索引最末尾的field，其排序顺序不同对于MongoDB的查询排序操作是有影响的。
+比如：
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">db</span><span class="selector-class">.events</span><span class="selector-class">.createIndex</span>( &#123; <span class="attribute">username</span>: <span class="number">1</span>, date: -<span class="number">1</span> &#125; )</span><br></pre></td></tr></table></figure></p>
+<p>这种情况下， 如下的query可以利用索引：
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">db</span><span class="selector-class">.events</span><span class="selector-class">.find</span>()<span class="selector-class">.sort</span>( &#123; <span class="attribute">username</span>: <span class="number">1</span>, date: -<span class="number">1</span> &#125; )</span><br></pre></td></tr></table></figure></p>
+<p>但是如下query则无法利用index进行排序
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">db</span><span class="selector-class">.events</span><span class="selector-class">.find</span>()<span class="selector-class">.sort</span>( &#123; <span class="attribute">username</span>: <span class="number">1</span>, date: <span class="number">1</span> &#125; )</span><br></pre></td></tr></table></figure></p>
+<h3>多key索引 （Multikey Index）</h3>
+<p>这个主要是针对数据类型为数组的类型，如下示例：
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#123;<span class="string">"name"</span> : <span class="string">"jack"</span>, <span class="string">"age"</span> : <span class="number">19</span>, habbit: [<span class="string">"football, runnning"</span>]&#125;</span><br><span class="line">db<span class="selector-class">.person</span><span class="selector-class">.createIndex</span>( &#123;habbit: <span class="number">1</span>&#125; )  <span class="comment">// 自动创建多key索引</span></span><br><span class="line">db<span class="selector-class">.person</span><span class="selector-class">.find</span>( &#123;habbit: <span class="string">"football"</span>&#125; )</span><br></pre></td></tr></table></figure></p>
+<h3>其它类型索引</h3>
+<p>另外，MongoDB中还有其它如哈希索引，地理位置索引以及文本索引，主要用于一些特定场景，具体可以参考官网，在此不再详解</p>
+<h3>索引属性</h3>
+<p>索引主要有以下几个属性:</p>
+<ul>
+<li>unique：这个非常常用，用于限制索引的field是否具有唯一性属性，即保证该field的值唯一</li>
+<li>partial：很有用，在索引的时候只针对符合特定条件的文档来建立索引，如下
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">db.restaurants.createIndex(</span><br><span class="line">   &#123; <span class="string">cuisine:</span> <span class="number">1</span>, <span class="string">name:</span> <span class="number">1</span> &#125;,</span><br><span class="line">   &#123; <span class="string">partialFilterExpression:</span> &#123; <span class="string">rating:</span> &#123; <span class="string">$gt:</span> <span class="number">5</span> &#125; &#125; &#125; <span class="comment">//只有当rating大于5时才会建立索引</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p>这样做的好处是，我们可以只为部分数据建立索引，从而可以减少索引数据的量，除节省空间外，其检索性能也会因为较少的数据量而得到提升。</p>
+<ul>
+<li>sparse：可以认为是partial索引的一种特殊情况，由于MongoDB3.2之后已经支持partial属性，所以建议直接使用partial属性。</li>
+<li>TTL。 可以用于设定文档有效期，有效期到自动删除对应的文档。</li>
+</ul>
+<h1>通过explain结果来分析性能</h1>
+<p>我们往往会通过打点数据来分析业务的性能瓶颈，这时，我们会发现很多瓶颈都是出现在数据库相关的操作上，这时由于数据库的查询和存取都涉及大量的IO操作，而且有时由于使用不当，会导致IO操作的大幅度增长，从而导致了产生性能问题。而MongoDB提供了一个explain工具来用于分析数据库的操作。直接拿官网的示例来做说明：</p>
+<p>假设我们在inventory collection中有如下文档：
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#123; <span class="string">"_id"</span> : <span class="number">1</span>, <span class="string">"item"</span> : <span class="string">"f1"</span>, <span class="string">type:</span> <span class="string">"food"</span>, <span class="string">quantity:</span> <span class="number">500</span> &#125;</span><br><span class="line">&#123; <span class="string">"_id"</span> : <span class="number">2</span>, <span class="string">"item"</span> : <span class="string">"f2"</span>, <span class="string">type:</span> <span class="string">"food"</span>, <span class="string">quantity:</span> <span class="number">100</span> &#125;</span><br><span class="line">&#123; <span class="string">"_id"</span> : <span class="number">3</span>, <span class="string">"item"</span> : <span class="string">"p1"</span>, <span class="string">type:</span> <span class="string">"paper"</span>, <span class="string">quantity:</span> <span class="number">200</span> &#125;</span><br><span class="line">&#123; <span class="string">"_id"</span> : <span class="number">4</span>, <span class="string">"item"</span> : <span class="string">"p2"</span>, <span class="string">type:</span> <span class="string">"paper"</span>, <span class="string">quantity:</span> <span class="number">150</span> &#125;</span><br><span class="line">&#123; <span class="string">"_id"</span> : <span class="number">5</span>, <span class="string">"item"</span> : <span class="string">"f3"</span>, <span class="string">type:</span> <span class="string">"food"</span>, <span class="string">quantity:</span> <span class="number">300</span> &#125;</span><br><span class="line">&#123; <span class="string">"_id"</span> : <span class="number">6</span>, <span class="string">"item"</span> : <span class="string">"t1"</span>, <span class="string">type:</span> <span class="string">"toys"</span>, <span class="string">quantity:</span> <span class="number">500</span> &#125;</span><br><span class="line">&#123; <span class="string">"_id"</span> : <span class="number">7</span>, <span class="string">"item"</span> : <span class="string">"a1"</span>, <span class="string">type:</span> <span class="string">"apparel"</span>, <span class="string">quantity:</span> <span class="number">250</span> &#125;</span><br><span class="line">&#123; <span class="string">"_id"</span> : <span class="number">8</span>, <span class="string">"item"</span> : <span class="string">"a2"</span>, <span class="string">type:</span> <span class="string">"apparel"</span>, <span class="string">quantity:</span> <span class="number">400</span> &#125;</span><br><span class="line">&#123; <span class="string">"_id"</span> : <span class="number">9</span>, <span class="string">"item"</span> : <span class="string">"t2"</span>, <span class="string">type:</span> <span class="string">"toys"</span>, <span class="string">quantity:</span> <span class="number">50</span> &#125;</span><br><span class="line">&#123; <span class="string">"_id"</span> : <span class="number">10</span>, <span class="string">"item"</span> : <span class="string">"f4"</span>, <span class="string">type:</span> <span class="string">"food"</span>, <span class="string">quantity:</span> <span class="number">75</span> &#125;</span><br></pre></td></tr></table></figure></p>
+<p>假设此时没有建立索引，做如下查询：
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">db</span><span class="selector-class">.inventory</span><span class="selector-class">.find</span>( &#123; <span class="attribute">quantity</span>: &#123; $gte: <span class="number">100</span>, $lte: <span class="number">200</span> &#125; &#125; )</span><br></pre></td></tr></table></figure></p>
+<p>返回结果如下：
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#123; <span class="attr">"_id"</span> : <span class="number">2</span>, <span class="attr">"item"</span> : <span class="string">"f2"</span>, <span class="attr">"type"</span> : <span class="string">"food"</span>, <span class="attr">"quantity"</span> : <span class="number">100</span> &#125;</span><br><span class="line">&#123; <span class="attr">"_id"</span> : <span class="number">3</span>, <span class="attr">"item"</span> : <span class="string">"p1"</span>, <span class="attr">"type"</span> : <span class="string">"paper"</span>, <span class="attr">"quantity"</span> : <span class="number">200</span> &#125;</span><br><span class="line">&#123; <span class="attr">"_id"</span> : <span class="number">4</span>, <span class="attr">"item"</span> : <span class="string">"p2"</span>, <span class="attr">"type"</span> : <span class="string">"paper"</span>, <span class="attr">"quantity"</span> : <span class="number">150</span> &#125;</span><br></pre></td></tr></table></figure></p>
+<p>这是我们可以通过explain来分析整个查询的过程：
+<figure class="highlight autoit"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta"># explain 有三种模式： <span class="string">"queryPlanner"</span>, <span class="string">"executionStats"</span>, and <span class="string">"allPlansExecution"</span>.</span></span><br><span class="line"><span class="meta"># 其中最常用的就是第二种<span class="string">"executionStats"</span>，它会返回具体执行的时候的统计数据</span></span><br><span class="line">db.inventory.find(</span><br><span class="line">   &#123; quantity: &#123; $gte: <span class="number">100</span>, $lte: <span class="number">200</span> &#125; &#125;</span><br><span class="line">).explain(<span class="string">"executionStats"</span>)</span><br></pre></td></tr></table></figure></p>
+<p>explain的结果如下：
+<figure class="highlight clean"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">   <span class="string">"queryPlanner"</span> : &#123;</span><br><span class="line">         <span class="string">"plannerVersion"</span> : <span class="number">1</span>,</span><br><span class="line">         ...</span><br><span class="line">         <span class="string">"winningPlan"</span> : &#123;</span><br><span class="line">            <span class="string">"stage"</span> : <span class="string">"COLLSCAN"</span>,</span><br><span class="line">            ...</span><br><span class="line">         &#125;</span><br><span class="line">   &#125;,</span><br><span class="line">   <span class="string">"executionStats"</span> : &#123;</span><br><span class="line">      <span class="string">"executionSuccess"</span> : true,</span><br><span class="line">      <span class="string">"nReturned"</span> : <span class="number">3</span>,  # 查询返回的document数量</span><br><span class="line">      <span class="string">"executionTimeMillis"</span> : <span class="number">0</span>, # 执行查询所用的时间</span><br><span class="line">      <span class="string">"totalKeysExamined"</span> : <span class="number">0</span>, # 总共查询了多少个key，由于没有使用索引，因此这里为<span class="number">0</span></span><br><span class="line">      <span class="string">"totalDocsExamined"</span> : <span class="number">10</span>, # 总共在磁盘查询了多少个document，由于是全表扫描，我们总共有<span class="number">10</span>个documents，因此，这里为<span class="number">10</span></span><br><span class="line">      <span class="string">"executionStages"</span> : &#123;</span><br><span class="line">         <span class="string">"stage"</span> : <span class="string">"COLLSCAN"</span>,  # 注意这里，<span class="string">"COLLSCAN"</span>意味着全表扫描</span><br><span class="line">         ...</span><br><span class="line">      &#125;,</span><br><span class="line">      ...</span><br><span class="line">   &#125;,</span><br><span class="line">   ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>上面的结果中有一个&quot;stage&quot;字段，上例中stage为&quot;COLLSCAN&quot;，而MongoDB总共有如下几种stage：</p>
+<ul>
+<li>COLLSCAN – Collection scan</li>
+<li>IXSCAN – Scan of data in index keys</li>
+<li>FETCH – Retrieving documents</li>
+<li>SHARD_MERGE – Merging results from shards</li>
+<li>SORT – Explicit sort rather than using index order</li>
+</ul>
+<p>现在我们来创建一个索引：
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">db</span><span class="selector-class">.inventory</span><span class="selector-class">.createIndex</span>( &#123; <span class="attribute">quantity</span>: <span class="number">1</span> &#125; )</span><br></pre></td></tr></table></figure></p>
+<p>再来看下explain的结果</p>
+<p><figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">db</span><span class="selector-class">.inventory</span><span class="selector-class">.find</span>(</span><br><span class="line">   &#123; <span class="attribute">quantity</span>: &#123; $gte: <span class="number">100</span>, $lte: <span class="number">200</span> &#125; &#125;</span><br><span class="line">)<span class="selector-class">.explain</span>("<span class="selector-tag">executionStats</span>")</span><br></pre></td></tr></table></figure></p>
+<p>结果如下：
+<figure class="highlight clojure"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">   <span class="string">"queryPlanner"</span> : &#123;</span><br><span class="line">         <span class="string">"plannerVersion"</span> : <span class="number">1</span>,</span><br><span class="line">         ...</span><br><span class="line">         <span class="string">"winningPlan"</span> : &#123;</span><br><span class="line">               <span class="string">"stage"</span> : <span class="string">"FETCH"</span>,</span><br><span class="line">               <span class="string">"inputStage"</span> : &#123;</span><br><span class="line">                  <span class="string">"stage"</span> : <span class="string">"IXSCAN"</span>,  # 这里<span class="string">"IXSCAN"</span>意味着索引扫描</span><br><span class="line">                  <span class="string">"keyPattern"</span> : &#123;</span><br><span class="line">                     <span class="string">"quantity"</span> : <span class="number">1</span></span><br><span class="line">                  &#125;,</span><br><span class="line">                  ...</span><br><span class="line">               &#125;</span><br><span class="line">         &#125;,</span><br><span class="line">         <span class="string">"rejectedPlans"</span> : [ ]</span><br><span class="line">   &#125;,</span><br><span class="line">   <span class="string">"executionStats"</span> : &#123;</span><br><span class="line">         <span class="string">"executionSuccess"</span> : <span class="literal">true</span>,</span><br><span class="line">         <span class="string">"nReturned"</span> : <span class="number">3</span>,</span><br><span class="line">         <span class="string">"executionTimeMillis"</span> : <span class="number">0</span>,</span><br><span class="line">         <span class="string">"totalKeysExamined"</span> : <span class="number">3</span>,  # 这里nReturned、totalKeysExamined和totalDocsExamined相等说明索引没有问题，因为我们通过索引快速查找到了三个文档，且从磁盘上也是去取这三个文档，并返回三个文档。</span><br><span class="line">         <span class="string">"totalDocsExamined"</span> : <span class="number">3</span>,</span><br><span class="line">         <span class="string">"executionStages"</span> : &#123;</span><br><span class="line">            ...</span><br><span class="line">         &#125;,</span><br><span class="line">         ...</span><br><span class="line">   &#125;,</span><br><span class="line">   ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>再来看下如何通过explain来比较compound index的性能，之前我们在介绍复合索引的时候已经说过field的顺序会影响查询的效率。有时这种顺序并不太好确定（比如field的值都不是unique的），那么怎么判断哪种顺序的复合索引的效率高呢，这就像需要explain结合hint来进行分析。
+比如我们要做如下查询：
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">db</span><span class="selector-class">.inventory</span><span class="selector-class">.find</span>( &#123;</span><br><span class="line">   <span class="attribute">quantity</span>: &#123;</span><br><span class="line">      $gte: <span class="number">100</span>, $lte: <span class="number">300</span></span><br><span class="line">   &#125;,</span><br><span class="line">   <span class="selector-tag">type</span>: "<span class="selector-tag">food</span>"</span><br><span class="line">&#125; )</span><br></pre></td></tr></table></figure></p>
+<p>会返回如下文档：
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#123; <span class="attr">"_id"</span> : <span class="number">2</span>, <span class="attr">"item"</span> : <span class="string">"f2"</span>, <span class="attr">"type"</span> : <span class="string">"food"</span>, <span class="attr">"quantity"</span> : <span class="number">100</span> &#125;</span><br><span class="line">&#123; <span class="attr">"_id"</span> : <span class="number">5</span>, <span class="attr">"item"</span> : <span class="string">"f3"</span>, <span class="attr">"type"</span> : <span class="string">"food"</span>, <span class="attr">"quantity"</span> : <span class="number">300</span> &#125;</span><br></pre></td></tr></table></figure></p>
+<p>现在我们要比较如下两种复合索引
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">db</span><span class="selector-class">.inventory</span><span class="selector-class">.createIndex</span>( &#123; <span class="attribute">quantity</span>: <span class="number">1</span>, type: <span class="number">1</span> &#125; )</span><br><span class="line"><span class="selector-tag">db</span><span class="selector-class">.inventory</span><span class="selector-class">.createIndex</span>( &#123; <span class="attribute">type</span>: <span class="number">1</span>, quantity: <span class="number">1</span> &#125; )</span><br></pre></td></tr></table></figure></p>
+<p>分析索引 { quantity: 1, type: 1 }的情况</p>
+<p><figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># 结合<span class="selector-tag">hint</span>和<span class="selector-tag">explain</span>来进行分析</span><br><span class="line"><span class="selector-tag">db</span><span class="selector-class">.inventory</span><span class="selector-class">.find</span>(</span><br><span class="line">   &#123; <span class="attribute">quantity</span>: &#123; $gte: <span class="number">100</span>, $lte: <span class="number">300</span> &#125;, <span class="selector-tag">type</span>: "<span class="selector-tag">food</span>" &#125;</span><br><span class="line">)<span class="selector-class">.hint</span>(&#123; <span class="attribute">quantity</span>: <span class="number">1</span>, type: <span class="number">1</span> &#125;)<span class="selector-class">.explain</span>("<span class="selector-tag">executionStats</span>") # 这里使用<span class="selector-tag">hint</span>会强制数据库使用索引 &#123; <span class="attribute">quantity</span>: <span class="number">1</span>, type: <span class="number">1</span> &#125;</span><br></pre></td></tr></table></figure></p>
+<p>explain结果
+<figure class="highlight xquery"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">   <span class="string">"queryPlanner"</span> : &#123;</span><br><span class="line">      ...</span><br><span class="line">      <span class="string">"winningPlan"</span> : &#123;</span><br><span class="line">         <span class="string">"stage"</span> : <span class="string">"FETCH"</span>,</span><br><span class="line">         <span class="string">"inputStage"</span> : &#123;</span><br><span class="line">            <span class="string">"stage"</span> : <span class="string">"IXSCAN"</span>,</span><br><span class="line">            <span class="string">"keyPattern"</span> : &#123;</span><br><span class="line">               <span class="string">"quantity"</span> : <span class="number">1</span>,</span><br><span class="line">               <span class="string">"type"</span> : <span class="number">1</span></span><br><span class="line">            &#125;,</span><br><span class="line">            ...</span><br><span class="line">            &#125;</span><br><span class="line">         &#125;</span><br><span class="line">      &#125;,</span><br><span class="line">      <span class="string">"rejectedPlans"</span> : [ ]</span><br><span class="line">   &#125;,</span><br><span class="line">   <span class="string">"executionStats"</span> : &#123;</span><br><span class="line">      <span class="string">"executionSuccess"</span> : true,</span><br><span class="line">      <span class="string">"nReturned"</span> : <span class="number">2</span>,</span><br><span class="line">      <span class="string">"executionTimeMillis"</span> : <span class="number">0</span>,</span><br><span class="line">      <span class="string">"totalKeysExamined"</span> : <span class="number">5</span>,  # 这里是<span class="number">5</span>与totalDocsExamined、nReturned都不相等</span><br><span class="line">      <span class="string">"totalDocsExamined"</span> : <span class="number">2</span>,</span><br><span class="line">      <span class="string">"executionStages"</span> : &#123;</span><br><span class="line">      ...</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;,</span><br><span class="line">   ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>再来看下索引 { type: 1, quantity: 1 } 的分析</p>
+<p><figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">db</span><span class="selector-class">.inventory</span><span class="selector-class">.find</span>(</span><br><span class="line">   &#123; <span class="attribute">quantity</span>: &#123; $gte: <span class="number">100</span>, $lte: <span class="number">300</span> &#125;, <span class="selector-tag">type</span>: "<span class="selector-tag">food</span>" &#125;</span><br><span class="line">)<span class="selector-class">.hint</span>(&#123; <span class="attribute">type</span>: <span class="number">1</span>, quantity: <span class="number">1</span> &#125;)<span class="selector-class">.explain</span>("<span class="selector-tag">executionStats</span>")</span><br></pre></td></tr></table></figure></p>
+<p>结果如下：</p>
+<p><figure class="highlight clojure"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">   <span class="string">"queryPlanner"</span> : &#123;</span><br><span class="line">      ...</span><br><span class="line">      <span class="string">"winningPlan"</span> : &#123;</span><br><span class="line">         <span class="string">"stage"</span> : <span class="string">"FETCH"</span>,</span><br><span class="line">         <span class="string">"inputStage"</span> : &#123;</span><br><span class="line">            <span class="string">"stage"</span> : <span class="string">"IXSCAN"</span>,</span><br><span class="line">            <span class="string">"keyPattern"</span> : &#123;</span><br><span class="line">               <span class="string">"type"</span> : <span class="number">1</span>,</span><br><span class="line">               <span class="string">"quantity"</span> : <span class="number">1</span></span><br><span class="line">            &#125;,</span><br><span class="line">            ...</span><br><span class="line">         &#125;</span><br><span class="line">      &#125;,</span><br><span class="line">      <span class="string">"rejectedPlans"</span> : [ ]</span><br><span class="line">   &#125;,</span><br><span class="line">   <span class="string">"executionStats"</span> : &#123;</span><br><span class="line">      <span class="string">"executionSuccess"</span> : <span class="literal">true</span>,</span><br><span class="line">      <span class="string">"nReturned"</span> : <span class="number">2</span>,</span><br><span class="line">      <span class="string">"executionTimeMillis"</span> : <span class="number">0</span>,</span><br><span class="line">      <span class="string">"totalKeysExamined"</span> : <span class="number">2</span>, # 这里是<span class="number">2</span>，与totalDocsExamined、nReturned相同</span><br><span class="line">      <span class="string">"totalDocsExamined"</span> : <span class="number">2</span>,</span><br><span class="line">      <span class="string">"executionStages"</span> : &#123;</span><br><span class="line">         ...</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;,</span><br><span class="line">   ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>可以看出后一种索引的totalKeysExamined返回是2，相比前一种索引的5，显然更有效率。</p>
+<h1>References</h1>
+<ul>
+<li><a href="https://docs.mongodb.com/manual/indexes/" target="_blank" rel="noopener">MongoDB Index</a></li>
+<li><a href="http://blog.codinglabs.org/articles/theory-of-mysql-index.html" target="_blank" rel="noopener">MySQL索引背后的数据结构及算法原理</a></li>
+<li><a href="http://www.mongoing.com/archives/2797" target="_blank" rel="noopener">MongoDB索引原理</a></li>
+<li><a href="https://docs.mongodb.com/manual/tutorial/analyze-query-plan/" target="_blank" rel="noopener">Analyze Query Performance</a></li>
+</ul>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+    <div>
+      
+    </div>
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/02/16/gRPC详解/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="geekpy">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Geekpy's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/02/16/gRPC详解/" itemprop="url">
+                  gRPC详解
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-02-16 15:30:04" itemprop="dateCreated datePublished" datetime="2019-02-16T15:30:04+08:00">2019-02-16</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2019-03-26 15:32:57" itemprop="dateModified" datetime="2019-03-26T15:32:57+08:00">2019-03-26</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/架构/" itemprop="url" rel="index"><span itemprop="name">架构</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/02/16/gRPC详解/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">Comments: </span> <span class="post-comments-count valine-comment-count" data-xid="/2019/02/16/gRPC详解/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2019/02/16/gRPC详解/" class="leancloud_visitors" data-flag-title="gRPC详解">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">Views: </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2>gRPC是什么？</h2>
+<p>gRPC是什么可以用官网的一句话来概括</p>
+<blockquote>
+<p>A high-performance, open-source universal RPC framework</p>
+</blockquote>
+<p>**所谓RPC(remote procedure call 远程过程调用)框架实际是提供了一套机制，使得应用程序之间可以进行通信，而且也遵从server/client模型。使用的时候客户端调用server端提供的接口就像是调用本地的函数一样。**如下图所示就是一个典型的RPC结构图。</p>
+<p><img src="https://upload-images.jianshu.io/upload_images/3959253-76284b64125a8673.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="RPC通信"></p>
+<h2>gRPC有什么好处以及在什么场景下需要用gRPC</h2>
+<p>既然是server/client模型，那么我们直接用restful api不是也可以满足吗，为什么还需要RPC呢？下面我们就来看看RPC到底有哪些优势</p>
+<h3>gRPC vs. Restful API</h3>
+<p>gRPC和restful API都提供了一套通信机制，用于server/client模型通信，而且它们都使用http作为底层的传输协议(严格地说, gRPC使用的http2.0，而restful api则不一定)。不过gRPC还是有些特有的优势，如下：</p>
+<ul>
+<li>gRPC可以通过protobuf来定义接口，从而可以有更加严格的接口约束条件。关于protobuf可以参见笔者之前的小文<a href="https://www.jianshu.com/p/b723053a86a6" target="_blank" rel="noopener">Google Protobuf简明教程</a></li>
+<li>另外，通过protobuf可以将数据序列化为二进制编码，这会大幅减少需要传输的数据量，从而大幅提高性能。</li>
+<li>gRPC可以方便地支持流式通信(理论上通过http2.0就可以使用streaming模式, 但是通常web服务的restful api似乎很少这么用，通常的流式数据应用如视频流，一般都会使用专门的协议如HLS，RTMP等，这些就不是我们通常web服务了，而是有专门的服务器应用。）</li>
+</ul>
+<h3>使用场景</h3>
+<ul>
+<li>需要对接口进行严格约束的情况，比如我们提供了一个公共的服务，很多人，甚至公司外部的人也可以访问这个服务，这时对于接口我们希望有更加严格的约束，我们不希望客户端给我们传递任意的数据，尤其是考虑到安全性的因素，我们通常需要对接口进行更加严格的约束。这时gRPC就可以通过protobuf来提供严格的接口约束。</li>
+<li>对于性能有更高的要求时。有时我们的服务需要传递大量的数据，而又希望不影响我们的性能，这个时候也可以考虑gRPC服务，因为通过protobuf我们可以将数据压缩编码转化为二进制格式，通常传递的数据量要小得多，而且通过http2我们可以实现异步的请求，从而大大提高了通信效率。</li>
+</ul>
+<p>但是，通常我们不会去单独使用gRPC，而是将gRPC作为一个部件进行使用，这是因为在生产环境，我们面对大并发的情况下，需要使用分布式系统来去处理，而gRPC并没有提供分布式系统相关的一些必要组件。而且，真正的线上服务还需要提供包括负载均衡，限流熔断，监控报警，服务注册和发现等等必要的组件。不过，这就不属于本篇文章讨论的主题了，我们还是先继续看下如何使用gRPC。</p>
+<h2>gRPC HelloWorld实例详解</h2>
+<p>gRPC的使用通常包括如下几个步骤：</p>
+<ol>
+<li>通过protobuf来定义接口和数据类型</li>
+<li>编写gRPC server端代码</li>
+<li>编写gRPC client端代码
+下面来通过一个实例来详细讲解上述的三步。
+下边的hello world实例完成之后，其目录结果如下：
+<img src="https://upload-images.jianshu.io/upload_images/3959253-df25b1a5150fe55d.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="project helloworld"></li>
+</ol>
+<h3>定义接口和数据类型</h3>
+<ul>
+<li>
+<p>通过protobuf定义接口和数据类型
+<figure class="highlight puppet"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">syntax = <span class="string">"proto3"</span>;</span><br><span class="line"></span><br><span class="line">package rpc_package;</span><br><span class="line"></span><br><span class="line">// <span class="keyword">define</span> <span class="section">a</span> service</span><br><span class="line">service <span class="keyword">HelloWorldService</span> &#123;</span><br><span class="line">    // define the interface <span class="keyword">and</span> data <span class="built_in">type</span></span><br><span class="line">    rpc SayHello (HelloRequest) <span class="literal">returns</span> (HelloReply) &#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// <span class="keyword">define</span> <span class="section">the</span> data type of request</span><br><span class="line">message <span class="keyword">HelloRequest</span> &#123;</span><br><span class="line">    string <span class="literal">name</span> = <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// <span class="keyword">define</span> <span class="section">the</span> data type of response</span><br><span class="line">message <span class="keyword">HelloReply</span> &#123;</span><br><span class="line">    string <span class="literal">message</span> = <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+</li>
+<li>
+<p>使用gRPC protobuf生成工具生成对应语言的库函数
+<figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python -m grpc_tools.protoc -I=<span class="string">./protos</span> <span class="params">--python_out=</span><span class="string">./rpc_package</span> <span class="params">--grpc_python_out=</span><span class="string">./rpc_package</span> <span class="string">./protos/user_info.proto</span></span><br></pre></td></tr></table></figure></p>
+</li>
+</ul>
+<p>这个指令会自动生成rpc_package文件夹中的<code>helloworld_pb2.py</code>和<code>helloworld_pb2_grpc.py</code>，但是不会自动生成<code>__init__.py</code>文件，需要我们手动添加</p>
+<p>关于protobuf的详细解释请参考<a href="https://www.jianshu.com/p/b723053a86a6" target="_blank" rel="noopener">Google Protobuf简明教程</a></p>
+<h3>gRPC server端代码</h3>
+<p><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="comment"># -*-coding: utf-8 -*-</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> concurrent <span class="keyword">import</span> futures</span><br><span class="line"><span class="keyword">import</span> grpc</span><br><span class="line"><span class="keyword">import</span> logging</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> rpc_package.helloworld_pb2_grpc <span class="keyword">import</span> add_HelloWorldServiceServicer_to_server, \ </span><br><span class="line">    HelloWorldServiceServicer</span><br><span class="line"><span class="keyword">from</span> rpc_package.helloworld_pb2 <span class="keyword">import</span> HelloRequest, HelloReply</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Hello</span><span class="params">(HelloWorldServiceServicer)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 这里实现我们定义的接口</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">SayHello</span><span class="params">(self, request, context)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> HelloReply(message=<span class="string">'Hello, %s!'</span> % request.name)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">serve</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="comment"># 这里通过thread pool来并发处理server的任务</span></span><br><span class="line">    server = grpc.server(futures.ThreadPoolExecutor(max_workers=<span class="number">10</span>))</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 将对应的任务处理函数添加到rpc server中</span></span><br><span class="line">    add_HelloWorldServiceServicer_to_server(Hello(), server)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 这里使用的非安全接口，世界gRPC支持TLS/SSL安全连接，以及各种鉴权机制</span></span><br><span class="line">    server.add_insecure_port(<span class="string">'[::]:50000'</span>)</span><br><span class="line">    server.start()</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="keyword">while</span> <span class="keyword">True</span>:</span><br><span class="line">            time.sleep(<span class="number">60</span> * <span class="number">60</span> * <span class="number">24</span>)</span><br><span class="line">    <span class="keyword">except</span> KeyboardInterrupt:</span><br><span class="line">        server.stop(<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:</span><br><span class="line">    logging.basicConfig()</span><br><span class="line">    serve()</span><br></pre></td></tr></table></figure></p>
+<h3>gRPC client端代码</h3>
+<p><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> __future__ <span class="keyword">import</span> print_function</span><br><span class="line"><span class="keyword">import</span> logging</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> grpc</span><br><span class="line"><span class="keyword">from</span> rpc_package.helloworld_pb2 <span class="keyword">import</span> HelloRequest, HelloReply</span><br><span class="line"><span class="keyword">from</span> rpc_package.helloworld_pb2_grpc <span class="keyword">import</span> HelloWorldServiceStub</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">run</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="comment"># 使用with语法保证channel自动close</span></span><br><span class="line">    <span class="keyword">with</span> grpc.insecure_channel(<span class="string">'localhost:50000'</span>) <span class="keyword">as</span> channel:</span><br><span class="line">        <span class="comment"># 客户端通过stub来实现rpc通信</span></span><br><span class="line">        stub = HelloWorldServiceStub(channel)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 客户端必须使用定义好的类型，这里是HelloRequest类型</span></span><br><span class="line">        response = stub.SayHello(HelloRequest(name=<span class="string">'eric'</span>))</span><br><span class="line">    <span class="keyword">print</span> (<span class="string">"hello client received: "</span> + response.message)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:</span><br><span class="line">    logging.basicConfig()</span><br><span class="line">    run()</span><br></pre></td></tr></table></figure></p>
+<h3>演示</h3>
+<p>先执行server端代码
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">python</span> hello_server.<span class="keyword">py</span></span><br></pre></td></tr></table></figure></p>
+<p>接着执行client端代码如下：
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">➜  grpc_test python hello_client.py</span><br><span class="line">hello<span class="built_in"> client </span>received: Hello, eric!</span><br></pre></td></tr></table></figure></p>
+<h2>References</h2>
+<ul>
+<li><a href="https://grpc.io/" target="_blank" rel="noopener">gRPC官网</a></li>
+<li><a href="https://www.jianshu.com/p/b723053a86a6" target="_blank" rel="noopener">Google Protobuf简明教程</a></li>
+</ul>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+    <div>
+      
+    </div>
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/10/06/pandas7/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1791,371 +2403,11 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/06/16/Pandas系列3-DataFrame之增加与删除/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="geekpy">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Geekpy's Blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/06/16/Pandas系列3-DataFrame之增加与删除/" itemprop="url">
-                  Pandas系列3-DataFrame之增加与删除
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-
-              
-                
-              
-
-              <time title="Created: 2018-06-16 18:18:18" itemprop="dateCreated datePublished" datetime="2018-06-16T18:18:18+08:00">2018-06-16</time>
-            
-
-            
-              
-
-              
-                
-                <span class="post-meta-divider">|</span>
-                
-
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">Edited on</span>
-                
-                <time title="Modified: 2018-10-06 13:29:01" itemprop="dateModified" datetime="2018-10-06T13:29:01+08:00">2018-10-06</time>
-              
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/06/16/Pandas系列3-DataFrame之增加与删除/#comments" itemprop="discussionUrl">
-                  <span class="post-meta-item-text">Comments: </span> <span class="post-comments-count valine-comment-count" data-xid="/2018/06/16/Pandas系列3-DataFrame之增加与删除/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2018/06/16/Pandas系列3-DataFrame之增加与删除/" class="leancloud_visitors" data-flag-title="Pandas系列3-DataFrame之增加与删除">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">Views: </span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>在使用Pandas的过程增删改查是频繁使用的操作，这一节主要就是展示DataFrame常用的增加和删除操作</p>
-<p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2018/06/16/Pandas系列3-DataFrame之增加与删除/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-    <div>
-      
-    </div>
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/06/15/Pandas系列2-DataFrame之数据定位/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="geekpy">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Geekpy's Blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/06/15/Pandas系列2-DataFrame之数据定位/" itemprop="url">
-                  Pandas系列2-DataFrame之数据定位
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-
-              
-                
-              
-
-              <time title="Created: 2018-06-15 18:18:18" itemprop="dateCreated datePublished" datetime="2018-06-15T18:18:18+08:00">2018-06-15</time>
-            
-
-            
-              
-
-              
-                
-                <span class="post-meta-divider">|</span>
-                
-
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">Edited on</span>
-                
-                <time title="Modified: 2018-10-06 13:29:01" itemprop="dateModified" datetime="2018-10-06T13:29:01+08:00">2018-10-06</time>
-              
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/06/15/Pandas系列2-DataFrame之数据定位/#comments" itemprop="discussionUrl">
-                  <span class="post-meta-item-text">Comments: </span> <span class="post-comments-count valine-comment-count" data-xid="/2018/06/15/Pandas系列2-DataFrame之数据定位/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2018/06/15/Pandas系列2-DataFrame之数据定位/" class="leancloud_visitors" data-flag-title="Pandas系列2-DataFrame之数据定位">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">Views: </span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>在Pandas中我们往往需要先定位数据才能进行相应的赋值、修改等后续操作，因此定位是Pandas中非常重要的一环，本文将详解Pandas中的各种定位方式。</p>
-<p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2018/06/15/Pandas系列2-DataFrame之数据定位/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-    <div>
-      
-    </div>
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
   </nav>
 
 
@@ -2198,7 +2450,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">29</span>
+                    <span class="site-state-item-count">31</span>
                     <span class="site-state-item-name">posts</span>
                   </a>
                 </div>
@@ -2221,7 +2473,11 @@
                     
                       
                     
-                    <span class="site-state-item-count">5</span>
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">7</span>
                     <span class="site-state-item-name">categories</span>
                   </a>
                 </div>
@@ -2276,7 +2532,17 @@
                     
                       
                     
-                    <span class="site-state-item-count">21</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">26</span>
                     <span class="site-state-item-name">tags</span>
                   </a>
                 </div>
@@ -2337,7 +2603,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
   <span class="with-love" id="animate">
     <i class="fa fa-user"></i>
   </span>

@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '6.4.2',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="索引基础知识 什么是索引 索引最常用的比喻就是书籍的目录，查询索引就像查询一本书的目录。本质上目录是将书中一小部分内容信息（比如题目）和内容的位置信息（页码）共同构成，而由于信息量小（只有题目），所以我们可以很快找到我们想要的信息片段，再根据页码找到相应的内容。同样索引也是只保留某个域的一部分信息（建立了索引的field的信息），以及对应的文档的位置信息。 假设我们有如下文档（每行的数据在Mong">
+<meta name="keywords" content="index,MongoDB">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MongoDB索引详解">
+<meta property="og:url" content="http://yoursite.com/2019/02/22/MongoDB索引详解/index.html">
+<meta property="og:site_name" content="Geekpy&#39;s Blog">
+<meta property="og:description" content="索引基础知识 什么是索引 索引最常用的比喻就是书籍的目录，查询索引就像查询一本书的目录。本质上目录是将书中一小部分内容信息（比如题目）和内容的位置信息（页码）共同构成，而由于信息量小（只有题目），所以我们可以很快找到我们想要的信息片段，再根据页码找到相应的内容。同样索引也是只保留某个域的一部分信息（建立了索引的field的信息），以及对应的文档的位置信息。 假设我们有如下文档（每行的数据在Mong">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/3959253-7e2a31d0b5301c9f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/3959253-6b00f39c08c49406.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:updated_time" content="2019-03-26T08:05:55.238Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="MongoDB索引详解">
+<meta name="twitter:description" content="索引基础知识 什么是索引 索引最常用的比喻就是书籍的目录，查询索引就像查询一本书的目录。本质上目录是将书中一小部分内容信息（比如题目）和内容的位置信息（页码）共同构成，而由于信息量小（只有题目），所以我们可以很快找到我们想要的信息片段，再根据页码找到相应的内容。同样索引也是只保留某个域的一部分信息（建立了索引的field的信息），以及对应的文档的位置信息。 假设我们有如下文档（每行的数据在Mong">
+<meta name="twitter:image" content="https://upload-images.jianshu.io/upload_images/3959253-7e2a31d0b5301c9f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Geekpy's Blog" type="application/atom+xml" />
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2019/02/22/MongoDB索引详解/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>MongoDB索引详解 | Geekpy's Blog</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Geekpy's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br />About</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />Tags</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />Categories</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />Archives</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+    
+    
+    <div class="post-block page">
+      <header class="post-header">
+
+<h1 class="post-title" itemprop="name headline">MongoDB索引详解</h1>
+
+<div class="post-meta">
+  
+  
+
+
+  
+  
+  <ul class="breadcrumb">
+    
+      
+      
+        
+          <li><a href="/2019/">2019</a></li>
+          
+            
+          
+        
+      
+    
+      
+      
+        
+          <li><a href="/2019/02/">02</a></li>
+          
+            
+          
+        
+      
+    
+      
+      
+        
+          <li><a href="/2019/02/22/">22</a></li>
+          
+            
+          
+        
+      
+    
+      
+      
+        
+          <li>MONGODB索引详解</li>
+        
+      
+    
+      
+      
+        
+          <li><a href="/2019/02/22//"></a></li>
+          
+            
+          
+        
+      
+    
+  </ul>
+
+
+</div>
+
+</header>
+
+      
+      
+      
+      <div class="post-body">
+        
+        
+          <h1>索引基础知识</h1>
+<h2>什么是索引</h2>
+<p>索引最常用的比喻就是书籍的目录，查询索引就像查询一本书的目录。本质上目录是将书中一小部分内容信息（比如题目）和内容的位置信息（页码）共同构成，而由于信息量小（只有题目），所以我们可以很快找到我们想要的信息片段，再根据页码找到相应的内容。同样索引也是只保留某个域的一部分信息（建立了索引的field的信息），以及对应的文档的位置信息。
+假设我们有如下文档（每行的数据在MongoDB中是存在于一个Document当中）</p>
+<table>
+<thead>
+<tr>
+<th>姓名</th>
+<th>id</th>
+<th>部门</th>
+<th>city</th>
+<th>score</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>张三</td>
+<td>2</td>
+<td>xxx</td>
+<td>Beijing</td>
+<td>90</td>
+</tr>
+<tr>
+<td>李四</td>
+<td>1</td>
+<td>xxx</td>
+<td>Shanghai</td>
+<td>70</td>
+</tr>
+<tr>
+<td>王五</td>
+<td>3</td>
+<td>xxx</td>
+<td>guangzhou</td>
+<td>60</td>
+</tr>
+</tbody>
+</table>
+<p>假如我们想找id为2的document(即张三的记录)，如果没有索引，我们就需要扫描整个数据表，然后找出所有为2的document。当数据表中有大量documents的时候，这个时间就会非常长（从磁盘上查找数据还涉及大量的IO操作)。建立索引后会有什么变化呢？MongoDB会将id数据拿出来建立索引数据，如下</p>
+<table>
+<thead>
+<tr>
+<th>索引值</th>
+<th>位置</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>pos2</td>
+</tr>
+<tr>
+<td>2</td>
+<td>pos1</td>
+</tr>
+<tr>
+<td>3</td>
+<td>pos3</td>
+</tr>
+</tbody>
+</table>
+<p>这样我们就可以通过扫描这个小表找到document对应的位置。</p>
+<p>查找过程示意图如下：
+<img src="https://upload-images.jianshu.io/upload_images/3959253-7e2a31d0b5301c9f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="图片来源MongoDB官网"></p>
+<p>为什么这样速度会快呢？这主要有几方面的因素</p>
+<ol>
+<li>索引数据通过B+树来存储，从而使得搜索的时间复杂度为O(log&lt;sub&gt;d&lt;/sub&gt;&lt;sup&gt;N&lt;/sup&gt;)级别的(d是B+树的度, 通常d的值比较大，比如大于100)，比原先O(N)的复杂度大幅下降。这个差距是惊人的，以一个实际例子来看，假设d=100，N=1亿，那么O(log&lt;sub&gt;d&lt;/sub&gt;&lt;sup&gt;N&lt;/sup&gt;) = 8, 而O(N)是1亿。是的，这就是算法的威力。</li>
+<li>索引本身是在高速缓存当中，相比磁盘IO操作会有大幅的性能提升。（需要注意的是，有的时候数据量非常大的时候，索引数据也会非常大，当大到超出内存容量的时候，会导致部分索引数据存储在磁盘上，这会导致磁盘IO的开销大幅增加，从而影响性能，所以务必要保证有足够的内存能容下所有的索引数据）</li>
+</ol>
+<p>当然，事物总有其两面性，在提升查询速度的同时，由于要建立索引，所以写入操作时就需要额外的添加索引的操作，这必然会影响写入的性能，所以当有大量写操作而读操作比较少的时候，且对读操作性能不需要考虑的时候，就不适合建立索引。当然，目前大多数互联网应用都是读操作远大于写操作，因此建立索引很多时候是非常划算和必要的操作。</p>
+<p>关于索引原理的详细解释可以参考文章<a href="http://blog.codinglabs.org/articles/theory-of-mysql-index.html" target="_blank" rel="noopener">MySQL索引背后的数据结构及算法原理</a>，虽然讲得是MySQL但是原理相似。</p>
+<h2>MongoDB有哪些类型的索引</h2>
+<h3>单字段索引 （Single Field Index）</h3>
+<p>这个是最简单最常用的索引类型，比如我们上边的例子，为id建立一个单独的索引就是此种类型。
+<figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"> <span class="meta"># 为id field建立索引，1表示升序，-1表示降序，没有差别</span></span><br><span class="line">db.employee.createIndex(&#123;'id': <span class="number">1</span>&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>需要注意的是通常MongoDB会自动为我们的文档插入'_id' field，且已经按照升序进行索引，如果我们插入的文档中包含有'_id' field，则MongoDB就不会自动创建'_id' field，但是需要我们自己来保证唯一性从而唯一标识一个文档</p>
+<h3>复合索引 (Compound Index)</h3>
+<p>符合索引的原理如下图所示：
+<img src="https://upload-images.jianshu.io/upload_images/3959253-6b00f39c08c49406.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="复合索引示意图">
+上图查询索引的时候会先查询userid，再查询score，然后就可以找到对应的文档。
+对于复合索引需要注意以下几点：</p>
+<h4>索引field的先后顺序很关键，影响有两方面：</h4>
+<ol>
+<li>MongoDB在复合索引中是根据prefix排序查询，就是说排在前面的可以单独使用。我们创建一个如下的索引
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">db<span class="selector-class">.collection</span><span class="selector-class">.createIndex</span>(&#123;<span class="string">'id'</span>: <span class="number">1</span>, <span class="string">'city'</span>: <span class="number">1</span>, <span class="string">'score'</span>: <span class="number">1</span>&#125;)</span><br></pre></td></tr></table></figure></li>
+</ol>
+<p>我们如下的查询可以利用索引
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">db<span class="selector-class">.collection</span><span class="selector-class">.find</span>(&#123;<span class="string">'id'</span>: xxx&#125;)</span><br><span class="line">db<span class="selector-class">.collection</span><span class="selector-class">.find</span>(&#123;<span class="string">'id'</span>: xxx, <span class="string">'city'</span>: xxx&#125;)</span><br><span class="line">db<span class="selector-class">.collection</span><span class="selector-class">.find</span>(&#123;<span class="string">'id'</span>: xxx, <span class="string">'city'</span>:xxx, <span class="string">'score'</span>: xxxx&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>但是如下的查询无法利用该索引
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">db<span class="selector-class">.collection</span><span class="selector-class">.find</span>(&#123;<span class="string">'city'</span>: xxx&#125;)</span><br><span class="line">db<span class="selector-class">.collection</span><span class="selector-class">.find</span>(&#123;<span class="string">'city'</span>:xxx, <span class="string">'score'</span>: xxxx&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>还有一种特殊的情况，就是如下查询：
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">db<span class="selector-class">.collection</span><span class="selector-class">.find</span>(&#123;<span class="string">'id'</span>: xxx, <span class="string">'score'</span>: xxxx&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>这个查询也可以利用索引的前缀'id'来查询，但是却不能针对score进行查询，你可以说是部分利用了索引，因此其效率可能不如如下索引：
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">db<span class="selector-class">.collection</span><span class="selector-class">.createIndex</span>(&#123;<span class="string">'id'</span>: <span class="number">1</span>, <span class="string">'score'</span>: <span class="number">1</span>&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>2.过滤出的document越少的field越应该放在前面，比如此例中id如果是唯一的，那么就应该放在最前面，因为这样通过id就可以锁定唯一一个文档。而如果通过city或者score过滤完成后还是会有大量文档，这就会影响最终的性能。</p>
+<h4>索引的排序顺序不同</h4>
+<p>复合索引最末尾的field，其排序顺序不同对于MongoDB的查询排序操作是有影响的。
+比如：
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">db</span><span class="selector-class">.events</span><span class="selector-class">.createIndex</span>( &#123; <span class="attribute">username</span>: <span class="number">1</span>, date: -<span class="number">1</span> &#125; )</span><br></pre></td></tr></table></figure></p>
+<p>这种情况下， 如下的query可以利用索引：
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">db</span><span class="selector-class">.events</span><span class="selector-class">.find</span>()<span class="selector-class">.sort</span>( &#123; <span class="attribute">username</span>: <span class="number">1</span>, date: -<span class="number">1</span> &#125; )</span><br></pre></td></tr></table></figure></p>
+<p>但是如下query则无法利用index进行排序
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">db</span><span class="selector-class">.events</span><span class="selector-class">.find</span>()<span class="selector-class">.sort</span>( &#123; <span class="attribute">username</span>: <span class="number">1</span>, date: <span class="number">1</span> &#125; )</span><br></pre></td></tr></table></figure></p>
+<h3>多key索引 （Multikey Index）</h3>
+<p>这个主要是针对数据类型为数组的类型，如下示例：
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#123;<span class="string">"name"</span> : <span class="string">"jack"</span>, <span class="string">"age"</span> : <span class="number">19</span>, habbit: [<span class="string">"football, runnning"</span>]&#125;</span><br><span class="line">db<span class="selector-class">.person</span><span class="selector-class">.createIndex</span>( &#123;habbit: <span class="number">1</span>&#125; )  <span class="comment">// 自动创建多key索引</span></span><br><span class="line">db<span class="selector-class">.person</span><span class="selector-class">.find</span>( &#123;habbit: <span class="string">"football"</span>&#125; )</span><br></pre></td></tr></table></figure></p>
+<h3>其它类型索引</h3>
+<p>另外，MongoDB中还有其它如哈希索引，地理位置索引以及文本索引，主要用于一些特定场景，具体可以参考官网，在此不再详解</p>
+<h3>索引属性</h3>
+<p>索引主要有以下几个属性:</p>
+<ul>
+<li>unique：这个非常常用，用于限制索引的field是否具有唯一性属性，即保证该field的值唯一</li>
+<li>partial：很有用，在索引的时候只针对符合特定条件的文档来建立索引，如下
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">db.restaurants.createIndex(</span><br><span class="line">   &#123; <span class="string">cuisine:</span> <span class="number">1</span>, <span class="string">name:</span> <span class="number">1</span> &#125;,</span><br><span class="line">   &#123; <span class="string">partialFilterExpression:</span> &#123; <span class="string">rating:</span> &#123; <span class="string">$gt:</span> <span class="number">5</span> &#125; &#125; &#125; <span class="comment">//只有当rating大于5时才会建立索引</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p>这样做的好处是，我们可以只为部分数据建立索引，从而可以减少索引数据的量，除节省空间外，其检索性能也会因为较少的数据量而得到提升。</p>
+<ul>
+<li>sparse：可以认为是partial索引的一种特殊情况，由于MongoDB3.2之后已经支持partial属性，所以建议直接使用partial属性。</li>
+<li>TTL。 可以用于设定文档有效期，有效期到自动删除对应的文档。</li>
+</ul>
+<h1>通过explain结果来分析性能</h1>
+<p>我们往往会通过打点数据来分析业务的性能瓶颈，这时，我们会发现很多瓶颈都是出现在数据库相关的操作上，这时由于数据库的查询和存取都涉及大量的IO操作，而且有时由于使用不当，会导致IO操作的大幅度增长，从而导致了产生性能问题。而MongoDB提供了一个explain工具来用于分析数据库的操作。直接拿官网的示例来做说明：</p>
+<p>假设我们在inventory collection中有如下文档：
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#123; <span class="string">"_id"</span> : <span class="number">1</span>, <span class="string">"item"</span> : <span class="string">"f1"</span>, <span class="string">type:</span> <span class="string">"food"</span>, <span class="string">quantity:</span> <span class="number">500</span> &#125;</span><br><span class="line">&#123; <span class="string">"_id"</span> : <span class="number">2</span>, <span class="string">"item"</span> : <span class="string">"f2"</span>, <span class="string">type:</span> <span class="string">"food"</span>, <span class="string">quantity:</span> <span class="number">100</span> &#125;</span><br><span class="line">&#123; <span class="string">"_id"</span> : <span class="number">3</span>, <span class="string">"item"</span> : <span class="string">"p1"</span>, <span class="string">type:</span> <span class="string">"paper"</span>, <span class="string">quantity:</span> <span class="number">200</span> &#125;</span><br><span class="line">&#123; <span class="string">"_id"</span> : <span class="number">4</span>, <span class="string">"item"</span> : <span class="string">"p2"</span>, <span class="string">type:</span> <span class="string">"paper"</span>, <span class="string">quantity:</span> <span class="number">150</span> &#125;</span><br><span class="line">&#123; <span class="string">"_id"</span> : <span class="number">5</span>, <span class="string">"item"</span> : <span class="string">"f3"</span>, <span class="string">type:</span> <span class="string">"food"</span>, <span class="string">quantity:</span> <span class="number">300</span> &#125;</span><br><span class="line">&#123; <span class="string">"_id"</span> : <span class="number">6</span>, <span class="string">"item"</span> : <span class="string">"t1"</span>, <span class="string">type:</span> <span class="string">"toys"</span>, <span class="string">quantity:</span> <span class="number">500</span> &#125;</span><br><span class="line">&#123; <span class="string">"_id"</span> : <span class="number">7</span>, <span class="string">"item"</span> : <span class="string">"a1"</span>, <span class="string">type:</span> <span class="string">"apparel"</span>, <span class="string">quantity:</span> <span class="number">250</span> &#125;</span><br><span class="line">&#123; <span class="string">"_id"</span> : <span class="number">8</span>, <span class="string">"item"</span> : <span class="string">"a2"</span>, <span class="string">type:</span> <span class="string">"apparel"</span>, <span class="string">quantity:</span> <span class="number">400</span> &#125;</span><br><span class="line">&#123; <span class="string">"_id"</span> : <span class="number">9</span>, <span class="string">"item"</span> : <span class="string">"t2"</span>, <span class="string">type:</span> <span class="string">"toys"</span>, <span class="string">quantity:</span> <span class="number">50</span> &#125;</span><br><span class="line">&#123; <span class="string">"_id"</span> : <span class="number">10</span>, <span class="string">"item"</span> : <span class="string">"f4"</span>, <span class="string">type:</span> <span class="string">"food"</span>, <span class="string">quantity:</span> <span class="number">75</span> &#125;</span><br></pre></td></tr></table></figure></p>
+<p>假设此时没有建立索引，做如下查询：
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">db</span><span class="selector-class">.inventory</span><span class="selector-class">.find</span>( &#123; <span class="attribute">quantity</span>: &#123; $gte: <span class="number">100</span>, $lte: <span class="number">200</span> &#125; &#125; )</span><br></pre></td></tr></table></figure></p>
+<p>返回结果如下：
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#123; <span class="attr">"_id"</span> : <span class="number">2</span>, <span class="attr">"item"</span> : <span class="string">"f2"</span>, <span class="attr">"type"</span> : <span class="string">"food"</span>, <span class="attr">"quantity"</span> : <span class="number">100</span> &#125;</span><br><span class="line">&#123; <span class="attr">"_id"</span> : <span class="number">3</span>, <span class="attr">"item"</span> : <span class="string">"p1"</span>, <span class="attr">"type"</span> : <span class="string">"paper"</span>, <span class="attr">"quantity"</span> : <span class="number">200</span> &#125;</span><br><span class="line">&#123; <span class="attr">"_id"</span> : <span class="number">4</span>, <span class="attr">"item"</span> : <span class="string">"p2"</span>, <span class="attr">"type"</span> : <span class="string">"paper"</span>, <span class="attr">"quantity"</span> : <span class="number">150</span> &#125;</span><br></pre></td></tr></table></figure></p>
+<p>这是我们可以通过explain来分析整个查询的过程：
+<figure class="highlight autoit"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta"># explain 有三种模式： <span class="string">"queryPlanner"</span>, <span class="string">"executionStats"</span>, and <span class="string">"allPlansExecution"</span>.</span></span><br><span class="line"><span class="meta"># 其中最常用的就是第二种<span class="string">"executionStats"</span>，它会返回具体执行的时候的统计数据</span></span><br><span class="line">db.inventory.find(</span><br><span class="line">   &#123; quantity: &#123; $gte: <span class="number">100</span>, $lte: <span class="number">200</span> &#125; &#125;</span><br><span class="line">).explain(<span class="string">"executionStats"</span>)</span><br></pre></td></tr></table></figure></p>
+<p>explain的结果如下：
+<figure class="highlight clean"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">   <span class="string">"queryPlanner"</span> : &#123;</span><br><span class="line">         <span class="string">"plannerVersion"</span> : <span class="number">1</span>,</span><br><span class="line">         ...</span><br><span class="line">         <span class="string">"winningPlan"</span> : &#123;</span><br><span class="line">            <span class="string">"stage"</span> : <span class="string">"COLLSCAN"</span>,</span><br><span class="line">            ...</span><br><span class="line">         &#125;</span><br><span class="line">   &#125;,</span><br><span class="line">   <span class="string">"executionStats"</span> : &#123;</span><br><span class="line">      <span class="string">"executionSuccess"</span> : true,</span><br><span class="line">      <span class="string">"nReturned"</span> : <span class="number">3</span>,  # 查询返回的document数量</span><br><span class="line">      <span class="string">"executionTimeMillis"</span> : <span class="number">0</span>, # 执行查询所用的时间</span><br><span class="line">      <span class="string">"totalKeysExamined"</span> : <span class="number">0</span>, # 总共查询了多少个key，由于没有使用索引，因此这里为<span class="number">0</span></span><br><span class="line">      <span class="string">"totalDocsExamined"</span> : <span class="number">10</span>, # 总共在磁盘查询了多少个document，由于是全表扫描，我们总共有<span class="number">10</span>个documents，因此，这里为<span class="number">10</span></span><br><span class="line">      <span class="string">"executionStages"</span> : &#123;</span><br><span class="line">         <span class="string">"stage"</span> : <span class="string">"COLLSCAN"</span>,  # 注意这里，<span class="string">"COLLSCAN"</span>意味着全表扫描</span><br><span class="line">         ...</span><br><span class="line">      &#125;,</span><br><span class="line">      ...</span><br><span class="line">   &#125;,</span><br><span class="line">   ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>上面的结果中有一个&quot;stage&quot;字段，上例中stage为&quot;COLLSCAN&quot;，而MongoDB总共有如下几种stage：</p>
+<ul>
+<li>COLLSCAN – Collection scan</li>
+<li>IXSCAN – Scan of data in index keys</li>
+<li>FETCH – Retrieving documents</li>
+<li>SHARD_MERGE – Merging results from shards</li>
+<li>SORT – Explicit sort rather than using index order</li>
+</ul>
+<p>现在我们来创建一个索引：
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">db</span><span class="selector-class">.inventory</span><span class="selector-class">.createIndex</span>( &#123; <span class="attribute">quantity</span>: <span class="number">1</span> &#125; )</span><br></pre></td></tr></table></figure></p>
+<p>再来看下explain的结果</p>
+<p><figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">db</span><span class="selector-class">.inventory</span><span class="selector-class">.find</span>(</span><br><span class="line">   &#123; <span class="attribute">quantity</span>: &#123; $gte: <span class="number">100</span>, $lte: <span class="number">200</span> &#125; &#125;</span><br><span class="line">)<span class="selector-class">.explain</span>("<span class="selector-tag">executionStats</span>")</span><br></pre></td></tr></table></figure></p>
+<p>结果如下：
+<figure class="highlight clojure"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">   <span class="string">"queryPlanner"</span> : &#123;</span><br><span class="line">         <span class="string">"plannerVersion"</span> : <span class="number">1</span>,</span><br><span class="line">         ...</span><br><span class="line">         <span class="string">"winningPlan"</span> : &#123;</span><br><span class="line">               <span class="string">"stage"</span> : <span class="string">"FETCH"</span>,</span><br><span class="line">               <span class="string">"inputStage"</span> : &#123;</span><br><span class="line">                  <span class="string">"stage"</span> : <span class="string">"IXSCAN"</span>,  # 这里<span class="string">"IXSCAN"</span>意味着索引扫描</span><br><span class="line">                  <span class="string">"keyPattern"</span> : &#123;</span><br><span class="line">                     <span class="string">"quantity"</span> : <span class="number">1</span></span><br><span class="line">                  &#125;,</span><br><span class="line">                  ...</span><br><span class="line">               &#125;</span><br><span class="line">         &#125;,</span><br><span class="line">         <span class="string">"rejectedPlans"</span> : [ ]</span><br><span class="line">   &#125;,</span><br><span class="line">   <span class="string">"executionStats"</span> : &#123;</span><br><span class="line">         <span class="string">"executionSuccess"</span> : <span class="literal">true</span>,</span><br><span class="line">         <span class="string">"nReturned"</span> : <span class="number">3</span>,</span><br><span class="line">         <span class="string">"executionTimeMillis"</span> : <span class="number">0</span>,</span><br><span class="line">         <span class="string">"totalKeysExamined"</span> : <span class="number">3</span>,  # 这里nReturned、totalKeysExamined和totalDocsExamined相等说明索引没有问题，因为我们通过索引快速查找到了三个文档，且从磁盘上也是去取这三个文档，并返回三个文档。</span><br><span class="line">         <span class="string">"totalDocsExamined"</span> : <span class="number">3</span>,</span><br><span class="line">         <span class="string">"executionStages"</span> : &#123;</span><br><span class="line">            ...</span><br><span class="line">         &#125;,</span><br><span class="line">         ...</span><br><span class="line">   &#125;,</span><br><span class="line">   ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>再来看下如何通过explain来比较compound index的性能，之前我们在介绍复合索引的时候已经说过field的顺序会影响查询的效率。有时这种顺序并不太好确定（比如field的值都不是unique的），那么怎么判断哪种顺序的复合索引的效率高呢，这就像需要explain结合hint来进行分析。
+比如我们要做如下查询：
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">db</span><span class="selector-class">.inventory</span><span class="selector-class">.find</span>( &#123;</span><br><span class="line">   <span class="attribute">quantity</span>: &#123;</span><br><span class="line">      $gte: <span class="number">100</span>, $lte: <span class="number">300</span></span><br><span class="line">   &#125;,</span><br><span class="line">   <span class="selector-tag">type</span>: "<span class="selector-tag">food</span>"</span><br><span class="line">&#125; )</span><br></pre></td></tr></table></figure></p>
+<p>会返回如下文档：
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#123; <span class="attr">"_id"</span> : <span class="number">2</span>, <span class="attr">"item"</span> : <span class="string">"f2"</span>, <span class="attr">"type"</span> : <span class="string">"food"</span>, <span class="attr">"quantity"</span> : <span class="number">100</span> &#125;</span><br><span class="line">&#123; <span class="attr">"_id"</span> : <span class="number">5</span>, <span class="attr">"item"</span> : <span class="string">"f3"</span>, <span class="attr">"type"</span> : <span class="string">"food"</span>, <span class="attr">"quantity"</span> : <span class="number">300</span> &#125;</span><br></pre></td></tr></table></figure></p>
+<p>现在我们要比较如下两种复合索引
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">db</span><span class="selector-class">.inventory</span><span class="selector-class">.createIndex</span>( &#123; <span class="attribute">quantity</span>: <span class="number">1</span>, type: <span class="number">1</span> &#125; )</span><br><span class="line"><span class="selector-tag">db</span><span class="selector-class">.inventory</span><span class="selector-class">.createIndex</span>( &#123; <span class="attribute">type</span>: <span class="number">1</span>, quantity: <span class="number">1</span> &#125; )</span><br></pre></td></tr></table></figure></p>
+<p>分析索引 { quantity: 1, type: 1 }的情况</p>
+<p><figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># 结合<span class="selector-tag">hint</span>和<span class="selector-tag">explain</span>来进行分析</span><br><span class="line"><span class="selector-tag">db</span><span class="selector-class">.inventory</span><span class="selector-class">.find</span>(</span><br><span class="line">   &#123; <span class="attribute">quantity</span>: &#123; $gte: <span class="number">100</span>, $lte: <span class="number">300</span> &#125;, <span class="selector-tag">type</span>: "<span class="selector-tag">food</span>" &#125;</span><br><span class="line">)<span class="selector-class">.hint</span>(&#123; <span class="attribute">quantity</span>: <span class="number">1</span>, type: <span class="number">1</span> &#125;)<span class="selector-class">.explain</span>("<span class="selector-tag">executionStats</span>") # 这里使用<span class="selector-tag">hint</span>会强制数据库使用索引 &#123; <span class="attribute">quantity</span>: <span class="number">1</span>, type: <span class="number">1</span> &#125;</span><br></pre></td></tr></table></figure></p>
+<p>explain结果
+<figure class="highlight xquery"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">   <span class="string">"queryPlanner"</span> : &#123;</span><br><span class="line">      ...</span><br><span class="line">      <span class="string">"winningPlan"</span> : &#123;</span><br><span class="line">         <span class="string">"stage"</span> : <span class="string">"FETCH"</span>,</span><br><span class="line">         <span class="string">"inputStage"</span> : &#123;</span><br><span class="line">            <span class="string">"stage"</span> : <span class="string">"IXSCAN"</span>,</span><br><span class="line">            <span class="string">"keyPattern"</span> : &#123;</span><br><span class="line">               <span class="string">"quantity"</span> : <span class="number">1</span>,</span><br><span class="line">               <span class="string">"type"</span> : <span class="number">1</span></span><br><span class="line">            &#125;,</span><br><span class="line">            ...</span><br><span class="line">            &#125;</span><br><span class="line">         &#125;</span><br><span class="line">      &#125;,</span><br><span class="line">      <span class="string">"rejectedPlans"</span> : [ ]</span><br><span class="line">   &#125;,</span><br><span class="line">   <span class="string">"executionStats"</span> : &#123;</span><br><span class="line">      <span class="string">"executionSuccess"</span> : true,</span><br><span class="line">      <span class="string">"nReturned"</span> : <span class="number">2</span>,</span><br><span class="line">      <span class="string">"executionTimeMillis"</span> : <span class="number">0</span>,</span><br><span class="line">      <span class="string">"totalKeysExamined"</span> : <span class="number">5</span>,  # 这里是<span class="number">5</span>与totalDocsExamined、nReturned都不相等</span><br><span class="line">      <span class="string">"totalDocsExamined"</span> : <span class="number">2</span>,</span><br><span class="line">      <span class="string">"executionStages"</span> : &#123;</span><br><span class="line">      ...</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;,</span><br><span class="line">   ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>再来看下索引 { type: 1, quantity: 1 } 的分析</p>
+<p><figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">db</span><span class="selector-class">.inventory</span><span class="selector-class">.find</span>(</span><br><span class="line">   &#123; <span class="attribute">quantity</span>: &#123; $gte: <span class="number">100</span>, $lte: <span class="number">300</span> &#125;, <span class="selector-tag">type</span>: "<span class="selector-tag">food</span>" &#125;</span><br><span class="line">)<span class="selector-class">.hint</span>(&#123; <span class="attribute">type</span>: <span class="number">1</span>, quantity: <span class="number">1</span> &#125;)<span class="selector-class">.explain</span>("<span class="selector-tag">executionStats</span>")</span><br></pre></td></tr></table></figure></p>
+<p>结果如下：</p>
+<p><figure class="highlight clojure"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">   <span class="string">"queryPlanner"</span> : &#123;</span><br><span class="line">      ...</span><br><span class="line">      <span class="string">"winningPlan"</span> : &#123;</span><br><span class="line">         <span class="string">"stage"</span> : <span class="string">"FETCH"</span>,</span><br><span class="line">         <span class="string">"inputStage"</span> : &#123;</span><br><span class="line">            <span class="string">"stage"</span> : <span class="string">"IXSCAN"</span>,</span><br><span class="line">            <span class="string">"keyPattern"</span> : &#123;</span><br><span class="line">               <span class="string">"type"</span> : <span class="number">1</span>,</span><br><span class="line">               <span class="string">"quantity"</span> : <span class="number">1</span></span><br><span class="line">            &#125;,</span><br><span class="line">            ...</span><br><span class="line">         &#125;</span><br><span class="line">      &#125;,</span><br><span class="line">      <span class="string">"rejectedPlans"</span> : [ ]</span><br><span class="line">   &#125;,</span><br><span class="line">   <span class="string">"executionStats"</span> : &#123;</span><br><span class="line">      <span class="string">"executionSuccess"</span> : <span class="literal">true</span>,</span><br><span class="line">      <span class="string">"nReturned"</span> : <span class="number">2</span>,</span><br><span class="line">      <span class="string">"executionTimeMillis"</span> : <span class="number">0</span>,</span><br><span class="line">      <span class="string">"totalKeysExamined"</span> : <span class="number">2</span>, # 这里是<span class="number">2</span>，与totalDocsExamined、nReturned相同</span><br><span class="line">      <span class="string">"totalDocsExamined"</span> : <span class="number">2</span>,</span><br><span class="line">      <span class="string">"executionStages"</span> : &#123;</span><br><span class="line">         ...</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;,</span><br><span class="line">   ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>可以看出后一种索引的totalKeysExamined返回是2，相比前一种索引的5，显然更有效率。</p>
+<h1>References</h1>
+<ul>
+<li><a href="https://docs.mongodb.com/manual/indexes/" target="_blank" rel="noopener">MongoDB Index</a></li>
+<li><a href="http://blog.codinglabs.org/articles/theory-of-mysql-index.html" target="_blank" rel="noopener">MySQL索引背后的数据结构及算法原理</a></li>
+<li><a href="http://www.mongoing.com/archives/2797" target="_blank" rel="noopener">MongoDB索引原理</a></li>
+<li><a href="https://docs.mongodb.com/manual/tutorial/analyze-query-plan/" target="_blank" rel="noopener">Analyze Query Performance</a></li>
+</ul>
+
+        
+      </div>
+      
+      
+      
+    </div>
+    
+
+
+  
+  
+  <ul class="breadcrumb">
+    
+      
+      
+        
+          <li><a href="/2019/">2019</a></li>
+          
+            
+          
+        
+      
+    
+      
+      
+        
+          <li><a href="/2019/02/">02</a></li>
+          
+            
+          
+        
+      
+    
+      
+      
+        
+          <li><a href="/2019/02/22/">22</a></li>
+          
+            
+          
+        
+      
+    
+      
+      
+        
+          <li>MONGODB索引详解</li>
+        
+      
+    
+      
+      
+        
+          <li><a href="/2019/02/22//"></a></li>
+          
+            
+          
+        
+      
+    
+  </ul>
+
+
+    
+    
+    
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">geekpy</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">31</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">7</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">26</span>
+                    <span class="site-state-item-name">tags</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/geekpy" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:rebor.liu@gmail.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">索引基础知识</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.1.</span> <span class="nav-text">什么是索引</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.2.</span> <span class="nav-text">MongoDB有哪些类型的索引</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">1.2.1.</span> <span class="nav-text">单字段索引 （Single Field Index）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">1.2.2.</span> <span class="nav-text">复合索引 (Compound Index)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">1.2.2.1.</span> <span class="nav-text">索引field的先后顺序很关键，影响有两方面：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">1.2.2.2.</span> <span class="nav-text">索引的排序顺序不同</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">1.2.3.</span> <span class="nav-text">多key索引 （Multikey Index）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">1.2.4.</span> <span class="nav-text">其它类型索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undefined"><span class="nav-number">1.2.5.</span> <span class="nav-text">索引属性</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#undefined"><span class="nav-number">2.</span> <span class="nav-text">通过explain结果来分析性能</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#undefined"><span class="nav-number">3.</span> <span class="nav-text">References</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">geekpy</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> v3.7.1</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Muse</a> v6.4.2</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'OCjgmQiFa9gpVkDabM6KTb8g-gzGzoHsz',
+        appKey: 'Ie7XE2V6spB6Q6C1W2GU9drV',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script>
+    
+    function showTime(Counter) {
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      Counter('get', '/classes/Counter', { where: JSON.stringify({ url: { "$in": entries } }) })
+        .done(function ({ results }) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.url;
+            var time = item.time;
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function ({ responseJSON }) {
+          console.log("LeanCloud Counter Error: " + responseJSON.code + " " + responseJSON.error);
+        });
+    }
+    
+
+    $(function() {
+      $.get('https://app-router.leancloud.cn/2/route?appId=' + "OCjgmQiFa9gpVkDabM6KTb8g-gzGzoHsz")
+        .done(function ({ api_server }) {
+          var Counter = function (method, url, data) {
+            return $.ajax({
+              method: method,
+              url: `https://${api_server}/1.1${url}`,
+              headers: {
+                'X-LC-Id': "OCjgmQiFa9gpVkDabM6KTb8g-gzGzoHsz",
+                'X-LC-Key': "Ie7XE2V6spB6Q6C1W2GU9drV",
+                'Content-Type': 'application/json',
+              },
+              data: data,
+            });
+          };
+          
+          if ($('.post-title-link').length >= 1) {
+            showTime(Counter);
+          }
+          
+        })
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
