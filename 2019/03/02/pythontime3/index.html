@@ -108,14 +108,18 @@
 
 
 
-  <meta name="keywords" content="computer, programming, data science, deep learning">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Geekpy&#39;s Blog">
-<meta property="og:url" content="http://yoursite.com/tags/acid/index.html">
+  <meta name="description" content="本篇文章主要讲解在Python中如何将日期和周数进行互相转化">
+<meta name="keywords" content="python time">
+<meta property="og:type" content="article">
+<meta property="og:title" content="史上最详解Python日期和时间处理(三) - 周数转换">
+<meta property="og:url" content="http://yoursite.com/2019/03/02/pythontime3/index.html">
 <meta property="og:site_name" content="Geekpy&#39;s Blog">
+<meta property="og:description" content="本篇文章主要讲解在Python中如何将日期和周数进行互相转化">
 <meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2019-03-26T08:16:42.231Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Geekpy&#39;s Blog">
+<meta name="twitter:title" content="史上最详解Python日期和时间处理(三) - 周数转换">
+<meta name="twitter:description" content="本篇文章主要讲解在Python中如何将日期和周数进行互相转化">
 
 
 
@@ -124,7 +128,7 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/tags/acid/"/>
+  <link rel="canonical" href="http://yoursite.com/2019/03/02/pythontime3/"/>
 
 
 
@@ -134,7 +138,7 @@
   };
 </script>
 
-  <title>Tag: acid | Geekpy's Blog</title>
+  <title>史上最详解Python日期和时间处理(三) - 周数转换 | Geekpy's Blog</title>
   
 
 
@@ -181,7 +185,7 @@
     
   
 
-  <div class="container sidebar-position-left ">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -234,7 +238,7 @@
         
         
           
-          <li class="menu-item menu-item-tags menu-item-active">
+          <li class="menu-item menu-item-tags">
     <a href="/tags/" rel="section">
       <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />Tags</a>
   </li>
@@ -263,28 +267,6 @@
   
     
 
-    
-    
-      
-      
-    
-      
-      
-    
-      
-      
-    
-      
-      
-    
-      
-      
-    
-    
-
-  
-
-
   
 
   
@@ -309,58 +291,194 @@
           <div id="content" class="content">
             
 
-  
-  
-  
-  <div class="post-block tag">
+  <div id="posts" class="posts-expand">
+    
+    
+    
+    <div class="post-block page">
+      <header class="post-header">
 
-    <div id="posts" class="posts-collapse">
-      <div class="collection-title">
-        <h1>acid<small>Tag</small>
-        </h1>
-      </div>
+<h1 class="post-title" itemprop="name headline">史上最详解Python日期和时间处理(三) - 周数转换</h1>
 
+<div class="post-meta">
+  
+  
+
+
+  
+  
+  <ul class="breadcrumb">
+    
+      
       
         
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
+          <li><a href="/2019/">2019</a></li>
+          
+            
+          
         
-            <a class="post-title-link" href="/2018/01/08/db_acid_cap/" itemprop="url">
-              
-                <span itemprop="name">理解数据库的事务，ACID，CAP和一致性</span>
-              
-            </a>
+      
+    
+      
+      
         
-      </h2>
+          <li><a href="/2019/03/">03</a></li>
+          
+            
+          
+        
+      
+    
+      
+      
+        
+          <li><a href="/2019/03/02/">02</a></li>
+          
+            
+          
+        
+      
+    
+      
+      
+        
+          <li>PYTHONTIME3</li>
+        
+      
+    
+      
+      
+        
+          <li><a href="/2019/03/02//"></a></li>
+          
+            
+          
+        
+      
+    
+  </ul>
 
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2018-01-08T18:18:18+08:00"
-              content="2018-01-08" >
-          01-08
-        </time>
+
+</div>
+
+</header>
+
+      
+      
+      
+      <div class="post-body">
+        
+        
+          <p>本篇文章主要讲解在Python中如何将日期和周数进行互相转化
+<a id="more"></a></p>
+<h2>周数的转换</h2>
+<ul>
+<li>日期转换周数
+当我们需要获取特定日期对应的周数的时候，通常我们使用如下方法：
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">from datetime import <span class="built_in">date</span></span><br><span class="line">dt1 = <span class="built_in">date</span>(<span class="number">2018</span>, <span class="number">10</span>, <span class="number">10</span>)</span><br><span class="line">dt2 = <span class="built_in">date</span>(<span class="number">2018</span>, <span class="number">12</span>, <span class="number">31</span>)</span><br><span class="line">dt1.strftime(<span class="string">"%V"</span>)   # <span class="built_in">output</span>: <span class="string">'41'</span></span><br><span class="line">dt2.strftime(<span class="string">"%V"</span>)  # <span class="built_in">output</span> <span class="string">'1'</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<p>可以看出周数显示的没有问题，但是对于d2，如果没有year会让我们无法清楚到底是2018年还是2019年的第一周，这会导致程序的一些错误。为避免这种混乱，我们需要一个函数来同时返回year和周数。
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">def get_week_number(dt):</span><br><span class="line">    <span class="string">""</span><span class="comment">"get both year and week number of a specified date object</span></span><br><span class="line">    </span><br><span class="line">    :param d<span class="variable">t:</span> date <span class="built_in">or</span> datetime object which you want <span class="keyword">to</span> corresponding <span class="built_in">get</span> week <span class="keyword">number</span></span><br><span class="line">    :<span class="keyword">return</span>: <span class="keyword">a</span> tuple including both year <span class="built_in">and</span> week <span class="keyword">number</span>. (year, week_num)</span><br><span class="line">    <span class="string">""</span><span class="comment">"</span></span><br><span class="line">    year = dt.year</span><br><span class="line">    month = dt.month</span><br><span class="line">    week_num = <span class="keyword">int</span>(dt.<span class="built_in">strftime</span>(<span class="string">"%V"</span>))</span><br><span class="line">    <span class="keyword">if</span> dt.month == <span class="number">12</span> <span class="built_in">and</span> week_num == <span class="number">1</span>:</span><br><span class="line">        <span class="keyword">return</span> year + <span class="number">1</span>, week_num</span><br><span class="line">    <span class="keyword">return</span> year, week_num</span><br></pre></td></tr></table></figure></p>
+<p>调用结果如下：
+<figure class="highlight less"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">get_week_number</span>(d2)</span><br><span class="line"># <span class="selector-tag">output</span>: (<span class="number">2019</span>, <span class="number">1</span>)</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li>通过周数转化为特定日期
+周数转化为特定日期时，我们其实不仅需要周数，还需要year和一周的第几天，这样才能知道具体是那一天，即：
+<ul>
+<li>year</li>
+<li>week number</li>
+<li>一周的第几天</li>
+</ul>
+</li>
+</ul>
+<p>最先想到的方法是如下方法：
+<figure class="highlight perl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">dt3 = datetime.strptime(<span class="string">"2018-41-3"</span>, <span class="string">"%Y-%W-%w"</span>)</span><br><span class="line">dt3  <span class="comment"># output:  datetime.datetime(2018, 10, 10, 0, 0)</span></span><br><span class="line"></span><br><span class="line">dt4 = datetime.strptime(<span class="string">"2019-1-1"</span>, <span class="string">"%Y-%W-%w"</span>)</span><br><span class="line">dt4  <span class="comment"># output:  datetime.datetime(2019, 1, 7, 0, 0)</span></span><br><span class="line"></span><br><span class="line">dt5 = datetime.strptime(<span class="string">"2018-41-0"</span>, <span class="string">"%Y-%W-%w"</span>)</span><br><span class="line">dt5  <span class="comment"># output:  datetime.datetime(2018, 10, 14, 0, 0)</span></span><br></pre></td></tr></table></figure></p>
+<p>上面的示例dt3转换没有问题，但是对于dt4可以看出并不是我们想要的结果，我们会发现python在这里有一个bug的（当然也许只是计算方式不对，不论怎样，这里并没有遵循ISO的标准进行转换）。</p>
+<p>另外一个问题是当我们想要获取第0天时，实际对应的是第7天（即周日）</p>
+<p>解决这个问题需要安装一个新的第三方包isoweek，如下：
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip <span class="keyword">install</span> isoweek</span><br></pre></td></tr></table></figure></p>
+<p>之后使用如下方法来获取对应的日期：
+<figure class="highlight capnproto"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> isoweek <span class="keyword">import</span> Week</span><br><span class="line"></span><br><span class="line">dt6 = Week(<span class="number">2019</span>, <span class="number">1</span>).monday()</span><br><span class="line">dt6  <span class="comment"># output: datetime.date(2018, 12, 31)</span></span><br></pre></td></tr></table></figure></p>
+<p>我们看到使用isoweek包，我们可以正确的将week number转化为对应的日期。另外需要说明的是iso的标准是从周一开始到周日。</p>
+
+        
       </div>
-
-    </header>
-  </article>
-
-
+      
+      
       
     </div>
+    
 
+
+  
+  
+  <ul class="breadcrumb">
+    
+      
+      
+        
+          <li><a href="/2019/">2019</a></li>
+          
+            
+          
+        
+      
+    
+      
+      
+        
+          <li><a href="/2019/03/">03</a></li>
+          
+            
+          
+        
+      
+    
+      
+      
+        
+          <li><a href="/2019/03/02/">02</a></li>
+          
+            
+          
+        
+      
+    
+      
+      
+        
+          <li>PYTHONTIME3</li>
+        
+      
+    
+      
+      
+        
+          <li><a href="/2019/03/02//"></a></li>
+          
+            
+          
+        
+      
+    
+  </ul>
+
+
+    
+    
+    
   </div>
-  
-  
-  
-
-  
 
 
           </div>
           
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
 
         </div>
         
@@ -381,8 +499,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -539,6 +666,22 @@
       </section>
 
       
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-number">1.</span> <span class="nav-text">周数的转换</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
 
       
 
@@ -668,6 +811,10 @@
   
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
 
   
 
